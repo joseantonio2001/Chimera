@@ -1,7 +1,7 @@
 import React from 'react'
-import {View, Image, StyleSheet, Button, Text} from 'react-native'
+import {View, Image, StyleSheet, Button} from 'react-native'
 import StyledText from './StyledText'
-import {Link, useNavigate} from 'react-router-native'
+import {useNavigate} from 'react-router-native'
 
 
 const Inicio = ()=>{
