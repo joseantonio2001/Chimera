@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
-import { Text, TextInput, View, Button, StyleSheet, Image } from 'react-native'
+import { Text, Picker, View, Button, StyleSheet, Image } from 'react-native'
 import { useNavigate } from 'react-router-native';
 import StyledText from './StyledText';
 import axios from 'axios';
 import StyledTextInput from './StyledTextInput';
+import StyledMultiSelect from './StyledMultiSelect';
+
 
 
 const CrearAula = () => {
@@ -17,12 +19,24 @@ const CrearAula = () => {
     const [id, setId] = useState('');
     const [capacidad, setCapacidad] = useState('');
 
+    //IMPLEMENTACIONNNNNNNN
+    const [selectedEstudiantes, setSelectedEstudiantes] = useState([]);
+    //IMPLEMENTACIONNNNNNNN
+    const [selectedProfesor, setSelectedProfesor] = useState('');
+    //IMPLEMENTACIONNNNNNNN
 
     const handleCreateAula = () => {
+        //IMPLEMENTACIONNNNNNNN
+        const estudiantesSeleccionados = selectedEstudiantes.map(estudiante => estudiante.id);
+        //IMPLEMENTACIONNNNNNNN
         // Realiza una solicitud POST al servidor backend para crear un alumno
         axios.post('http://localhost:5050/api/crearAula', {
             id,
-            capacidad
+            capacidad,
+            //IMPLEMENTACIONNNNNNNN
+            //selectedProfesor,
+            //estudiantesSeleccionados
+            //IMPLEMENTACIONNNNNNNN
         })
             .then((response) => {
                 // Maneja la respuesta exitosa
@@ -34,6 +48,22 @@ const CrearAula = () => {
             });
 
     };
+
+    //IMPLEMENTACIONNNNNNNN
+    const estudiantesData = [
+        { id: '1', name: 'Estudiante 1' },
+        { id: '2', name: 'Estudiante 2' },
+        // Agrega más estudiantes según sea necesario
+    ];
+    //IMPLEMENTACIONNNNNNNN
+
+    //IMPLEMENTACIONNNNNNNN
+    const profesoresData = [
+        { id: '1', name: 'Profesor 1' },
+        { id: '2', name: 'Profesor 2' },
+        // Agrega más profesores según sea necesario
+    ];
+    //IMPLEMENTACIONNNNNNNN
 
     return (
         <View>
@@ -53,6 +83,35 @@ const CrearAula = () => {
                 value={capacidad}
                 onChangeText={text => setCapacidad(text)}
             />
+
+
+            <StyledText style={styles.text}>Selecciona un Profesor:</StyledText>
+            <Picker
+                style={pickerStyles.picker}
+                selectedValue={selectedProfesor}
+                onValueChange={(itemValue, itemIndex) => setSelectedProfesor(itemValue)}
+            >
+                {profesoresData.map((profesor) => (
+                    <Picker.Item key={profesor.id} label={profesor.name} value={profesor.id} />
+                ))}
+            </Picker>
+
+
+
+            <Text style={styles.text}>Estudiantes:</Text>
+            <StyledMultiSelect
+                items={estudiantesData}
+                uniqueKey="id"
+                onSelectedItemsChange={selectedItems => setSelectedEstudiantes(selectedItems)}
+                selectedItems={selectedEstudiantes}
+                selectText="Selecciona estudiantes"
+                searchInputPlaceholderText="Buscar estudiantes..."
+                displayKey="name"
+                hideSubmitButton
+            />
+
+
+
 
             <View style={styles.button}>
                 <Button title="Crear Aula" onPress={handleCreateAula} />
@@ -111,8 +170,23 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 10,
     }
+
 })
 
+const pickerStyles = StyleSheet.create({
+    picker: {
+        borderRadius: 5,
+        borderWidth: 1,
+        borderColor: '#999',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        marginTop: 5,
+        marginBottom: 5,
+        width: 500,
+        justifyContent: 'center',
+        alignSelf: 'center',
+    },
+});
 
 
 
