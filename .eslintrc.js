@@ -30,6 +30,7 @@ module.exports = {
         memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
         allowSeparatedGroups: false
       }
-    ]
+    ],
+    'react/jsx-key': 'off'
   }
 };

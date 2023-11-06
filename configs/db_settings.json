@@ -1,0 +1,7 @@
+{
+  "DB_USER": "root",
+  "DB_PASSWORD": "tiger",
+  "DB_URL": "localhost",
+  "DB_PORT": 3306,
+  "DB_NAME": "colegio"
+}
