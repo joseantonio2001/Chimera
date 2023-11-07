@@ -1,20 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
+import PanelAdmin from './src/views/PanelAdmin';
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>This is just a placeholder</Text>
-      <StatusBar style="auto" />
-    </View>
+    <>
+    <PanelAdmin/>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center'
-  }
-});
