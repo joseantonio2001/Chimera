@@ -17,12 +17,6 @@ const Inicio = ()=>{
                 <Image style={styles.image} source={require('../../data/img/LogoColegio.png')}/>
                 <StyledText style={styles.text}>PÁGINA DE INICIO</StyledText>
                 <View style={styles.button}>
-                    <Button style={styles.buttonComponent} title='Alumno' onPress={() => handleButtonClick('/alumno')} />
-                </View> 
-                <View style={styles.button}>
-                    <Button style={styles.buttonComponent} title='Profesor' onPress={() => handleButtonClick('/profesor')}/>
-                </View>
-                <View style={styles.button}>
                     <Button style={styles.buttonComponent} title='Administración' onPress={() => handleButtonClick('/admin')}/>
                 </View>
         </View>
