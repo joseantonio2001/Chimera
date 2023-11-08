@@ -1,9 +1,16 @@
-import PanelAdmin from './src/views/PanelAdmin';
+import Main from './src/Components/Main';
+import { StatusBar } from 'expo-status-bar';
+
 
 export default function App() {
   return (
+    
     <>
-    <PanelAdmin/>
+    <StatusBar style='light'/>
+    <Main />
     </>
+    
   );
+    
 }
+
