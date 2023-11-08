@@ -1,11 +1,9 @@
 import React from 'react'
-import {View, Button, StyleSheet, Image} from 'react-native'
+import {Text, View, Button, StyleSheet} from 'react-native'
 import { useNavigate } from 'react-router-native';
-import StyledText from '../StyledText';
-import PanelAdmin from './PanelAdmin';
 
-const Admin = ()=>{
-    
+
+const Profesor = ()=>{
     const navigate = useNavigate();
     
         const handleButtonClick = (enlace) => {
@@ -15,14 +13,9 @@ const Admin = ()=>{
 
     return(
         <View>
-            <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
-            <StyledText style={styles.text}>MENÚ DE ADMINISTRACIÓN</StyledText>
-            <View style={styles.button}>
-                <Button title='Crear Aula' onPress={() => handleButtonClick('/crearaula')}/>
-            </View>
-            <>
-            <PanelAdmin/>
-            </>
+            <Text>
+                WORKING ON IT... (PROFESOR)
+            </Text>
             <View style={styles.button}>
                 <Button title='Volver a Inicio' onPress={() => handleButtonClick('/')}/>
             </View>
@@ -60,6 +53,4 @@ const styles=StyleSheet.create({
 
 
 
-
-
-export default Admin
+export default Profesor
