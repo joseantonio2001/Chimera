@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
-import { Text, Picker, View, Button, StyleSheet, Image } from 'react-native'
+import React, { useState, useEffect } from 'react'; // Añade 'useEffect'
+import { Text, Picker, View, Button, StyleSheet, Image } from 'react-native';
 import { useNavigate } from 'react-router-native';
-import StyledText from './StyledText';
 import axios from 'axios';
+import StyledText from './StyledText';
 import StyledTextInput from './StyledTextInput';
 import StyledMultiSelect from './StyledMultiSelect';
+
 
 
 
@@ -18,25 +19,38 @@ const CrearAula = () => {
 
     const [id, setId] = useState('');
     const [capacidad, setCapacidad] = useState('');
-
-    //IMPLEMENTACIONNNNNNNN
-    const [selectedEstudiantes, setSelectedEstudiantes] = useState([]);
-    //IMPLEMENTACIONNNNNNNN
+    const [profesores, setProfesores] = useState([]);
     const [selectedProfesor, setSelectedProfesor] = useState('');
-    //IMPLEMENTACIONNNNNNNN
+    const [estudiantes, setEstudiantes] = useState([]);
+    const [selectedEstudiantes, setSelectedEstudiantes] = useState([]);
+
+
+    useEffect(() => {
+        // Realiza una solicitud GET al servidor para obtener la lista de profesores
+        axios.get('http://localhost:5050/api/getprofesores')
+            .then((response) => {
+                setProfesores(response.data); // Almacena la lista de profesores en el estado
+            })
+            .catch((error) => {
+                console.error('Error al obtener la lista de profesores: ' + error);
+            });
+        axios.get('http://localhost:5050/api/getestudiantes')
+            .then((response) => {
+                setEstudiantes(response.data); // Almacena la lista de estudiantes en el estado
+            })
+            .catch((error) => {
+                console.error('Error al obtener la lista de estudiantes: ' + error);
+            });
+    }, []);
 
     const handleCreateAula = () => {
-        //IMPLEMENTACIONNNNNNNN
-        const estudiantesSeleccionados = selectedEstudiantes.map(estudiante => estudiante.id);
-        //IMPLEMENTACIONNNNNNNN
+        console.log('Joder' + selectedEstudiantes)
         // Realiza una solicitud POST al servidor backend para crear un alumno
         axios.post('http://localhost:5050/api/crearAula', {
             id,
             capacidad,
-            //IMPLEMENTACIONNNNNNNN
-            //selectedProfesor,
-            //estudiantesSeleccionados
-            //IMPLEMENTACIONNNNNNNN
+            profesor: selectedProfesor,
+            estudiantes: selectedEstudiantes
         })
             .then((response) => {
                 // Maneja la respuesta exitosa
@@ -48,22 +62,6 @@ const CrearAula = () => {
             });
 
     };
-
-    //IMPLEMENTACIONNNNNNNN
-    const estudiantesData = [
-        { id: '1', name: 'Estudiante 1' },
-        { id: '2', name: 'Estudiante 2' },
-        // Agrega más estudiantes según sea necesario
-    ];
-    //IMPLEMENTACIONNNNNNNN
-
-    //IMPLEMENTACIONNNNNNNN
-    const profesoresData = [
-        { id: '1', name: 'Profesor 1' },
-        { id: '2', name: 'Profesor 2' },
-        // Agrega más profesores según sea necesario
-    ];
-    //IMPLEMENTACIONNNNNNNN
 
     return (
         <View>
@@ -91,25 +89,29 @@ const CrearAula = () => {
                 selectedValue={selectedProfesor}
                 onValueChange={(itemValue, itemIndex) => setSelectedProfesor(itemValue)}
             >
-                {profesoresData.map((profesor) => (
-                    <Picker.Item key={profesor.id} label={profesor.name} value={profesor.id} />
+                <Picker.Item
+                    label="Seleccione profesor"
+                    value="" // O cualquier otro valor que desees como un valor nulo
+                />
+                {profesores.map((profesor) => (
+                    <Picker.Item
+                        key={profesor.id}
+                        label={`${profesor.nombre} ${profesor.apellido1} ${profesor.apellido2}`}
+                        value={profesor.id}
+                    />
                 ))}
             </Picker>
 
-
-
             <Text style={styles.text}>Estudiantes:</Text>
             <StyledMultiSelect
-                items={estudiantesData}
+                items={estudiantes.map(estudiante => ({ id: estudiante.id, name: `${estudiante.nombre} ${estudiante.apellido1} ${estudiante.apellido2}` }))}
                 uniqueKey="id"
                 onSelectedItemsChange={selectedItems => setSelectedEstudiantes(selectedItems)}
                 selectedItems={selectedEstudiantes}
                 selectText="Selecciona estudiantes"
                 searchInputPlaceholderText="Buscar estudiantes..."
-                displayKey="name"
                 hideSubmitButton
             />
-
 
 
 
