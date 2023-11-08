@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react'; // Añade 'useEffect'
 import { Text, Picker, View, Button, StyleSheet, Image } from 'react-native';
 import { useNavigate } from 'react-router-native';
 import axios from 'axios';
-import StyledText from './StyledText';
-import StyledTextInput from './StyledTextInput';
-import StyledMultiSelect from './StyledMultiSelect';
+import StyledText from '../StyledText';
+import StyledTextInput from '../StyledTextInput';
+import StyledMultiSelect from '../StyledMultiSelect';
 
 
 
@@ -65,7 +65,7 @@ const CrearAula = () => {
 
     return (
         <View>
-            <Image style={styles.image} source={require('../../data/img/LogoColegio.png')} />
+            <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')} />
             <StyledText style={styles.titleText}>Crear un Nuevo Alumno</StyledText>
 
             <StyledText style={styles.text}>Identificador del Aula:</StyledText>

@@ -1,10 +1,10 @@
 import React from 'react'
 import {View} from 'react-native'
 import {Route, Routes, NativeRouter, Link } from 'react-router-native'
-import Admin from './Admin.jsx'
+import Admin from './administracion/Admin.jsx'
 import Inicio from './Inicio.jsx'
-import ConfirmarCrearAula from './ConfirmacionCrearAula.jsx'
-import CrearAula from './CrearAula.jsx'
+import ConfirmarCrearAula from './administracion/ConfirmacionCrearAula.jsx'
+import CrearAula from './administracion/CrearAula.jsx'
 
 
 

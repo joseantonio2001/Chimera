@@ -1,27 +1,27 @@
 import React from 'react'
-import {View, Button, StyleSheet, Image} from 'react-native'
-import { useNavigate } from 'react-router-native';
-import StyledText from './StyledText';
+import {Text, View, Button, StyleSheet, Image} from 'react-native'
+import { useNavigate, useLocation } from 'react-router-native';
+import StyledText from '../StyledText';
 
 
-const Admin = ()=>{
-    
+function ConfirmarCrearAula (props){
     const navigate = useNavigate();
     
         const handleButtonClick = (enlace) => {
         
         navigate(enlace);
     };
+    const { state } = useLocation();
+    const mensaje = state ? state.mensaje : '';
+
+
 
     return(
         <View>
-            <Image style={styles.image} source={require('../../data/img/LogoColegio.png')}/>
-            <StyledText style={styles.text}>MENÚ DE ADMINISTRACIÓN</StyledText>
+            <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
+            <StyledText style={styles.text}>{mensaje}</StyledText>
             <View style={styles.button}>
-                <Button title='Crear Aula' onPress={() => handleButtonClick('/crearaula')}/>
-            </View>
-            <View style={styles.button}>
-                <Button title='Volver a Inicio' onPress={() => handleButtonClick('/')}/>
+                <Button title='Volver al menú de administración' onPress={() => handleButtonClick('/admin')}/>
             </View>
         </View>
         
@@ -58,5 +58,4 @@ const styles=StyleSheet.create({
 
 
 
-
-export default Admin
+export default ConfirmarCrearAula
