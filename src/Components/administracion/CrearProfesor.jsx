@@ -1,9 +1,9 @@
 import React, {useState} from 'react'
 import {Text, TextInput, View, Button, StyleSheet, Image, Switch} from 'react-native'
 import { useNavigate } from 'react-router-native';
-import StyledText from './StyledText';
+import StyledText from '../StyledText';
 import axios from 'axios';
-import StyledTextInput from './StyledTextInput';
+import StyledTextInput from '../StyledTextInput';
 
 
 const CrearProfe = ()=>{
@@ -14,7 +14,7 @@ const CrearProfe = ()=>{
         navigate(enlace);
     };
 
-    const [dni, setDni] = useState('');
+    const [id, setID] = useState('');
     const [nombre, setNombre] = useState('');
     const [apellido1, setApellido1] = useState('');
     const [apellido2, setApellido2] = useState('');
@@ -28,8 +28,8 @@ const CrearProfe = ()=>{
 
     const handleCreateProfe = () => {
         // Realiza una solicitud POST al servidor backend para crear un alumno
-        axios.post('http://localhost:5050/api/crearProfe', {
-            dni,
+        axios.post('http://localhost:5050/profesores/crearProfe', {
+            id,
             nombre,
             apellido1,
             apellido2,
@@ -50,14 +50,14 @@ const CrearProfe = ()=>{
 
     return(
         <View>
-            <Image style={styles.image} source={require('../../data/img/LogoColegio.png')}/>
+            <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
             <StyledText style={styles.titleText}>Crear un Nuevo Profesor</StyledText>
             
             <StyledText style={styles.text}>Identificador de Usuario:</StyledText>
             <StyledTextInput
-                placeholder="DNI"
-                value={dni}
-                onChangeText={text => setDni(text)}
+                placeholder="ID"
+                value={id}
+                onChangeText={text => setID(text)}
             />
             <StyledText style={styles.text}>Nombre y apellidos:</StyledText>
             <StyledTextInput

@@ -5,6 +5,7 @@ const mysql = require('mysql2');
 const app = express();
 
 app.use(cors());
+app.use(express.json());
 
 dotenv.config({ path: '../../.env' }); // Path del .env
 
@@ -22,6 +23,7 @@ async function abrirConexion(){
 } 
 
 // Rutas API
+// Consultas / GETS
 app.get('/usuarios', async (req, res) => { // GET Usuarios
   try {
     const connection = await abrirConexion();
@@ -85,6 +87,72 @@ app.get('/clases', async (req, res) => { // GET Clases
   } catch (error) {
     console.error('Error al obtener clases:', error);
     res.status(500).json({ error: 'Error al obtener clases' });
+  }
+});
+
+// Insercioones / POST
+// Ruta para insertar un estudiante en la base de datos
+app.post('/estudiantes/crearAlumno', async (req, res) => {
+  try{
+    const connection = await abrirConexion();
+    const { id, nombre, apellido1, apellido2, contraseña,  preferencias, fechaNac} = req.body;
+    const query1 = 'INSERT INTO usuarios (id, nombre, apellido1, apellido2, fecha_nac, PASSWORD,img_perfil) VALUES (?, ?, ?, ?, ?, MD5(?),?)';
+    await connection.promise().query(query1, [id, nombre, apellido1, apellido2, fechaNac, contraseña, null ], (err, result) => {
+    if (err) {
+      console.error('Error al insertar estudiante: ' + err);
+      return;
+    }
+    console.log('Estudiante insertado con éxito en usuarios');
+    });
+
+    const query2 = 'INSERT INTO estudiantes (id, preferencias) VALUES (?, ?)';
+    await connection.promise().query(query2, [id,preferencias], (err, result) => {
+    if (err) {
+      console.error('Error al insertar estudiante: ' + err);
+      res.status(500).json({ error: 'Error al insertar estudiante en la base de datos' });
+      return;
+    }
+    console.log('Estudiante insertado con éxito en Estudiantes');
+    res.status(201).json({ message: 'Estudiante insertado con éxito' });
+    });
+    connection.end();
+  } catch (error){
+    console.error('Error al introducir estudiante:', error);
+    res.status(500).json({ error: 'Error al introducir estudiante' });
+  }
+
+});
+
+// Ruta para insertar un profesor en la base de datos
+app.post('/profesores/crearProfe',  async (req, res) => {
+  try{
+    const connection = await abrirConexion();
+    const { id, nombre, apellido1, apellido2, contraseña,  admin, fechaNac} = req.body;
+    const query1 = 'INSERT INTO usuarios (id, nombre, apellido1, apellido2, fecha_nac, PASSWORD,img_perfil) VALUES (?, ?, ?, ?, ?, MD5(?),?)';
+    
+      connection.promise().query(query1, [id, nombre, apellido1, apellido2, fechaNac, contraseña, null ], (err, result) => {
+      if (err) {
+        console.error('Error al insertar profesor: ' + err);
+        return;
+      }
+
+      console.log('Profesor insertado con éxito en usuarios');
+    });
+
+    const query2 = 'INSERT INTO profesores (id, admin) VALUES (?, ?)';
+    connection.promise().query(query2, [id,admin], (err, result) => {
+    if (err) {
+      console.error('Error al insertar profesor: ' + err);
+      res.status(500).json({ error: 'Error al insertar profesor en la base de datos' });
+      return;
+    }
+    console.log('Profesor insertado con éxito en Profesores');
+    res.status(201).json({ message: 'Profesor insertado con éxito' });
+    });
+    connection.end();
+  } catch (error){
+    console.error('Error al introducir estudiante:', error);
+    res.status(500).json({ error: 'Error al introducir estudiante' });
   }
 });
 

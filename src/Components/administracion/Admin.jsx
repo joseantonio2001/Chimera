@@ -1,8 +1,7 @@
-import React from 'react'
-import {View, Button, StyleSheet, Image} from 'react-native'
+import {Button, Image, StyleSheet, View} from 'react-native';
+import PanelAdmin from './PanelAdmin';
+import StyledText from '../StyledText';
 import { useNavigate } from 'react-router-native';
-import StyledText from './StyledText';
-
 
 const Admin = ()=>{
     
@@ -15,14 +14,11 @@ const Admin = ()=>{
 
     return(
         <View>
-            <Image style={styles.image} source={require('../../data/img/LogoColegio.png')}/>
+            <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
             <StyledText style={styles.text}>MENÚ DE ADMINISTRACIÓN</StyledText>
-            <View style={styles.button}>
-                <Button title='Crear Alumno' onPress={() => handleButtonClick('/crearalumno')}/>
-            </View>
-            <View style={styles.button}>
-                <Button title='Crear Profesor' onPress={() => handleButtonClick('/crearprofe')}/>
-            </View>
+            <>
+            <PanelAdmin/>
+            </>
             <View style={styles.button}>
                 <Button title='Volver a Inicio' onPress={() => handleButtonClick('/')}/>
             </View>

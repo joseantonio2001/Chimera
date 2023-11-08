@@ -1,7 +1,7 @@
 import React from 'react'
 import {Text, View, Button, StyleSheet, Image} from 'react-native'
 import { useNavigate, useLocation } from 'react-router-native';
-import StyledText from './StyledText';
+import StyledText from '../StyledText';
 
 
 function ConfirmarCrearUsuario (props){
@@ -18,7 +18,7 @@ function ConfirmarCrearUsuario (props){
 
     return(
         <View>
-            <Image style={styles.image} source={require('../../data/img/LogoColegio.png')}/>
+            <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
             <StyledText style={styles.text}>{mensaje}</StyledText>
             <View style={styles.button}>
                 <Button title='Volver al menú de administración' onPress={() => handleButtonClick('/admin')}/>

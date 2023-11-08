@@ -1,7 +1,12 @@
 import * as React from 'react';
+import { DataGrid, GridToolbarContainer } from '@mui/x-data-grid';
+import AddIcon from '@mui/icons-material/Add';
 import Box from '@mui/material/Box';
-import { DataGrid } from '@mui/x-data-grid';
+import { Button } from 'react-native';
 import axios from 'axios';
+import { useNavigate } from 'react-router-native';
+
+
 
 const formatoColumnas = (props) => {
   const [columnas, setColumnas] = React.useState([]); 
@@ -120,14 +125,45 @@ const obtenerLista =  (props) => {
 return filas;
 };
 
+const toolBar = (props) => { // Toolbar custom del panel de DataGrid
+  const navigate = useNavigate();
+  const handleClick = () => { 
+    switch(props.nombre){
+      case 'estudiantes':
+        navigate('/admin/crearalumno');
+      break;
+      case 'profesores':
+        navigate('/admin/crearprofe');
+      break;
+      default:
+        console.log('Todavía no configurado');
+      break;
+    }
+  };
+
+  return (
+    <GridToolbarContainer>
+      <Button startIcon={<AddIcon />} onPress={handleClick}>
+        Añadir {props.nombre}
+      </Button>
+    </GridToolbarContainer>
+  );
+}
+
 
 const TablasAdmin = (props) => {
     const filas = obtenerLista(props);
     const columnas = formatoColumnas(props);
-
+    const nombre = props.nombre;
     return(
       <Box>
         <DataGrid rows={filas} columns={columnas}
+        slots={{
+          toolbar: (props) => toolBar(props),
+        }}
+        slotProps={{
+          toolbar: {nombre},
+        }}
         />
       </Box>
     )
