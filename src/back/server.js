@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-dotenv.config({ path: '../../.env' }); // Path del .env
+dotenv.config({ path:'.env' }); // Modificar en caso de null@172... a la conexion de api
 
 const dbConfig = {
   host: process.env.DB_HOST,
@@ -16,6 +16,7 @@ const dbConfig = {
   database: process.env.DB_DATABASE,
   port: process.env.DB_PORT
 };
+
 
 async function abrirConexion(){
   const connection = await mysql.createConnection(dbConfig);

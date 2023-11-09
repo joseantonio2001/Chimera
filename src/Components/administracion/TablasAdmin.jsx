@@ -3,10 +3,78 @@ import { DataGrid, GridToolbarContainer } from '@mui/x-data-grid';
 import AddIcon from '@mui/icons-material/Add';
 import Box from '@mui/material/Box';
 import { Button } from 'react-native';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import { IconButton } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-native';
 
 
+const botonesAcciones = (params, nombre) => {
+  const [bdialogAbierto, setbDialogAbierto] = React.useState(false);
+  const [filaEliminar, setFilaEliminar] = React.useState(null);
+
+  const handleDelete = (nombre) => {
+      switch(nombre){
+        case 'estudiantes':
+          axios.delete('http://localhost:5050/estudiantes/borrarAlumno/'+params.row.id);
+        break;
+        case 'profesores':
+          axios.delete('http://localhost:5050/profesores/borrarProfe/'+params.row.id);
+        break;
+        case 'tareas':
+          axios.delete('http://localhost:5050/tareas/borrarTarea/'+params.row.id);
+        break;
+        case 'clases':
+          axios.delete('http://localhost:5050/clases/borrarClase/'+params.row.id);
+        break;
+      }
+      setbDialogAbierto(false);
+      setFilaEliminar(null);
+  };
+
+  const handleDeleteConfirmation = (fila) => {
+    setFilaEliminar(fila);
+    setbDialogAbierto(true);
+  };
+
+  return(
+    <div>
+    <IconButton
+      variant="outlined"
+      color="primary"
+      onClick={() => handleEdit(params.row.id)}
+    >
+      <EditIcon/>
+    </IconButton>
+    <IconButton
+      variant="outlined"
+      color="secondary"
+      onClick={() => handleDeleteConfirmation(params.row)}
+    >
+      <DeleteIcon/>
+    </IconButton>
+
+    <Dialog open={bdialogAbierto} onClose={() => setbDialogAbierto(false)}>
+      <DialogTitle>¡Cuidado!</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          ¿Estás seguro de que deseas eliminar esta fila {filaEliminar ? filaEliminar.nombre : ''}? 
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onPress={() => setbDialogAbierto(false)} title='Cancelar'/>
+        <Button onPress={() => handleDelete(nombre)} title='Eliminar' color='#b71c1c'/>
+      </DialogActions>
+      </Dialog>
+    </div>
+  );
+};
 
 const formatoColumnas = (props) => {
   const [columnas, setColumnas] = React.useState([]); 
@@ -21,7 +89,8 @@ const formatoColumnas = (props) => {
         {field: 'apellido2', headerName: 'Apellido 2', width: 150},
         {field: 'f_nac', headerName: 'Fecha nacimiento', width: 125},
         {field: 'password', headerName: 'Contraseña', width: 200},
-        {field: 'preferencias', headerName: 'Preferencia', width: 150}
+        {field: 'preferencias', headerName: 'Preferencia', width: 150},
+        {field: 'acciones', headerName: 'Acciones', width: 100, renderCell: (params) => botonesAcciones(params,props.nombre)}
         ]);
         break;
       case 'profesores':
@@ -33,7 +102,8 @@ const formatoColumnas = (props) => {
         {field: 'apellido2', headerName: 'Apellido 2', width: 150},
         {field: 'f_nac', headerName: 'Fecha nacimiento', width: 125},
         {field: 'password', headerName: 'Contraseña', width: 200},
-        {field: 'admin', headerName: 'Administrador', width: 100}
+        {field: 'admin', headerName: 'Administrador', width: 100},
+        {field: 'acciones', headerName: 'Acciones', width: 100, renderCell: (params) => botonesAcciones(params,props.nombre)}
         ]);
         break;
       case 'tareas':
@@ -43,7 +113,8 @@ const formatoColumnas = (props) => {
         {field: 'descripcion', headerName: 'Descripción', width: 200},
         {field: 'imagenes', headerName: 'Imágenes', width: 150},
         {field: 'video', headerName: 'Vídeo', width: 100},
-        {field: 'tipo', headerName: 'Tipo', width: 50}
+        {field: 'tipo', headerName: 'Tipo', width: 50},
+        {field: 'acciones', headerName: 'Acciones', width: 100, renderCell: (params) => botonesAcciones(params,props.nombre)}
         ]);
         break;
       case 'clases':
@@ -51,7 +122,8 @@ const formatoColumnas = (props) => {
         {field: 'id', headerName: 'ID', width: 50},
         {field: 'capacidad', headerName: 'Capacidad', width: 150},
         {field: 'id_profesor', headerName: 'ID Profesor', width: 100},
-        {field: 'id_estudiante', headerName: 'ID Estudiante', width: 100}
+        {field: 'id_estudiante', headerName: 'ID Estudiante', width: 100},
+        {field: 'acciones', headerName: 'Acciones', width: 100, renderCell: (params) => botonesAcciones(params,props.nombre)}
         ]);
         break;
     }
@@ -143,9 +215,9 @@ const toolBar = (props) => { // Toolbar custom del panel de DataGrid
 
   return (
     <GridToolbarContainer>
-      <Button startIcon={<AddIcon />} onPress={handleClick}>
-        Añadir {props.nombre}
-      </Button>
+      <IconButton onClick={handleClick}>
+        <AddIcon/>
+      </IconButton>
     </GridToolbarContainer>
   );
 }
