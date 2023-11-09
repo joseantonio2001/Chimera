@@ -207,6 +207,9 @@ const toolBar = (props) => { // Toolbar custom del panel de DataGrid
       case 'profesores':
         navigate('/admin/crearprofe');
       break;
+      case 'tareas':
+        navigate('/admin/creartarea');
+      break;
       default:
         console.log('Todavía no configurado');
       break;
