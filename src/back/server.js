@@ -33,7 +33,6 @@ app.get('/usuarios', async (req, res) => { // GET Usuarios
     const queryUsuarios = 'SELECT * FROM usuarios';
     const [resultado] = await connection.promise().query(queryUsuarios);
     connection.end(); // Libera recursos BD
-    connection.destroy();
     res.json([resultado]); // Resultado servido en HTTP formato JSON  
   } catch (error) {
     console.error('Error al obtener usuarios:', error);
@@ -279,9 +278,9 @@ app.get('/pasosTarea/:id', async (req, res) => { // GET Pasos
 app.post('/estudiantes/crearAlumno', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const { id, nombre, apellido1, apellido2, contraseña,  preferencias, fechaNac} = req.body;
-    const query1 = 'INSERT INTO usuarios (id, nombre, apellido1, apellido2, fecha_nac, PASSWORD,img_perfil) VALUES (?, ?, ?, ?, ?, MD5(?),?)';
-    await connection.promise().query(query1, [id, nombre, apellido1, apellido2, fechaNac, contraseña, null ], (err, result) => {
+    const { nombre, apellido1, apellido2, contraseña,  preferencias, fechaNac} = req.body;
+    const query1 = 'INSERT INTO usuarios (nombre, apellido1, apellido2, fecha_nac, PASSWORD,img_perfil) VALUES (?, ?, ?, ?, MD5(?),?)';
+    await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, contraseña, null ], (err, result) => {
     if (err) {
       console.error('Error al insertar estudiante: ' + err);
       return;
@@ -289,33 +288,39 @@ app.post('/estudiantes/crearAlumno', async (req, res) => {
     console.log('Estudiante insertado con éxito en usuarios');
     });
 
-    const query2 = 'INSERT INTO estudiantes (id, preferencias) VALUES (?, ?)';
-    await connection.promise().query(query2, [id,preferencias], (err, result) => {
+    const queryID = 'SELECT id FROM usuarios ORDER BY id DESC LIMIT 1;';
+    const idResult = await connection.promise().query(queryID);
+    const id = idResult[0][0].id;
+
+    const query2 = 'INSERT INTO estudiantes (id,preferencias) VALUES (?, ?)';
+    await connection.promise().query(query2, [id,preferencias], (err, result2) => {
     if (err) {
       console.error('Error al insertar estudiante: ' + err);
-      res.status(500).json({ error: 'Error al insertar estudiante en la base de datos' });
+      result2.status(500).json({ error: 'Error al insertar estudiante en la base de datos' });
       return;
     }
     console.log('Estudiante insertado con éxito en Estudiantes');
-    res.status(201).json({ message: 'Estudiante insertado con éxito' });
+    result2.status(201).json({ message: 'Estudiante insertado con éxito' });
     });
-    console.log('Estudiante insertado con éxito');
     connection.end();
   } catch (error){
     console.error('Error al introducir estudiante:', error);
     res.status(500).json({ error: 'Error al introducir estudiante' });
   }
+  console.log('Estudiante insertado con éxito en la base de datos!');
+  res.status(201).json({ message: 'Estudiante insertado con éxito' });
 
 });
+
 
 // Ruta para insertar un profesor en la base de datos
 app.post('/profesores/crearProfe',  async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const { id, nombre, apellido1, apellido2, contraseña,  admin, fechaNac} = req.body;
-    const query1 = 'INSERT INTO usuarios (id, nombre, apellido1, apellido2, fecha_nac, PASSWORD,img_perfil) VALUES (?, ?, ?, ?, ?, MD5(?),?)';
+    const {nombre, apellido1, apellido2, contraseña,  admin, fechaNac} = req.body;
+    const query1 = 'INSERT INTO usuarios (nombre, apellido1, apellido2, fecha_nac, PASSWORD,img_perfil) VALUES (?, ?, ?, ?, MD5(?),?)';
     
-      connection.promise().query(query1, [id, nombre, apellido1, apellido2, fechaNac, contraseña, null ], (err, result) => {
+      connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, contraseña, null ], (err, result) => {
       if (err) {
         console.error('Error al insertar profesor: ' + err);
         return;
@@ -324,21 +329,27 @@ app.post('/profesores/crearProfe',  async (req, res) => {
       console.log('Profesor insertado con éxito en usuarios');
     });
 
+    const queryID = 'SELECT id FROM usuarios ORDER BY id DESC LIMIT 1;';
+    const idResult = await connection.promise().query(queryID);
+    const id = idResult[0][0].id;
+    
     const query2 = 'INSERT INTO profesores (id, admin) VALUES (?, ?)';
-    connection.promise().query(query2, [id,admin], (err, result) => {
+    connection.promise().query(query2, [id,admin], (err, result2) => {
     if (err) {
       console.error('Error al insertar profesor: ' + err);
-      res.status(500).json({ error: 'Error al insertar profesor en la base de datos' });
+      result2.status(500).json({ error: 'Error al insertar profesor en la base de datos' });
       return;
     }
     console.log('Profesor insertado con éxito en Profesores');
-    res.status(201).json({ message: 'Profesor insertado con éxito' });
+    result2.status(201).json({ message: 'Profesor insertado con éxito' });
     });
     connection.end();
   } catch (error){
     console.error('Error al introducir estudiante:', error);
     res.status(500).json({ error: 'Error al introducir estudiante' });
   }
+  console.log('Profesor insertado con éxito en la base de datos!');
+  res.status(201).json({ message: 'Estudiante insertado con éxito' });
 });
 
 // Insertar clase
@@ -809,3 +820,5 @@ app.delete('/tareas/borrarTarea/:id', async (req, res) => {
 app.listen(5050, () => { // Inicia el servidor en el puerto 5050
   console.log('Servidor en ejecución en el puerto 5050');
 });
+
+

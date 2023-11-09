@@ -29,7 +29,6 @@ const CrearProfe = ()=>{
     const handleCreateProfe = () => {
         // Realiza una solicitud POST al servidor backend para crear un alumno
         axios.post('http://localhost:5050/profesores/crearProfe', {
-            id,
             nombre,
             apellido1,
             apellido2,
@@ -53,12 +52,6 @@ const CrearProfe = ()=>{
             <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
             <StyledText style={styles.titleText}>Crear un Nuevo Profesor</StyledText>
             
-            <StyledText style={styles.text}>Identificador de Usuario:</StyledText>
-            <StyledTextInput
-                placeholder="ID"
-                value={id}
-                onChangeText={text => setID(text)}
-            />
             <StyledText style={styles.text}>Nombre y apellidos:</StyledText>
             <StyledTextInput
                 placeholder="Nombre"

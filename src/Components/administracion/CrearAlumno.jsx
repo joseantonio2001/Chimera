@@ -25,7 +25,6 @@ const CrearAlumno = ()=>{
     const handleCreateAlumno = () => {
         // Realiza una solicitud POST al servidor backend para crear un alumno
         axios.post('http://localhost:5050/estudiantes/crearAlumno', {
-            id,
             nombre,
             apellido1,
             apellido2,
@@ -49,12 +48,6 @@ const CrearAlumno = ()=>{
             <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
             <StyledText style={styles.titleText}>Crear un Nuevo Alumno</StyledText>
             
-            <StyledText style={styles.text}>Identificador de Usuario:</StyledText>
-            <StyledTextInput
-                placeholder="ID"
-                value={id}
-                onChangeText={text => setID(text)}
-            />
             <StyledText style={styles.text}>Nombre y apellidos:</StyledText>
             <StyledTextInput
                 placeholder="Nombre"
