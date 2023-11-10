@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-dotenv.config({ path:'.env' }); // Modificar en caso de null@172... a la conexion de api
+dotenv.config({ path:'../../.env' }); // Modificar en caso de null@172... a la conexion de api
 
 const dbConfig = {
   host: process.env.DB_HOST,
@@ -353,43 +353,39 @@ app.post('/profesores/crearProfe',  async (req, res) => {
 });
 
 // Insertar clase
+// Insertar clase
 app.post('/clases/crearAula', async (req, res) => {
-  try{
+  try {
     const connection = await abrirConexion();
-    const { id, capacidad, id_profesor, estudiantes} = req.body;
-    const query1 = 'INSERT INTO clases (id, capacidad) VALUES (?, ?)';
-    await connection.promise().query(query1, [id, capacidad], (err, result) => {
-    if (err) {
-      console.error('Error al insertar clase: ' + err);
-      res.status(500).json({ error: 'Error al insertar clase en la base de datos' });
+    const { id, capacidad, id_profesor, estudiantes } = req.body;
+
+    // Validar capacidad antes de realizar las inserciones
+    if (estudiantes.length > capacidad) {
+      res.status(400).json({ error: 'Error en la creación del aula: La cantidad de estudiantes supera la capacidad del aula.' });
       return;
     }
-    console.log('Clase insertada con éxito en clases');
-    res.status(201).json({ message: 'Clase insertada con éxito' });
-    });
+
+    const query1 = 'INSERT INTO clases (id, capacidad) VALUES (?, ?)';
+    await connection.promise().query(query1, [id, capacidad]);
 
     let limite = capacidad;
 
     const query2 = 'INSERT INTO asignaciones (id_estudiante, id_profesor, id_clase) VALUES (?, ?, ?)';
-    estudiantes.forEach(async estudianteId =>  {
-      await connection.promise().query(query2, [estudianteId, id_profesor, id], (err, result) => {
-        if (err || limite === 0 ) {
-          console.error('Error al insertar estudiante en clase: ' + err);
-          // Puedes manejar el error aquí si lo deseas
-        }
+    await Promise.all(estudiantes.map(async estudianteId => {
+      if (limite > 0) {
+        await connection.promise().query(query2, [estudianteId, id_profesor, id]);
         limite--;
-      });
-    });
+      }
+    }));
 
-    console.log('Estudiantes insertados en asignaciones');
     connection.end();
-    // Envía una respuesta exitosa
-    res.status(200).json({ mensaje: 'Aula creada con éxito' });
-  } catch (error){
+    res.status(201).json({ mensaje: 'Aula creada con éxito' });
+  } catch (error) {
     console.error('Error al introducir clase:', error);
     res.status(500).json({ error: 'Error al introducir clase' });
   }
 });
+
 
 // Insertar elemento inventario
 app.post('/inventario/crearElemento', async (req, res) => {
