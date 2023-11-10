@@ -16,11 +16,14 @@
     "@expo/webpack-config": "^19.0.0",
     "@mui/icons-material": "^5.14.16",
     "@mui/material": "^5.14.17",
+    "@mui/styled-engine-sc": "^6.0.0-alpha.5",
     "@mui/x-data-grid": "^6.18.0",
+    "@mui/x-date-pickers": "^6.18.1",
     "axios": "^1.6.0",
     "body-parser": "^1.20.2",
     "color": "^4.2.3",
     "cors": "^2.8.5",
+    "dayjs": "^1.11.10",
     "dotenv": "^16.3.1",
     "expo": "~49.0.15",
     "expo-status-bar": "~1.6.0",
@@ -37,6 +40,7 @@
 
     "react-native-web": "~0.19.6",
     "react-router-native": "^6.18.0",
+    "styled-components": "^6.1.1",
     "telnet": "^0.0.1"
   },
   "devDependencies": {
