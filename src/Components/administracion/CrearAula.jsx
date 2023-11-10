@@ -48,7 +48,7 @@ const CrearAula = () => {
         axios.post('http://localhost:5050/clases/crearAula', {
             id,
             capacidad,
-            profesor: selectedProfesor,
+            id_profesor: selectedProfesor,
             estudiantes: selectedEstudiantes
         })
             .then((response) => {
