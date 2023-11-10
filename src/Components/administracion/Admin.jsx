@@ -1,7 +1,8 @@
-import {Button, Image, StyleSheet, View} from 'react-native';
+import {Button, Image, StyleSheet, View } from 'react-native';
 import PanelAdmin from './PanelAdmin';
 import StyledText from '../StyledText';
 import { useNavigate } from 'react-router-native';
+
 
 const Admin = ()=>{
     

@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-native';
 import StyledText from '../StyledText';
 
 
-function ConfirmarCrearTarea (props){
+function ConfirmarCrearAula (props){
     const navigate = useNavigate();
     
         const handleButtonClick = (enlace) => {
@@ -58,4 +58,4 @@ const styles=StyleSheet.create({
 
 
 
-export default ConfirmarCrearTarea
+export default ConfirmarCrearAula

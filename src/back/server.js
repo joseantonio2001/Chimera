@@ -353,12 +353,12 @@ app.post('/profesores/crearProfe',  async (req, res) => {
 });
 
 // Insertar clase
-app.post('/clases/crearClase', async (req, res) => {
+app.post('/clases/crearAula', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const { id, capacidad, id_profesor, id_estudiante } = req.body;
-    const query1 = 'INSERT INTO clases (id, capacidad, id_profesor, id_estudiante) VALUES (?, ?, ?, ?)';
-    await connection.promise().query(query1, [id, capacidad, id_profesor, id_estudiante ], (err, result) => {
+    const { id, capacidad, id_profesor, estudiantes} = req.body;
+    const query1 = 'INSERT INTO clases (id, capacidad) VALUES (?, ?)';
+    await connection.promise().query(query1, [id, capacidad], (err, result) => {
     if (err) {
       console.error('Error al insertar clase: ' + err);
       res.status(500).json({ error: 'Error al insertar clase en la base de datos' });
@@ -367,7 +367,24 @@ app.post('/clases/crearClase', async (req, res) => {
     console.log('Clase insertada con éxito en clases');
     res.status(201).json({ message: 'Clase insertada con éxito' });
     });
+
+    let limite = capacidad;
+
+    const query2 = 'INSERT INTO asignaciones (id_estudiante, id_profesor, id_clase) VALUES (?, ?, ?)';
+    estudiantes.forEach(async estudianteId =>  {
+      await connection.promise().query(query2, [estudianteId, id_profesor, id], (err, result) => {
+        if (err || limite === 0 ) {
+          console.error('Error al insertar estudiante en clase: ' + err);
+          // Puedes manejar el error aquí si lo deseas
+        }
+        limite--;
+      });
+    });
+
+    console.log('Estudiantes insertados en asignaciones');
     connection.end();
+    // Envía una respuesta exitosa
+    res.status(200).json({ mensaje: 'Aula creada con éxito' });
   } catch (error){
     console.error('Error al introducir clase:', error);
     res.status(500).json({ error: 'Error al introducir clase' });
