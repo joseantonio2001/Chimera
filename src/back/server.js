@@ -34,7 +34,7 @@ app.get('/usuarios', async (req, res) => { // GET Usuarios
     const [resultado] = await connection.promise().query(queryUsuarios);
     connection.end(); // Libera recursos BD
     connection.destroy();
-    res.json([resultado]); // Resultado servido en HTTP formato JSON  
+    res.json([resultado]); // Resultado servido en HTTP formato JSON
   } catch (error) {
     console.error('Error al obtener usuarios:', error);
     res.status(500).json({ error: 'Error al obtener usuarios' });
@@ -349,7 +349,13 @@ app.post('/clases/crearAula', async (req, res) => {
   try{
     let nuevoElementoId = '-1';
     const connection = await abrirConexion();
-    const { capacidad, id_profesor, estudiantes} = req.body;
+    const { capacidad, id_profesor, estudiantes } = req.body;
+
+    // Validar capacidad antes de realizar las inserciones
+    if (estudiantes.length > capacidad) {
+      res.status(400).json({ error: 'Error en la creación del aula: La cantidad de estudiantes supera la capacidad del aula.' });
+      return;
+    }
     const query1 = 'INSERT INTO clases (capacidad) VALUES (?)';
     const result = await connection.promise().query(query1, [capacidad]);
     if (result[0].err) {
@@ -364,22 +370,21 @@ app.post('/clases/crearAula', async (req, res) => {
     let limite = capacidad;
 
     const query2 = 'INSERT INTO asignaciones (id_estudiante, id_profesor, id_clase) VALUES (?, ?, ?)';
-    estudiantes.forEach(async estudianteId =>  {
-      await connection.promise().query(query2, [estudianteId, id_profesor, nuevoElementoId], (err, result) => {
-        if (err || limite === 0 ) {
-          console.error('Error al insertar estudiante en clase: ' + err);
-        }
+    await Promise.all(estudiantes.map(async estudianteId => {
+      if (limite > 0) {
+        await connection.promise().query(query2, [estudianteId, id_profesor, id]);
         limite--;
-      });
-    });
-    console.log('Estudiantes insertados en asignaciones');
+      }
+    }));
+
     connection.end();
-    res.status(200).json({ mensaje: 'Aula creada con éxito' });
-  } catch (error){
+    res.status(201).json({ mensaje: 'Aula creada con éxito' });
+  } catch (error) {
     console.error('Error al introducir clase:', error);
     res.status(500).json({ error: 'Error al introducir clase' });
   }
 });
+
 
 // Insertar elemento inventario
 app.post('/inventario/crearElemento', async (req, res) => {

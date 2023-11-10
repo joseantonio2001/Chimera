@@ -121,8 +121,6 @@ const formatoColumnas = (props) => {
         setColumnas([ // Columnas de la tabla a mostrar
         {field: 'id', headerName: 'ID', width: 50},
         {field: 'capacidad', headerName: 'Capacidad', width: 150},
-        {field: 'id_profesor', headerName: 'ID Profesor', width: 100},
-        {field: 'id_estudiante', headerName: 'ID Estudiante', width: 100},
         {field: 'acciones', headerName: 'Acciones', width: 100, renderCell: (params) => botonesAcciones(params,props.nombre)}
         ]);
         break;
