@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-dotenv.config({ path:'../../.env' }); // Modificar en caso de null@172... a la conexion de api
+dotenv.config({ path:'.env' }); // Modificar en caso de null@172... a la conexion de api
 
 const dbConfig = {
   host: process.env.DB_HOST,
@@ -33,7 +33,8 @@ app.get('/usuarios', async (req, res) => { // GET Usuarios
     const queryUsuarios = 'SELECT * FROM usuarios';
     const [resultado] = await connection.promise().query(queryUsuarios);
     connection.end(); // Libera recursos BD
-    res.json([resultado]); // Resultado servido en HTTP formato JSON  
+    connection.destroy();
+    res.json([resultado]); // Resultado servido en HTTP formato JSON
   } catch (error) {
     console.error('Error al obtener usuarios:', error);
     res.status(500).json({ error: 'Error al obtener usuarios' });
@@ -277,38 +278,35 @@ app.get('/pasosTarea/:id', async (req, res) => { // GET Pasos
 // Ruta para insertar un estudiante en la base de datos
 app.post('/estudiantes/crearAlumno', async (req, res) => {
   try{
+    let nuevoElementoId = '-1';
     const connection = await abrirConexion();
     const { nombre, apellido1, apellido2, contraseña,  preferencias, fechaNac} = req.body;
     const query1 = 'INSERT INTO usuarios (nombre, apellido1, apellido2, fecha_nac, PASSWORD,img_perfil) VALUES (?, ?, ?, ?, MD5(?),?)';
-    await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, contraseña, null ], (err, result) => {
-    if (err) {
+    const result = await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, contraseña, null ]);
+    if (result[0].err) {
       console.error('Error al insertar estudiante: ' + err);
       return;
     }
+    nuevoElementoId = result[0].insertId;
+    console.log(result[0]);
     console.log('Estudiante insertado con éxito en usuarios');
-    });
 
-    const queryID = 'SELECT id FROM usuarios ORDER BY id DESC LIMIT 1;';
-    const idResult = await connection.promise().query(queryID);
-    const id = idResult[0][0].id;
-
-    const query2 = 'INSERT INTO estudiantes (id,preferencias) VALUES (?, ?)';
-    await connection.promise().query(query2, [id,preferencias], (err, result2) => {
-    if (err) {
+    const query2 = 'INSERT INTO estudiantes (id, preferencias) VALUES (?, ?)';
+    const result2 = await connection.promise().query(query2, [nuevoElementoId, preferencias]);
+    if (result2[0].err) {
       console.error('Error al insertar estudiante: ' + err);
-      result2.status(500).json({ error: 'Error al insertar estudiante en la base de datos' });
+      res.status(500).json({ error: 'Error al insertar estudiante en la base de datos' });
       return;
     }
     console.log('Estudiante insertado con éxito en Estudiantes');
-    result2.status(201).json({ message: 'Estudiante insertado con éxito' });
-    });
+    res.status(201).json({ message: 'Estudiante insertado con éxito' });
+
+    console.log('Estudiante insertado con éxito');
     connection.end();
   } catch (error){
     console.error('Error al introducir estudiante:', error);
     res.status(500).json({ error: 'Error al introducir estudiante' });
   }
-  console.log('Estudiante insertado con éxito en la base de datos!');
-  res.status(201).json({ message: 'Estudiante insertado con éxito' });
 
 });
 
@@ -316,64 +314,65 @@ app.post('/estudiantes/crearAlumno', async (req, res) => {
 // Ruta para insertar un profesor en la base de datos
 app.post('/profesores/crearProfe',  async (req, res) => {
   try{
+    let nuevoElementoId = '-1';
     const connection = await abrirConexion();
     const {nombre, apellido1, apellido2, contraseña,  admin, fechaNac} = req.body;
     const query1 = 'INSERT INTO usuarios (nombre, apellido1, apellido2, fecha_nac, PASSWORD,img_perfil) VALUES (?, ?, ?, ?, MD5(?),?)';
     
-      connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, contraseña, null ], (err, result) => {
-      if (err) {
-        console.error('Error al insertar profesor: ' + err);
-        return;
-      }
+    const result = await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, contraseña, null ]);
+    if (result[0].err) {
+      console.error('Error al insertar profesor: ' + result[0].err);
+      return;
+    }
+    console.log('Profesor insertado con éxito en usuarios');
+    nuevoElementoId = result[0].insertId;
 
-      console.log('Profesor insertado con éxito en usuarios');
-    });
-
-    const queryID = 'SELECT id FROM usuarios ORDER BY id DESC LIMIT 1;';
-    const idResult = await connection.promise().query(queryID);
-    const id = idResult[0][0].id;
-    
     const query2 = 'INSERT INTO profesores (id, admin) VALUES (?, ?)';
-    connection.promise().query(query2, [id,admin], (err, result2) => {
-    if (err) {
-      console.error('Error al insertar profesor: ' + err);
-      result2.status(500).json({ error: 'Error al insertar profesor en la base de datos' });
+    const result2 = await connection.promise().query(query2, [nuevoElementoId, admin]);
+    if (result2[0].err) {
+      console.error('Error al insertar profesor: ' + result2[0].err);
+      res.status(500).json({ error: 'Error al insertar profesor en la base de datos' });
       return;
     }
     console.log('Profesor insertado con éxito en Profesores');
-    result2.status(201).json({ message: 'Profesor insertado con éxito' });
-    });
+    res.status(201).json({ message: 'Profesor insertado con éxito' });
     connection.end();
   } catch (error){
-    console.error('Error al introducir estudiante:', error);
-    res.status(500).json({ error: 'Error al introducir estudiante' });
+    console.error('Error al introducir profesor:', error);
+    res.status(500).json({ error: 'Error al introducir profesor' });
   }
   console.log('Profesor insertado con éxito en la base de datos!');
-  res.status(201).json({ message: 'Estudiante insertado con éxito' });
 });
 
 // Insertar clase
-// Insertar clase
 app.post('/clases/crearAula', async (req, res) => {
-  try {
+  try{
+    let nuevoElementoId = '-1';
     const connection = await abrirConexion();
-    const { id, capacidad, id_profesor, estudiantes } = req.body;
+    const { capacidad, id_profesor, estudiantes } = req.body;
 
     // Validar capacidad antes de realizar las inserciones
     if (estudiantes.length > capacidad) {
       res.status(400).json({ error: 'Error en la creación del aula: La cantidad de estudiantes supera la capacidad del aula.' });
       return;
     }
-
-    const query1 = 'INSERT INTO clases (id, capacidad) VALUES (?, ?)';
-    await connection.promise().query(query1, [id, capacidad]);
+    const query1 = 'INSERT INTO clases (capacidad) VALUES (?)';
+    const result = await connection.promise().query(query1, [capacidad]);
+    if (result[0].err) {
+      console.error('Error al insertar clase: ' + result[0].err);
+      res.status(500).json({ error: 'Error al insertar clase en la base de datos' });
+      return;
+    }
+    nuevoElementoId = result[0].insertId;
+    console.log('Clase insertada con éxito en clases');
+    res.status(201).json({ message: 'Clase insertada con éxito' });
 
     let limite = capacidad;
 
     const query2 = 'INSERT INTO asignaciones (id_estudiante, id_profesor, id_clase) VALUES (?, ?, ?)';
     await Promise.all(estudiantes.map(async estudianteId => {
       if (limite > 0) {
-        await connection.promise().query(query2, [estudianteId, id_profesor, id]);
+        await connection.promise().query(query2, [estudianteId, id_profesor, nuevoElementoId]);
         limite--;
       }
     }));
@@ -391,9 +390,9 @@ app.post('/clases/crearAula', async (req, res) => {
 app.post('/inventario/crearElemento', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const { id, nombre, cantidad } = req.body;
-    const query1 = 'INSERT INTO inventario (id, nombre, cantidad) VALUES (?, ?, ?)';
-    await connection.promise().query(query1, [id, nombre, cantidad ], (err, result) => {
+    const { nombre, cantidad } = req.body;
+    const query1 = 'INSERT INTO inventario (nombre, cantidad) VALUES (?, ?)';
+    await connection.promise().query(query1, [nombre, cantidad ], (err, result) => {
     if (err) {
       console.error('Error al insertar elemento: ' + err);
       res.status(500).json({ error: 'Error al insertar elemento en la base de datos' });
@@ -413,9 +412,9 @@ app.post('/inventario/crearElemento', async (req, res) => {
 app.post('/menus/crearMenu', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const { id, nombre, descripcion } = req.body;
-    const query1 = 'INSERT INTO menus (id, nombre, descripcion) VALUES (?, ?, ?)';
-    await connection.promise().query(query1, [id, nombre, descripcion ], (err, result) => {
+    const { nombre, descripcion } = req.body;
+    const query1 = 'INSERT INTO menus (nombre, descripcion) VALUES (?, ?)';
+    await connection.promise().query(query1, [nombre, descripcion ], (err, result) => {
     if (err) {
       console.error('Error al insertar menu: ' + err);
       res.status(500).json({ error: 'Error al insertar menu en la base de datos' });
@@ -435,9 +434,9 @@ app.post('/menus/crearMenu', async (req, res) => {
 app.post('/pasos/crearPaso', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const { id, id_tarea, n_paso, imagen } = req.body;
-    const query1 = 'INSERT INTO pasos (id, id_tarea, n_paso, imagen) VALUES (?, ?, ?, ?)';
-    await connection.promise().query(query1, [id, id_tarea, n_paso, imagen ], (err, result) => {
+    const {id_tarea, n_paso, imagen } = req.body;
+    const query1 = 'INSERT INTO pasos (id_tarea, n_paso, imagen) VALUES (?, ?, ?, ?)';
+    await connection.promise().query(query1, [id_tarea, n_paso, imagen], (err, result) => {
     if (err) {
       console.error('Error al insertar paso: ' + err);
       res.status(500).json({ error: 'Error al insertar paso en la base de datos' });
@@ -457,9 +456,9 @@ app.post('/pasos/crearPaso', async (req, res) => {
 app.post('/tareas/crearTarea', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const { id, nombre, descripcion, video, portada, tipo } = req.body;
-    const query1 = 'INSERT INTO tareas (id, nombre, descripcion, video, portada, tipo) VALUES (?, ?, ?, ?, ?, ?)';
-    await connection.promise().query(query1, [id, nombre, descripcion, video, portada, tipo ], (err, result) => {
+    const { nombre, descripcion, video, portada, tipo } = req.body;
+    const query1 = 'INSERT INTO tareas (nombre, descripcion, video, portada, tipo) VALUES (?, ?, ?, ?, ?, ?)';
+    await connection.promise().query(query1, [nombre, descripcion, video, portada, tipo ], (err, result) => {
     if (err) {
       console.error('Error al insertar tarea: ' + err);
       res.status(500).json({ error: 'Error al insertar tarea en la base de datos' });
