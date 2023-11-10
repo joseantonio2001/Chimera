@@ -1,10 +1,10 @@
 import React, {useState} from 'react'
 import {Text, TextInput, View, Button, StyleSheet, Image, FlatList} from 'react-native'
 import { useNavigate } from 'react-router-native';
-import SquareButton from '../SquareButton';
 import StyledText from '../StyledText';
 import axios from 'axios';
 import StyledTextInput from '../StyledTextInput';
+import ImagePicker from 'react-native-image-picker';
 
 
 const CrearTarea = ()=>{
@@ -18,6 +18,7 @@ const CrearTarea = ()=>{
     const [id, setID] = useState('');
     const [nombre, setNombre] = useState('');
     const [descripcion, setDescripcion] = useState('');
+    const [portada, setPortada] = useState('');
     const [numPasos, setNumPasos] = useState('');
     const [listaPasos, setListaPasos] = useState([]);
 
@@ -33,13 +34,12 @@ const CrearTarea = ()=>{
     const handleCreateTarea = () => {
         // Realiza una solicitud POST al servidor backend para crear un alumno
         axios.post('http://localhost:5050/tareas/crearTarea', {
-            id,
             nombre,
-            descripcion,
-            listaPasos
+            descripcion
         })
         .then((response) => {
             // Maneja la respuesta exitosa
+            
             navigate('/confirmacioncreartarea', { state: { mensaje: '¡Tarea creada con éxito!' } });
         })
         .catch((error) => {
@@ -54,21 +54,40 @@ const CrearTarea = ()=>{
             <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
             <StyledText style={styles.titleText}>Crear una Nueva Tarea </StyledText>
             
+            {/* Nombre */}
             <StyledText style={styles.text}>Nombre:</StyledText>
             <StyledTextInput
                 placeholder="Nombre"
                 value={nombre}
                 onChangeText={text => setNombre(text)}
             />
+
+            {/* Descripción */}
             <StyledText style={styles.text}>Descripcion: </StyledText>
             <StyledTextInput
                 placeholder="Descripcion"
                 value={descripcion}
                 onChangeText={text => setDescripcion(text)}
             />
+
+            {/* Portada */}
+            <StyledText style={styles.text}>Portada (opcional) : </StyledText>
+            <StyledTextInput
+                placeholder="Portada"
+                value={portada}
+                onChangeText={text => setPortada(text)}
+            />
+
             <StyledText style={styles.text}>Pasos de la tarea:</StyledText>
+
+
+            <StyledText style={styles.titleText}>Crear pasos: </StyledText>
+
+            <View style={styles.button}>
+                <Button title='Crear Pasos' onPress={handleCreateTarea} />
+            </View>
             
-            {/* Lista para almacenar paso y que se vea?? */}
+            {/* Lista para almacenar paso y que se vea?? 
             <FlatList
                 data={listaPasos}
                 keyExtractor={(item) => item.id.toString()}
@@ -79,7 +98,7 @@ const CrearTarea = ()=>{
                 )}
             />
 
-            <SquareButton title="Paso" onPress={() => handleButtonClick('/admin/crearpaso', { numPasos, nombre, incrementarNumPasos, agregarPaso })}/>
+           <SquareButton title="Paso" onPress={() => handleButtonClick('/admin/crearpaso', { numPasos, nombre, incrementarNumPasos, agregarPaso })}/> */}
 
             
             <View style={styles.button}>
