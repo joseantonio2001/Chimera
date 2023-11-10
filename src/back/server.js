@@ -372,7 +372,7 @@ app.post('/clases/crearAula', async (req, res) => {
     const query2 = 'INSERT INTO asignaciones (id_estudiante, id_profesor, id_clase) VALUES (?, ?, ?)';
     await Promise.all(estudiantes.map(async estudianteId => {
       if (limite > 0) {
-        await connection.promise().query(query2, [estudianteId, id_profesor, id]);
+        await connection.promise().query(query2, [estudianteId, id_profesor, nuevoElementoId]);
         limite--;
       }
     }));
