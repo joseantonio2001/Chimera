@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-dotenv.config({ path:'.env' }); // Modificar en caso de null@172... a la conexion de api
+dotenv.config({ path:'../../.env' }); // Modificar en caso de null@172... a la conexion de api
 
 const dbConfig = {
   host: process.env.DB_HOST,
@@ -74,6 +74,7 @@ app.get('/estudiantes/:id', async (req, res) => { // GET Estudiantes
   try {
     const connection = await abrirConexion();
     const id = req.params.id;
+    console.log('Información del alumno con ID ', id)
     const queryEstudiantes = 'SELECT usuarios.*, estudiantes.* FROM usuarios INNER JOIN estudiantes ON usuarios.id = estudiantes.id WHERE usuarios.id = ?';
     const [resultado] = await connection.promise().query(queryEstudiantes, [id]);
     connection.end(); // Libera recursos BD
@@ -468,9 +469,9 @@ app.post('/tareas/crearTarea', async (req, res) => {
 app.put('/estudiantes/actualizarAlumno', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const { id, nombre, apellido1, apellido2, contraseña,  preferencias, fechaNac} = req.body;
-    const query1 = 'UPDATE usuarios SET nombre = ?, apellido1 = ?, apellido2 = ?, fecha_nac = ?, PASSWORD = MD5(?) WHERE id = ?';
-    await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, contraseña, id ], (err, result) => {
+    const { id, nombre, apellido1, apellido2,  preferencias, fechaNac} = req.body;
+    const query1 = 'UPDATE usuarios SET nombre = ?, apellido1 = ?, apellido2 = ?, fecha_nac = ? WHERE id = ?';
+    await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, id ], (err, result) => {
     if (err) {
       console.error('Error al actualizar estudiante: ' + err);
       return;
@@ -493,15 +494,17 @@ app.put('/estudiantes/actualizarAlumno', async (req, res) => {
     console.error('Error al actualizar estudiante:', error);
     res.status(500).json({ error: 'Error al actualizar estudiante' });
   }
+  console.log('Estudiante actualizado con éxito en la base de datos!');
+  res.status(201).json({ message: 'Estudiante actualizado con éxito' });
 });
 
 // Actualizar profesor
 app.put('/profesores/actualizarProfe', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const { id, nombre, apellido1, apellido2, contraseña,  admin, fechaNac} = req.body;
-    const query1 = 'UPDATE usuarios SET nombre = ?, apellido1 = ?, apellido2 = ?, fecha_nac = ?, PASSWORD = MD5(?) WHERE id = ?';
-    await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, contraseña, id ], (err, result) => {
+    const { id, nombre, apellido1, apellido2, admin, fechaNac} = req.body;
+    const query1 = 'UPDATE usuarios SET nombre = ?, apellido1 = ?, apellido2 = ?, fecha_nac = ? WHERE id = ?';
+    await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac,  id ], (err, result) => {
     if (err) {
       console.error('Error al actualizar profesor: ' + err);
       return;
@@ -524,6 +527,8 @@ app.put('/profesores/actualizarProfe', async (req, res) => {
     console.error('Error al actualizar profesor:', error);
     res.status(500).json({ error: 'Error al actualizar profesor' });
   }
+  console.log('Profesor actualizado con éxito en la base de datos!');
+  res.status(201).json({ message: 'Profesor actualizado con éxito' });
 });
 
 // Actualizar clase
@@ -642,10 +647,11 @@ app.put('/tareas/actualizarTarea', async (req, res) => {
 app.delete('/estudiantes/borrarAlumno/:id', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const id = req.params.id;
+    const id = parseInt(req.params.id, 10);
+    console.log('Queremos borrar alumno. ID: ',id)
 
     const query1 = 'DELETE FROM estudiantes WHERE id = ?';
-    await connection.promise().query(query1, [id], (err, result) => {
+    await connection.promise().query(query1, id, (err, result) => {
     if (err) {
       console.error('Error al borrar estudiante: ' + err);
       res.status(500).json({ error: 'Error al borrar estudiante en la base de datos' });
@@ -656,7 +662,7 @@ app.delete('/estudiantes/borrarAlumno/:id', async (req, res) => {
     });
 
     const query2 = 'DELETE FROM usuarios WHERE id = ?';
-    await connection.promise().query(query2, [id], (err, result) => {
+    await connection.promise().query(query2, id, (err, result) => {
     if (err) {
       console.error('Error al borrar estudiante: ' + err);
       return;
@@ -668,13 +674,16 @@ app.delete('/estudiantes/borrarAlumno/:id', async (req, res) => {
     console.error('Error al borrar estudiante:', error);
     res.status(500).json({ error: 'Error al borrar estudiante' });
   }
+  console.log('Estudiante eliminado con éxito en la base de datos!');
+  res.status(201).json({ message: 'Estudiante eliminado con éxito' });
 });
 
 // Borrar profesor
 app.delete('/profesores/borrarProfe/:id', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const id = req.params.id;
+    const id = parseInt(req.params.id, 10);
+    console.log('Queremos borrar profesor. ID: ',id)
 
     const query1 = 'DELETE FROM profesores WHERE id = ?';
     await connection.promise().query(query1, [id], (err, result) => {
@@ -700,13 +709,16 @@ app.delete('/profesores/borrarProfe/:id', async (req, res) => {
     console.error('Error al borrar profesor:', error);
     res.status(500).json({ error: 'Error al borrar profesor' });
   }
+  console.log('Profesor eliminado con éxito en la base de datos!');
+  res.status(201).json({ message: 'Profesor eliminado con éxito' });
 });
 
 // Borrar clase
 app.delete('/clases/borrarClase/:id', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const id = req.params.id;
+    const id = parseInt(req.params.id, 10);
+    console.log('Queremos borrar clase. ID: ',id)
 
     const query1 = 'DELETE FROM clases WHERE id = ?';
     await connection.promise().query(query1, [id], (err, result) => {
@@ -723,13 +735,16 @@ app.delete('/clases/borrarClase/:id', async (req, res) => {
     console.error('Error al borrar clase:', error);
     res.status(500).json({ error: 'Error al borrar clase' });
   }
+  console.log('Clase eliminada con éxito en la base de datos!');
+  res.status(201).json({ message: 'Clase eliminada con éxito' });
 });
 
 // Borrar elemento inventario
 app.delete('/inventario/borrarElemento/:id', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const id = req.params.id;
+    const id = parseInt(req.params.id, 10);
+    console.log('Queremos borrar un elemento del inventario. ID: ',id)
 
     const query1 = 'DELETE FROM inventario WHERE id = ?';
     await connection.promise().query(query1, [id], (err, result) => {
@@ -746,13 +761,16 @@ app.delete('/inventario/borrarElemento/:id', async (req, res) => {
     console.error('Error al borrar elemento:', error);
     res.status(500).json({ error: 'Error al borrar elemento' });
   }
+  console.log('Elemento del inventario eliminado con éxito en la base de datos!');
+  res.status(201).json({ message: 'Elemento del inventario eliminado con éxito' });
 });
 
 // Borrar menú
 app.delete('/menus/borrarMenu/:id', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const id = req.params.id;
+    const id = parseInt(req.params.id, 10);
+    console.log('Queremos borrar manú. ID: ',id)
 
     const query1 = 'DELETE FROM menus WHERE id = ?';
     await connection.promise().query(query1, [id], (err, result) => {
@@ -769,13 +787,16 @@ app.delete('/menus/borrarMenu/:id', async (req, res) => {
     console.error('Error al borrar menu:', error);
     res.status(500).json({ error: 'Error al borrar menu' });
   }
+  console.log('Menú eliminado con éxito en la base de datos!');
+  res.status(201).json({ message: 'Menú eliminado con éxito' });
 });
 
 // Borrar paso
 app.delete('/pasos/borrarPaso/:id', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const id = req.params.id;
+    const id = parseInt(req.params.id, 10);
+    console.log('Queremos borrar un paso de una tarea. ID: ',id)
 
     const query1 = 'DELETE FROM pasos WHERE id = ?';
     await connection.promise().query(query1, [id], (err, result) => {
@@ -792,13 +813,16 @@ app.delete('/pasos/borrarPaso/:id', async (req, res) => {
     console.error('Error al borrar paso:', error);
     res.status(500).json({ error: 'Error al borrar paso' });
   }
+  console.log('Paso de una tarea eliminado con éxito en la base de datos!');
+  res.status(201).json({ message: 'Paso de una tarea eliminado con éxito' });
 });
 
 // Borrar tarea
 app.delete('/tareas/borrarTarea/:id', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const id = req.params.id;
+    const id = parseInt(req.params.id, 10);
+    console.log('Queremos borrar tarea. ID: ',id)
 
     const query1 = 'DELETE FROM tareas WHERE id = ?';
     await connection.promise().query(query1, [id], (err, result) => {
@@ -815,6 +839,8 @@ app.delete('/tareas/borrarTarea/:id', async (req, res) => {
     console.error('Error al borrar tarea:', error);
     res.status(500).json({ error: 'Error al borrar tarea' });
   }
+  console.log('Tarea eliminada con éxito en la base de datos!');
+  res.status(201).json({ message: ' Tarea eliminada con éxito' });
 });
 
 app.listen(5050, () => { // Inicia el servidor en el puerto 5050

@@ -1,14 +1,15 @@
-import React, {useState} from 'react'
-import {Text, TextInput, View, Button, StyleSheet, Image, Switch} from 'react-native'
-import { useNavigate } from 'react-router-native';
+import React, {useState, useEffect} from 'react'
+import { View, Button, StyleSheet, Image, Switch} from 'react-native'
+import { useNavigate, useLocation } from 'react-router-native';
 import StyledText from '../StyledText';
 import axios from 'axios';
 import StyledTextInput from '../StyledTextInput';
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 
 
-const CrearProfe = ()=>{
+const EditarProfe = ()=>{
     const navigate = useNavigate();
     
         const handleButtonClick = (enlace) => {
@@ -16,34 +17,62 @@ const CrearProfe = ()=>{
         navigate(enlace);
     };
 
+    const { state } = useLocation();
+    const id = state ? state.id : '';
     const [nombre, setNombre] = useState('');
     const [apellido1, setApellido1] = useState('');
     const [apellido2, setApellido2] = useState('');
     const [contraseña, setContraseña] = useState('');
     const [admin, setAdmin] = useState(false);
     const [selectedDate, setSelectedDate] = useState('');
+    const [fechaNacimiento, setFechaNacimiento] = useState(Date);
+    const [fechaNacimientoBD, setFechaNacimientoBD] = useState(Date);
 
     const toggleAdmin = () => {
         setAdmin(!admin);
     };
+    const getDatosProfe = () => {
+        axios.get(`http://localhost:5050/profesores/${id}`)
+            .then((response) => {
+                const resultado = response.data[0];
+                if (resultado && resultado.length > 0 && Array.isArray(resultado)) {
+                    resultado.forEach((profe) => {
+                        setNombre(profe.nombre);
+                        setApellido1(profe.apellido1);
+                        setApellido2(profe.apellido2);
+                        setAdmin(profe.admin);
+                        
+                        const fechaNacimientoDB = new Date(profe.fecha_nac);
+                        setFechaNacimientoBD(profe.fecha_nac);
+    
+                        const año = fechaNacimientoDB.getFullYear();
+                        const mes = String(fechaNacimientoDB.getMonth() + 1).padStart(2, '0');
+                        const dia = String(fechaNacimientoDB.getDate()).padStart(2, '0');
+                        const fechaFormateada = `${año}/${mes}/${dia}`;
+    
+                        setFechaNacimiento(fechaFormateada);
+                    });
+                }
+            })
+            .catch((error) => {
+                // Manejar los errores
+                console.error('Error en la solicitud GET:', error);
+            });
+    };
 
-    const handleCreateProfe = () => {
-        if (!selectedDate) {
-            // Maneja el error de fecha no seleccionada
-            return;
-          }
-      
-          // Obtiene solo la fecha en formato YYYY/MM/DD
-          const formattedDate = selectedDate.format('YYYY/MM/DD');
+    const handleEditProfe = () => {
+        const fechaNacimientoAEnviar = selectedDate || fechaNacimientoBD;
+        const fechaFormateada = dayjs(fechaNacimientoAEnviar).format('YYYY-MM-DD');
+        console.log('Fecha a insertar en BD; ', fechaFormateada);
         
         // Realiza una solicitud POST al servidor backend para crear un alumno
-        axios.post('http://localhost:5050/profesores/crearProfe', {
+        axios.put('http://localhost:5050/profesores/actualizarProfe', {
+            id,
             nombre,
             apellido1,
             apellido2,
-            contraseña,
             admin,
-            fechaNac: formattedDate
+            fechaNac: fechaFormateada
         })
         .then((response) => {
             // Maneja la respuesta exitosa
@@ -56,10 +85,14 @@ const CrearProfe = ()=>{
         
     };
 
+    useEffect(() => {
+        getDatosProfe();
+      }, [])
+
     return(
         <View>
             <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
-            <StyledText style={styles.titleText}>Crear un Nuevo Profesor</StyledText>
+            <StyledText style={styles.titleText}>Editar Prfesor ID: {id}</StyledText>
             
             <StyledText style={styles.text}>Nombre y apellidos:</StyledText>
             <StyledTextInput
@@ -77,6 +110,7 @@ const CrearProfe = ()=>{
                 value={apellido2}
                 onChangeText={text => setApellido2(text)}
             />
+            <StyledText style={styles.text}>La fecha actual de nacimiento es {fechaNacimiento}. Si desea cambiarla introduzca una nueva:</StyledText>
             <StyledText style={styles.text}>Fecha de nacimiento: [AAAA/MM/DD]</StyledText>
             <View style={styles.calendarContainer}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -90,12 +124,6 @@ const CrearProfe = ()=>{
                     />
                 </LocalizationProvider>
             </View>
-            <StyledText style={styles.text}>Contraseña: </StyledText>
-            <StyledTextInput
-                placeholder="Contraseña"
-                value={contraseña}
-                onChangeText={text => setContraseña(text)}
-            />
             <StyledText style={styles.text}>Perfil de administración: </StyledText>
             <Switch style={styles.switch}
                 value={admin}
@@ -105,7 +133,7 @@ const CrearProfe = ()=>{
             />
 
             <View style={styles.button}>
-                <Button title="Crear Profesor" onPress={handleCreateProfe} />
+                <Button title="Editar Profesor" onPress={handleEditProfe} />
             </View>
 
             <View style={styles.button}>
@@ -183,5 +211,4 @@ const styles=StyleSheet.create({
 
 
 
-
-export default CrearProfe
+export default EditarProfe
