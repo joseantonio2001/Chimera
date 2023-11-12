@@ -39,8 +39,7 @@ const CrearTarea = ()=>{
         })
         .then((response) => {
             // Maneja la respuesta exitosa
-            
-            navigate('/confirmacioncreartarea', { state: { mensaje: '¡Tarea creada con éxito!' } });
+            // navigate('/confirmacioncreartarea', { state: { mensaje: '¡Tarea creada con éxito!' } });
         })
         .catch((error) => {
             // Maneja los errores
@@ -82,23 +81,9 @@ const CrearTarea = ()=>{
 
 
             <StyledText style={styles.titleText}>Crear pasos: </StyledText>
-
-            <View style={styles.button}>
-                <Button title='Crear Pasos' onPress={handleCreateTarea} />
-            </View>
+            handleCreateTarea
             
-            {/* Lista para almacenar paso y que se vea?? 
-            <FlatList
-                data={listaPasos}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <View>
-                        <Text>{item.contenido}</Text>
-                    </View>
-                )}
-            />
-
-           <SquareButton title="Paso" onPress={() => handleButtonClick('/admin/crearpaso', { numPasos, nombre, incrementarNumPasos, agregarPaso })}/> */}
+            {/* <SquareButton title="Paso" onPress={() => handleButtonClick('/admin/crearpaso', { numPasos, nombre, incrementarNumPasos, agregarPaso })}/> */}
 
             
             <View style={styles.button}>

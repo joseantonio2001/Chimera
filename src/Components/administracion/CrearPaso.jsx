@@ -15,43 +15,33 @@ const CrearPaso = ()=>{
         navigate(enlace);
     };
 
-    const [id, setID] = useState('');
     const [tarea, setTarea] = useState('');
     const [imagen, setImagen] = useState('');
     const [nPaso, setNpaso] = useState('');
     const [descripcion, setDescripcion] = useState('');
 
-    setNpaso(navigate.params?.numeroPasos);
-    setTarea(navigate.params?.nombre); // nombre de la tarea
+    axios.get('http://localhost:5050/pasos/crearPaso', {
+        
 
-    const seleccionarImagen = () => {
-        const options = {
-          title: 'Selecciona una imagen',
-          storageOptions: {
-            skipBackup: true,
-            path: 'images',
-          },
-        };
-    
-        // Imagenes: insertar imagenes??
-        ImagePicker.showImagePicker(options, (response) => {
-          if (response.didCancel) {
-            console.log('Cancelado por el usuario');
-          } else if (response.error) {
-            console.log('Error:', response.error);
-          } else {
-            setImagen(response.uri);
-          }
+    })
+
+    const handleUploadPhoto = () => {
+        axios.post('http://localhost:5050/pasos/crearPaso', {
+            imagen
+        })
+        .then((response) => {
+            console.log('response', response);
+        })
+        .catch((error) => {
+            console.log('error', error);
         });
     };
-  
-    
+     
     const handleCreatePaso = () => {
         // Realiza una solicitud POST al servidor backend para crear un alumno
         axios.post('http://localhost:5050/pasos/crearPaso', {
-            id,
+            descripcion,
             tarea,
-            imagen,
             nPaso
         })
         .then((response) => {
