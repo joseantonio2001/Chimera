@@ -74,12 +74,8 @@ const TablasAdmin = (props) => {
             .catch((error) => console.error('Error al eliminar:', error));
           break;
         case 'clases':
-          axios.delete(`http://localhost:5050/clases/borrarClase/${params.row.id}`)
-          .then((response) => {
-            navigate('/confirmacioncrearusuario', { state: { mensaje: '¡Clase eliminada con éxito!' } });
-            })
-            .catch((error) => console.error('Error al eliminar:', error));
-          break;
+          navigate('/admin/editarclase', {state: {idClase: params.row.id}});
+        break;
       }
     };
 
