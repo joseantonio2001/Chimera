@@ -59,6 +59,7 @@ app.get('/usuarios/:id', async (req, res) => { // GET Usuarios
 app.get('/estudiantes', async (req, res) => { // GET Estudiantes
   try {
     const connection = await abrirConexion();
+    console.log('Información de todos los estudiantes de la bd');
     const queryEstudiantes = 'SELECT usuarios.*, estudiantes.* FROM usuarios INNER JOIN estudiantes ON usuarios.id = estudiantes.id;';
     const [resultado] = await connection.promise().query(queryEstudiantes);
     connection.end(); // Libera recursos BD
@@ -80,6 +81,22 @@ app.get('/estudiantes/:id', async (req, res) => { // GET Estudiantes
     connection.end(); // Libera recursos BD
     res.json([resultado]); // Resultado servido en HTTP formato JSON
   } catch (error) {
+    console.error('Error al obtener estudiantes:', error);
+    res.status(500).json({ error: 'Error al obtener estudiantes' });
+  }
+});
+
+
+// Get de todos los estudiantes de una clase por el id de la clase
+app.get('/estudiantes/clases/:id', async (req, res) => {
+  try{
+    const connection = await abrirConexion();
+    const id = req.params.id;
+    const queryEstudiantes = 'SELECT usuarios.*, estudiantes.* FROM usuarios INNER JOIN estudiantes ON usuarios.id = estudiantes.id INNER JOIN asignaciones ON estudiantes.id = asignaciones.id_estudiante WHERE asignaciones.id_clase = ?';
+    const [resultado] = await connection.promise().query(queryEstudiantes, [id]);
+    connection.end(); // Libera recursos BD
+    res.json([resultado]); // Resultado servido en HTTP formato JSON
+  }catch (error) {
     console.error('Error al obtener estudiantes:', error);
     res.status(500).json({ error: 'Error al obtener estudiantes' });
   }
@@ -462,6 +479,79 @@ app.post('/tareas/crearTarea', async (req, res) => {
     res.status(500).json({ error: 'Error al introducir tarea' });
   }
 });
+
+// Insertar asignaciones
+
+app.post('/clases/aniadealumnos', async (req, res) => {
+  try {
+    const { claseId, estudiantes } = req.body;
+    const connection = await abrirConexion();
+
+    try {
+      // Iterar sobre los estudiantes seleccionados
+      for (const estudianteId of estudiantes) {
+        // Insertar una nueva fila en la tabla de asignaciones
+        const queryInsert = 'INSERT INTO asignaciones (id_clase, id_estudiante) VALUES (?, ?)';
+        await connection.promise().query(queryInsert, [claseId, estudianteId], (err, result) =>{
+        if (err){
+          console.error('Error al establecer conexión con la base de datos:' + err);
+          res.status(500).json({ error: 'Error al establecer conexión con la base de datos.' });
+        }
+        // Enviar respuesta exitosa
+        });
+        connection.end();
+
+      }
+
+       } catch (error) {
+      console.error('Error al añadir alumnos a la clase:', error);
+      res.status(500).json({ error: 'Error al añadir alumnos a la clase.' });
+    } 
+  } catch (error) {
+    console.error('Error al añadir los estudiantes:', error);
+    res.status(500).json({ error: 'Error al añadir los estudiantes.' });
+  }
+  console.log('Estudiante añadido cone exito')
+  res.status(201).json({ message: 'Alumnos añadidos con éxito a la clase.' });
+
+});
+
+// eliminar asignaciones
+
+app.post('/clases/quitaralumnos', async (req, res) => {
+  try {
+    const { claseId, estudiantes } = req.body;
+    const connection = await abrirConexion();
+
+    try {
+      // Iterar sobre los estudiantes seleccionados
+      for (const estudianteId of estudiantes) {
+        // Eliminar la fila correspondiente a la asignación
+        const queryDelete = 'DELETE FROM asignaciones WHERE id_clase = ? AND id_estudiante = ?';
+        await connection.promise().query(queryDelete, [claseId, estudianteId], (err, result) => {
+          if (err) {
+            console.error('Error al establecer conexión con la base de datos:' + err);
+            res.status(500).json({ error: 'Error al establecer conexión con la base de datos.' });
+          }
+        });
+      }
+
+    } catch (error) {
+      console.error('Error al quitar alumnos de la clase:', error);
+      res.status(500).json({ error: 'Error al quitar alumnos de la clase.' });
+    } finally {
+      connection.end();
+    }
+
+  } catch (error) {
+    console.error('Error al quitar los estudiantes:', error);
+    res.status(500).json({ error: 'Error al quitar los estudiantes.' });
+  }
+  console.log('Estudiante(s) quitado(s) con éxito');
+  res.status(200).json({ message: 'Estudiantes quitados con éxito de la clase.' });
+});
+    
+
 
 // Actualizaciones / PUT
 // Ruta para actualizar un estudiante en la base de datos
