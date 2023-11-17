@@ -1,5 +1,5 @@
 import React from 'react'
-import {Text, View, Button, StyleSheet} from 'react-native'
+import {Text, View, Button, StyleSheet, Image} from 'react-native'
 import { useNavigate } from 'react-router-native';
 
 
@@ -13,6 +13,7 @@ const Profesor = ()=>{
 
     return(
         <View>
+            <Image style={styles.image} source={require('../../data/img/LogoColegio.png')}/>
             <Text>
                 WORKING ON IT... (PROFESOR)
             </Text>
@@ -48,6 +49,12 @@ const styles=StyleSheet.create({
         fontWeight: '700',
         marginTop: 100,
         marginBottom: 100
+    },image:{
+        width: 600,
+        height: 200,
+        borderRadius: 4,
+        alignSelf: 'center',
+        paddingVertical: 10
     }
 })
 

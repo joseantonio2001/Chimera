@@ -1,10 +1,11 @@
 import React, {useState} from 'react'
-import {Text, TextInput, View, Button, StyleSheet, Image} from 'react-native'
+import { View, Button, StyleSheet, Image, Platform} from 'react-native'
 import { useNavigate } from 'react-router-native';
 import StyledText from '../StyledText';
 import axios from 'axios';
 import StyledTextInput from '../StyledTextInput';
-
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 const CrearAlumno = ()=>{
     const navigate = useNavigate();
@@ -14,15 +15,26 @@ const CrearAlumno = ()=>{
         navigate(enlace);
     };
 
-    const [id, setID] = useState('');
     const [nombre, setNombre] = useState('');
     const [apellido1, setApellido1] = useState('');
     const [apellido2, setApellido2] = useState('');
     const [contraseña, setContraseña] = useState('');
     const [preferencias, setPreferencias] = useState('');
-    const [fechaNac, setFechaNac] = useState('');
+    const [selectedDate, setSelectedDate] = useState('');
+
+    
+
+
 
     const handleCreateAlumno = () => {
+
+        if (!selectedDate) {
+            // Maneja el error de fecha no seleccionada
+            return;
+          }
+      
+          // Obtiene solo la fecha en formato YYYY/MM/DD
+          const formattedDate = selectedDate.format('YYYY/MM/DD');
         // Realiza una solicitud POST al servidor backend para crear un alumno
         axios.post('http://localhost:5050/estudiantes/crearAlumno', {
             nombre,
@@ -30,7 +42,7 @@ const CrearAlumno = ()=>{
             apellido2,
             contraseña,
             preferencias,
-            fechaNac
+            fechaNac: formattedDate
         })
         .then((response) => {
             // Maneja la respuesta exitosa
@@ -65,11 +77,19 @@ const CrearAlumno = ()=>{
                 onChangeText={text => setApellido2(text)}
             />
             <StyledText style={styles.text}>Fecha de nacimiento: [AAAA/MM/DD]</StyledText>
-            <StyledTextInput
-                placeholder="Fecha de nacimiento"
-                value={fechaNac}
-                onChangeText={text => setFechaNac(text)}
-            />
+            <View style={styles.calendarContainer}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker 
+                        label="Selecciona una fecha"
+                        format="YYYY/MM/DD"
+                        style={styles.calendar}
+                        value={selectedDate}
+                        onChange={(selectedDate) => setSelectedDate(selectedDate)}
+                        renderInput={(props) => <StyledTextInput {...props} />}
+                    />
+                </LocalizationProvider>
+            </View>
+
             <StyledText style={styles.text}>Contraseña: </StyledText>
             <StyledTextInput
                 placeholder="Contraseña"
@@ -139,7 +159,22 @@ const styles=StyleSheet.create({
         color: 'black', // Puedes cambiar el color a tu preferencia
         textAlign: 'center',
         marginTop: 10,
-    }
+    },
+    calendar:{
+        width:20, 
+        height: 40,
+        justifyContent: 'center',
+        alignSelf: 'center',
+        paddingVertical: 10,
+        marginBottom: 15,
+        marginTop: 1
+    },
+    calendarContainer: {
+        maxWidth: 250,
+        alignSelf: 'center',
+        marginBottom: 15,
+        marginTop: 1,
+      }
 })
 
 
