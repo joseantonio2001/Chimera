@@ -8,6 +8,12 @@ node_modules/
 dist/
 web-build/
 
+#dotenv
+.env
+
+#vscode workspace
+*.code-workspace
+
 # Native
 *.orig.*
 *.jks
