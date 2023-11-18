@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-native';
 import StyledText from '../StyledText';
 import axios from 'axios';
 import StyledTextInput from '../StyledTextInput';
-import ImagePicker from 'react-native-image-picker';
+import {launchImageLibrary} from 'react-native-image-picker';
+import * as ImagePicker from 'react-native-image-picker';
 
 
 const CrearTarea = ()=>{
@@ -15,12 +16,32 @@ const CrearTarea = ()=>{
         navigate(enlace);
     };
 
-    const [id, setID] = useState('');
+
     const [nombre, setNombre] = useState('');
     const [descripcion, setDescripcion] = useState('');
-    const [portada, setPortada] = useState('');
+    const [portada, setPortada] = useState(null);
+    const [video, setVideo] = useState(null);
     const [numPasos, setNumPasos] = useState('');
     const [listaPasos, setListaPasos] = useState([]);
+
+    const handleSetImagenVideo = (nombre) => {
+        const options = {
+            mediaType: 'mixed',
+            includeBase64: false
+        }
+        launchImageLibrary(options, (response) => {
+            if (response.didCancel) {
+                console.log('Selección de archivo cancelada');
+            } else if (response.error) {
+                console.error('Error al seleccionar el archivo:', response.error);
+            } else {
+                const imageUri = response.uri || response.assets?.[0]?.uri;
+                if(nombre === 'img') setPortada(imageUri);
+                else { setVideo(imageUri); }
+            }
+            }
+        );
+    }
 
     const incrementarNumPasos = () => {
         setNumPasos(numPasos + 1);
@@ -55,7 +76,7 @@ const CrearTarea = ()=>{
             <StyledText style={styles.titleText}>Crear una Nueva Tarea </StyledText>
             
             {/* Nombre */}
-            <StyledText style={styles.text}>Nombre:</StyledText>
+            <StyledText style={styles.text}>Nombre</StyledText>
             <StyledTextInput
                 placeholder="Nombre"
                 value={nombre}
@@ -63,25 +84,39 @@ const CrearTarea = ()=>{
             />
 
             {/* Descripción */}
-            <StyledText style={styles.text}>Descripcion: </StyledText>
+            <StyledText style={styles.text}>Descripcion </StyledText>
             <StyledTextInput
                 placeholder="Descripcion"
                 value={descripcion}
                 onChangeText={text => setDescripcion(text)}
+                multiline={true}
+                numberOfLines={3}
             />
 
             {/* Portada */}
-            <StyledText style={styles.text}>Portada (opcional) : </StyledText>
-            <StyledTextInput
-                placeholder="Portada"
-                value={portada}
-                onChangeText={text => setPortada(text)}
-            />
+            <StyledText style={styles.text}>Portada</StyledText>
+            <View style={styles.button}>
+            <Button title="Seleccionar Imagen" onPress={() => handleSetImagenVideo('img')} />
+                    {portada && (
+                        <Image source={portada} style={styles.previewImage  } />
+                        
+                    )}
+            </View>
 
-            <StyledText style={styles.text}>Pasos de la tarea:</StyledText>
+             {/* Vídeo */}
+            <StyledText style={styles.text}>Vídeos</StyledText>
+            <View style={styles.button}>
+            <Button title="Seleccionar vídeo" onPress={() => handleSetImagenVideo('video')} />
+                    {video && (
+                        <Image source={video} style={styles.previewImage  } />
+                        
+                    )}
+            </View>
+
+            <StyledText style={styles.text}>Pasos de la tarea</StyledText>
 
 
-            <StyledText style={styles.titleText}>Crear pasos: </StyledText>
+            <StyledText style={styles.titleText}>Crear pasos </StyledText>
 
             <View style={styles.button}>
                 <Button title='Crear Pasos' onPress={handleCreateTarea} />
@@ -157,6 +192,12 @@ const styles=StyleSheet.create({
         color: 'black', // Puedes cambiar el color a tu preferencia
         textAlign: 'center',
         marginTop: 10,
+    },
+    previewImage: {
+        width: 200,
+        height: 200,
+        marginTop: 20,
+        marginBottom: 20,
     }
 })
 

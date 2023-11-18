@@ -1,5 +1,4 @@
-import React from 'react'
-import {Text, View, Button, StyleSheet} from 'react-native'
+import {Pressable, StyleSheet, Text, View} from 'react-native'
 import { useNavigate } from 'react-router-native';
 
 
@@ -16,9 +15,9 @@ const Profesor = ()=>{
             <Text>
                 WORKING ON IT... (PROFESOR)
             </Text>
-            <View style={styles.button}>
-                <Button title='Volver a Inicio' onPress={() => handleButtonClick('/')}/>
-            </View>
+            <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/')}>
+                        <Text style={styles.pressableText}>Volver a inicio</Text>
+            </Pressable>
         </View>
         
     )
@@ -31,24 +30,34 @@ const styles=StyleSheet.create({
         alignSelf: 'center',
         paddingVertical: 10
     },
-    button: {
-        width:200, 
-        height: 40,
+    pressableButton: {
+        width: 200,
+        height: 50,
         justifyContent: 'center',
+        alignItems: 'center',
         alignSelf: 'center',
-        paddingVertical: 10,
+        backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
+        borderRadius: 10,
+        elevation: 3, // Sombra para un efecto de elevación
         marginBottom: 15,
-        marginTop: 15
+        marginTop: 15,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
     },
-    text: {
-        flex: 1,
-        justifyContent: 'center', // Centra horizontalmente
-        textAlign: 'center', 
-        fontSize: 20,
-        fontWeight: '700',
-        marginTop: 100,
-        marginBottom: 100
-    }
+    headerText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        color: '#333',  // Un tono de gris oscuro, puedes ajustarlo según tus preferencias
+        marginTop: 20,
+        marginBottom: 10,
+    },
+    pressableText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold', // Texto en negrita
+        textAlign: 'center',
+    },    
 })
 
 

@@ -1,5 +1,4 @@
-import React from 'react'
-import {View, Image, StyleSheet, Button} from 'react-native'
+import {Image,  Pressable, StyleSheet, Text, View} from 'react-native'
 import StyledText from './StyledText'
 import {useNavigate} from 'react-router-native'
 
@@ -13,20 +12,23 @@ const Inicio = ()=>{
     return(
         <View>
                 <Image style={styles.image} source={require('../../data/img/LogoColegio.png')}/>
-                <StyledText style={styles.text}>PÁGINA DE INICIO</StyledText>
-                <View style={styles.button}>
-                    <Button style={styles.buttonComponent} title='Alumno' onPress={() => handleButtonClick('/alumno')} />
-                </View> 
-                <View style={styles.button}>
-                    <Button style={styles.buttonComponent} title='Profesor' onPress={() => handleButtonClick('/profesor')}/>
-                </View>
-                <View style={styles.button}>
-                    <Button style={styles.buttonComponent} title='Administración' onPress={() => handleButtonClick('/admin')}/>
+                <StyledText style={styles.headerText}>PÁGINA DE INICIO</StyledText>
+                <View>
+                    <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/estudiante')}>
+                        <Text style={styles.pressableText}>Estudiante</Text>
+                    </Pressable>
+                    <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/profesor')}>
+                        <Text style={styles.pressableText}>Profesor</Text>
+                    </Pressable>
+                    <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/admin')}>
+                        <Text style={styles.pressableText}>Administrador</Text>
+                    </Pressable> 
                 </View>
         </View>
         
     )
 }
+
 const styles=StyleSheet.create({
     image:{
         width: 600,
@@ -35,30 +37,34 @@ const styles=StyleSheet.create({
         alignSelf: 'center',
         paddingVertical: 10
     },
-    button: {
-        width:200, 
-        height: 40,
+    pressableButton: {
+        width: 200,
+        height: 50,
         justifyContent: 'center',
+        alignItems: 'center',
         alignSelf: 'center',
-        paddingVertical: 10,
+        backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
+        borderRadius: 10,
+        elevation: 3, // Sombra para un efecto de elevación
         marginBottom: 15,
-        marginTop: 15
+        marginTop: 15,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
     },
-    buttonContainer:{
-        flexDirection: 'row', // Alinea los botones horizontalmente
-        justifyContent: 'space-around', // Espacio uniforme entre los botones
-        width: '80%', // Ancho deseado para el contenedor de botones
+    headerText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        color: '#333',  // Un tono de gris oscuro, puedes ajustarlo según tus preferencias
         marginTop: 20,
+        marginBottom: 10,
     },
-    text: {
-        flex: 1,
-        justifyContent: 'center', // Centra horizontalmente
-        textAlign: 'center', 
-        fontSize: 20,
-        fontWeight: '700',
-        marginTop: 100,
-        marginBottom: 100
-    }
+    pressableText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold', // Texto en negrita
+        textAlign: 'center',
+    },    
 })
 
 export default Inicio

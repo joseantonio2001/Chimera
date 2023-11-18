@@ -444,9 +444,9 @@ app.post('/pasos/crearPaso', async (req, res) => {
 app.post('/tareas/crearTarea', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const { id, nombre, descripcion, video, portada, tipo } = req.body;
-    const query1 = 'INSERT INTO tareas (id, nombre, descripcion, video, portada, tipo) VALUES (?, ?, ?, ?, ?, ?)';
-    await connection.promise().query(query1, [id, nombre, descripcion, video, portada, tipo ], (err, result) => {
+    const {nombre, descripcion, video, portada } = req.body;
+    const query1 = 'INSERT INTO tareas (nombre, descripcion, video, portada) VALUES ( ?, ?, ?, ?)';
+    await connection.promise().query(query1, [nombre, descripcion, video, portada ], (err, result) => {
     if (err) {
       console.error('Error al insertar tarea: ' + err);
       res.status(500).json({ error: 'Error al insertar tarea en la base de datos' });
