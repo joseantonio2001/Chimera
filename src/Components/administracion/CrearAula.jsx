@@ -17,7 +17,6 @@ const CrearAula = () => {
         navigate(enlace);
     };
 
-    const [id, setId] = useState('');
     const [capacidad, setCapacidad] = useState('');
     const [profesores, setProfesores] = useState([]);
     const [selectedProfesor, setSelectedProfesor] = useState('');
@@ -46,7 +45,6 @@ const CrearAula = () => {
     const handleCreateAula = () => {
         // Realiza una solicitud POST al servidor backend para crear un alumno
         axios.post('http://localhost:5050/clases/crearAula', {
-            id,
             capacidad,
             id_profesor: selectedProfesor,
             estudiantes: selectedEstudiantes
@@ -66,13 +64,6 @@ const CrearAula = () => {
         <View>
             <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')} />
             <StyledText style={styles.titleText}>Crear un Nuevo Alumno</StyledText>
-
-            <StyledText style={styles.text}>Identificador del Aula:</StyledText>
-            <StyledTextInput
-                placeholder="ID"
-                value={id}
-                onChangeText={text => setId(text)}
-            />
 
             <StyledText style={styles.text}>Capacidad del Aula:</StyledText>
             <StyledTextInput

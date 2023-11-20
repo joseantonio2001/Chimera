@@ -14,6 +14,7 @@ import CrearAula from './administracion/CrearAula.jsx'
 import EditarAlumno from './administracion/EditarAlumno.jsx'
 import EditarProfe from './administracion/EditarProfe.jsx'
 import EditarClase from './administracion/EditarClase.jsx'
+import ClaseProfesor from './ClaseProfesor.jsx'
 
 
 
@@ -35,6 +36,7 @@ const Main = ()=>{
                     <Route path='confirmacioncrearusuario' exact element={<ConfirmarCrearUsuario/>}/>
                     <Route path='/admin/crearaula' exact element={<CrearAula/>} />
                     <Route path='confirmacioncrearaula' exact element={<ConfirmarCrearAula/>}/>
+                    <Route path='/claseprofesor' exact element={<ClaseProfesor/>}/>
                 </Routes>
             </View>
         </NativeRouter>

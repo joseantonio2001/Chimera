@@ -10,13 +10,12 @@ app.use(express.json());
 dotenv.config({ path:'../../.env' }); // Modificar en caso de null@172... a la conexion de api
 
 const dbConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: 'tiger',
-  database: 'colegio',
-  port: 3306
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
+  port: process.env.DB_PORT
 };
-
 
 async function abrirConexion(){
   const connection = await mysql.createConnection(dbConfig);
@@ -89,12 +88,12 @@ app.get('/estudiantes/:id', async (req, res) => { // GET Estudiantes
 
 
 // Get de todos los estudiantes de una clase por el id de la clase
-app.get('/estudiantes/clases/:id', async (req, res) => {
+app.get('/estudiantes/clases/:idClase', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const id = req.params.id;
+    const idClase = req.params.idClase;
     const queryEstudiantes = 'SELECT usuarios.*, estudiantes.* FROM usuarios INNER JOIN estudiantes ON usuarios.id = estudiantes.id INNER JOIN asignaciones ON estudiantes.id = asignaciones.id_estudiante WHERE asignaciones.id_clase = ?';
-    const [resultado] = await connection.promise().query(queryEstudiantes, [id]);
+    const [resultado] = await connection.promise().query(queryEstudiantes, [idClase]);
     connection.end(); // Libera recursos BD
     res.json([resultado]); // Resultado servido en HTTP formato JSON
   }catch (error) {
@@ -129,6 +128,22 @@ app.get('/profesores/:id', async (req, res) => { // GET Profesores
   } catch (error) {
     console.error('Error al obtener profesores:', error);
     res.status(500).json({ error: 'Error al obtener profesores' });
+  }
+});
+
+// Get delid de clase de un profesor
+app.get('/profesor/clases/:id', async (req, res) => {
+  const id = req.params.id;
+  try{
+    const connection = await abrirConexion();
+    const queryIdClase='SELECT id_clase FROM asignaciones WHERE id_profesor=?';
+    const idClase=await connection.promise().query(queryIdClase, [id]);
+    const idClaseValor = idClase[0][0].id_clase;
+    connection.end(); // Libera recursos BD
+    res.json(idClaseValor); // Resultado servido en HTTP formato JSON
+  }catch (error) {
+    console.error('Error al obtener el id de la clase del profesor ', id, ':', error);
+    res.status(500).json({ error: 'Error al obtener el id de la clase del profesor ',id });
   }
 });
 
