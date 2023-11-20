@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import {Text, TextInput, View, Button, StyleSheet, Image} from 'react-native'
-import { useNavigate } from 'react-router-native';
-import ImagePicker from 'react-native-image-picker';
+import { useLocation, useNavigate } from 'react-router-native';
+// import ImagePicker from 'react-native-image-picker';
 import StyledText from '../StyledText';
 import axios from 'axios';
 import StyledTextInput from '../StyledTextInput';
@@ -15,42 +15,31 @@ const CrearPaso = ()=>{
         navigate(enlace);
     };
 
-    const [tarea, setTarea] = useState('');
+    // Traer de CrearTarea el id de la tarea y el numero de paso correspondiente
+    const { state } = useLocation();
+    const idTarea = state ? state.id : '';
+    const nPaso = state ? state.numPaso : '';
+
+    // Input imagen y descripción
     const [imagen, setImagen] = useState('');
-    const [nPaso, setNpaso] = useState('');
     const [descripcion, setDescripcion] = useState('');
 
-    axios.get('http://localhost:5050/pasos/crearPaso', {
-        
-
-    })
-
-    const handleUploadPhoto = () => {
-        axios.post('http://localhost:5050/pasos/crearPaso', {
-            imagen
-        })
-        .then((response) => {
-            console.log('response', response);
-        })
-        .catch((error) => {
-            console.log('error', error);
-        });
-    };
-     
+    
     const handleCreatePaso = () => {
         // Realiza una solicitud POST al servidor backend para crear un alumno
         axios.post('http://localhost:5050/pasos/crearPaso', {
+            imagen,
             descripcion,
-            tarea,
+            idTarea,
             nPaso
         })
         .then((response) => {
             // Maneja la respuesta exitosa
-            navigate('/confirmacioncrearpaso', { state: { mensaje: '¡Paso creado con éxito!' } });
+            navigate('/confirmacioncreartarea', { state: { mensaje: '¡Paso creado con éxito!' } });
         })
         .catch((error) => {
             // Maneja los errores
-            navigate('/confirmacioncrearpaso', { state: { mensaje: 'Error en la creación del paso',error } });
+            navigate('/confirmacioncreartarea', { state: { mensaje: 'Error en la creación del paso',error } });
         });
         
     };
@@ -58,13 +47,8 @@ const CrearPaso = ()=>{
     return(
         <View>
             <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
-            <StyledText style={styles.titleText}>Paso {nPaso} de la tarea {tarea}: </StyledText>
+            <StyledText style={styles.titleText}>Paso {nPaso} de la tarea {idTarea}: </StyledText>
            
-           
-           {/* Algo para seleccionar imagen */}
-            {imagen && <Image source={{ uri: imagen }} style={styles.imagenSeleccionada} />}
-            <Button title="Seleccionar Imagen" onPress={seleccionarImagen} />
-
             {/* Descripcion de la tarea */}
             <StyledText style={styles.text}>Descripcion: </StyledText>
             <StyledTextInput

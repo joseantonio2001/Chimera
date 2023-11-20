@@ -1,28 +1,30 @@
-import {Image, Pressable, StyleSheet, Text, View} from 'react-native'
-import { useNavigate } from 'react-router-native';
+import {Image, Pressable, StyleSheet,Text, View } from 'react-native'
+import {  useLocation, useNavigate } from 'react-router-native';
+import StyledText from '../StyledText';
 
 
-const Profesor = ()=>{
+function confirmAccion (props){
     const navigate = useNavigate();
     
         const handleButtonClick = (enlace) => {
         
         navigate(enlace);
     };
+    const { state } = useLocation();
+    const mensaje = state ? state.mensaje : '';
 
     return(
         <View>
-            <Image style={styles.image} source={require('../../data/img/LogoColegio.png')}/>
-            <Text>
-                WORKING ON IT... (PROFESOR)
-            </Text>
-            <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/')}>
-                        <Text style={styles.pressableText}>Volver a inicio</Text>
+            <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
+            <StyledText style={styles.headerText}>{mensaje}</StyledText>
+            <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/admin')}>
+                <Text style={styles.pressableText}>Volver al menú</Text>
             </Pressable>
         </View>
         
     )
 }
+
 const styles=StyleSheet.create({
     image:{
         width: 600,
@@ -61,6 +63,4 @@ const styles=StyleSheet.create({
     },    
 })
 
-
-
-export default Profesor
+export default confirmAccion;

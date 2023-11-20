@@ -1,11 +1,11 @@
 import {  Image, Platform, Pressable , StyleSheet, Text, View} from 'react-native'
-import { Switch, TextInput } from 'react-native-paper';
+import { useEffect, useState} from 'react'
+import { useLocation, useNavigate } from 'react-router-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import StyledText from '../StyledText';
 import StyledTextInput from '../StyledTextInput';
+import { Switch } from 'react-native-paper';
 import axios from 'axios';
-import { useNavigate } from 'react-router-native';
-import {useState} from 'react'
 
 const useHost = () => {
     if (Platform.OS === 'android') {
@@ -15,51 +15,67 @@ const useHost = () => {
     }
 };
 
-const CrearProfe = ()=>{
-    const navigate = useNavigate(); 
+const EditarProfe = ()=>{
+    const navigate = useNavigate();
+    
         const handleButtonClick = (enlace) => {
         
         navigate(enlace);
     };
 
+    const { state } = useLocation();
+    const id = state ? state.id : '';
     const [nombre, setNombre] = useState('');
     const [apellido1, setApellido1] = useState('');
     const [apellido2, setApellido2] = useState('');
-    const [contraseña, setContraseña] = useState('');
     const [admin, setAdmin] = useState(false);
-    const [hidePass, setHidePass] = useState(true);
-    /* Diferencia entre fechas debido a que en BD se introduce cómo string */
-    const [bdDate, setbdDate] = useState(''); 
-    const [date, setDate] = useState(new Date());
-    const [showDate, setShowDate] = useState(false);
-
-    const onChange = (event, selectedDate) => {
-        setShowDate(false);
-        setDate(selectedDate);
-        setbdDate((date.toISOString().split('T')[0]));
-    };
-
-    const showDatePicker = () => {
-        setShowDate(true);
-    }
-
+     /* Diferencia entre fechas debido a que en BD se introduce cómo string */
+     const [date, setDate] = useState(new Date());
+     const [bdDate, setbdDate] = useState(''); 
+     const [showDate, setShowDate] = useState(false);
+ 
+     const onChange = (event, selectedDate) => {
+         setShowDate(false);
+         setDate(selectedDate); // Fecha componente
+         setbdDate((date.toISOString().split('T')[0])); // Fecha BD
+     };
+ 
+     const showDatePicker = () => {
+         setShowDate(true);
+     }
 
     const toggleAdmin = () => {
         setAdmin(!admin);
     };
+    const getDatosProfe = () => {
+        axios.get(`${useHost()}/${id}`)
+            .then((response) => {
+                const resultado = response.data[0];
+                if (resultado && resultado.length > 0 && Array.isArray(resultado)) {
+                    resultado.forEach((profe) => {
+                        setNombre(profe.nombre);
+                        setApellido1(profe.apellido1);
+                        setApellido2(profe.apellido2);
+                        setAdmin(profe.admin);
+                        if(admin) toggleAdmin();
+                        setbdDate(profe.fecha_nac.split('T')[0]);
+                        
+                    });
+                }
+            })
+            .catch((error) => {
+                // Manejar los errores
+                console.error('Error en la solicitud GET:', error);
+            });
+    };
 
-    const handleCreateProfe = () => {
-        if (!date) {
-            // Maneja el error de fecha no seleccionada
-            return;
-        }
-        
+    const handleEditProfe = () => {
         // Realiza una solicitud POST al servidor backend para crear un alumno
-        axios.post(`${useHost()}/crearProfe`, {
+        axios.put(`${useHost()}/actualizarProfe`, {
+            id,
             nombre,
             apellido1,
             apellido2,
-            contraseña,
             admin,
             fechaNac: bdDate
         })
@@ -74,10 +90,14 @@ const CrearProfe = ()=>{
         
     };
 
+    useEffect(() => {
+        getDatosProfe();
+      }, [])
+
     return(
         <View>
             <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
-            <StyledText style={styles.titleText}>Crear un Nuevo Profesor</StyledText>
+            <StyledText style={styles.titleText}>Editar Prfesor ID: {id}</StyledText>
             
             <StyledText style={styles.text}>Nombre y apellidos:</StyledText>
             <StyledTextInput
@@ -95,6 +115,7 @@ const CrearProfe = ()=>{
                 value={apellido2}
                 onChangeText={text => setApellido2(text)}
             />
+            <StyledText style={styles.text}>La fecha actual de nacimiento es {date.toString()}. Si desea cambiarla introduzca una nueva:</StyledText>
             <StyledText style={styles.text}>Fecha de nacimiento: [AAAA/MM/DD]</StyledText>
             <View>
                 <Pressable style={styles.pressableButton} onPress={showDatePicker}>
@@ -111,14 +132,6 @@ const CrearProfe = ()=>{
                 />
                 )}
             </View>
-            <StyledText style={styles.text}>Contraseña: </StyledText>
-            <StyledTextInput
-            label="Contraseña"
-            secureTextEntry={hidePass}
-            value={contraseña}
-            onChangeText={text => setContraseña(text)}
-            right={<TextInput.Icon icon="eye" onPress={() => setHidePass(!hidePass)} />}
-            />
             <StyledText style={styles.text}>Perfil de administración: </StyledText>
             <Switch style={styles.switch}
                 value={admin}
@@ -128,9 +141,9 @@ const CrearProfe = ()=>{
             />
 
             <View style={styles.button}>
-                <Pressable style={styles.pressableButton} onPress={handleCreateProfe}>
-                    <Text style={styles.pressableText}>Crear Profesor</Text>
-                </Pressable> 
+                <Pressable style={styles.pressableButton} onPress={handleEditProfe} >
+                    <Text style={styles.pressableText}>Editar profesor</Text>
+                </Pressable>
             </View>
 
             <View style={styles.button}>
@@ -204,5 +217,4 @@ const styles=StyleSheet.create({
 
 
 
-
-export default CrearProfe
+export default EditarProfe

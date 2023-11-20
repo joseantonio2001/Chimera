@@ -1,7 +1,8 @@
-import {Button, Image, StyleSheet, View} from 'react-native';
+import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import PanelAdmin from './PanelAdmin';
 import StyledText from '../StyledText';
 import { useNavigate } from 'react-router-native';
+
 
 const Admin = ()=>{
     
@@ -13,15 +14,13 @@ const Admin = ()=>{
     };
 
     return(
-        <View>
+        <View style={{flex: 1}} /* Para tab visible definir esto o altura del componente parent */>
             <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
-            <StyledText style={styles.text}>MENÚ DE ADMINISTRACIÓN</StyledText>
-            <>
+            <StyledText style={styles.headerText}>MENÚ DE ADMINISTRACIÓN</StyledText>
             <PanelAdmin/>
-            </>
-            <View style={styles.button}>
-                <Button title='Volver a Inicio' onPress={() => handleButtonClick('/')}/>
-            </View>
+            <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/')}>
+                <Text style={styles.pressableText}>Volver a inicio</Text>
+            </Pressable>
         </View>
         
     )
@@ -34,24 +33,34 @@ const styles=StyleSheet.create({
         alignSelf: 'center',
         paddingVertical: 10
     },
-    button: {
-        width:200, 
-        height: 40,
+    pressableButton: {
+        width: 200,
+        height: 50,
         justifyContent: 'center',
+        alignItems: 'center',
         alignSelf: 'center',
-        paddingVertical: 10,
+        backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
+        borderRadius: 10,
+        elevation: 3, // Sombra para un efecto de elevación
         marginBottom: 15,
-        marginTop: 15
+        marginTop: 15,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
     },
-    text: {
-        flex: 1,
-        justifyContent: 'center', // Centra horizontalmente
-        textAlign: 'center', 
-        fontSize: 20,
-        fontWeight: '700',
-        marginTop: 100,
-        marginBottom: 100
-    }
+    headerText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        color: '#333',  // Un tono de gris oscuro, puedes ajustarlo según tus preferencias
+        marginTop: 20,
+        marginBottom: 10,
+    },
+    pressableText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold', // Texto en negrita
+        textAlign: 'center',
+    },    
 })
 
 

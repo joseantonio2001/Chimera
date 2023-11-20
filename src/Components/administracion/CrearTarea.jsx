@@ -19,16 +19,7 @@ const CrearTarea = ()=>{
     const [nombre, setNombre] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [portada, setPortada] = useState('');
-    const [numPasos, setNumPasos] = useState('');
-    const [listaPasos, setListaPasos] = useState([]);
-
-    const incrementarNumPasos = () => {
-        setNumPasos(numPasos + 1);
-    };
-
-    const agregarPaso = (paso) => {
-        setListaPasos([...listaPasos, paso]);
-    };
+    const [numPaso, setNumPaso] = useState('');
 
     
     const handleCreateTarea = () => {
@@ -39,7 +30,7 @@ const CrearTarea = ()=>{
         })
         .then((response) => {
             // Maneja la respuesta exitosa
-            // navigate('/confirmacioncreartarea', { state: { mensaje: '¡Tarea creada con éxito!' } });
+            navigate('/confirmacioncreartarea', { state: { mensaje: '¡Tarea creada con éxito!' } });
         })
         .catch((error) => {
             // Maneja los errores
@@ -69,22 +60,15 @@ const CrearTarea = ()=>{
                 onChangeText={text => setDescripcion(text)}
             />
 
-            {/* Portada */}
-            <StyledText style={styles.text}>Portada (opcional) : </StyledText>
-            <StyledTextInput
-                placeholder="Portada"
-                value={portada}
-                onChangeText={text => setPortada(text)}
-            />
-
             <StyledText style={styles.text}>Pasos de la tarea:</StyledText>
 
 
             <StyledText style={styles.titleText}>Crear pasos: </StyledText>
-            handleCreateTarea
-            
-            {/* <SquareButton title="Paso" onPress={() => handleButtonClick('/admin/crearpaso', { numPasos, nombre, incrementarNumPasos, agregarPaso })}/> */}
-
+            <View style={styles.button}>
+                {/* <Button title='Crear Paso' onPress={() => navigate('/crearpaso', { state: { id, numPaso } })}/> 
+                <Button title='Crear Paso' onPress={() => navigate('/crearalumno')}/> */}
+                <Button title='Crear Paso' onPress={() => handleButtonClick('/crearpaso')}/>
+            </View>
             
             <View style={styles.button}>
                 <Button title="Crear Tarea" onPress={handleCreateTarea} />
@@ -112,7 +96,7 @@ const styles=StyleSheet.create({
         justifyContent: 'center',
         alignSelf: 'center',
         paddingVertical: 10,
-        marginBottom: 15,
+        marginBottom: 20,
         marginTop: 15
     },
     titleText: {

@@ -1,58 +1,62 @@
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import Tab from '@mui/material/Tab';
-import TablasAdmin from './TablasAdmin';
-import Tabs from '@mui/material/Tabs';
-import { View } from 'react-native';
+import {  Dimensions , View} from 'react-native';
+import { SceneMap,TabView } from 'react-native-tab-view';
+import TablaClase from './tablas/TablaClase';
+import TablaEstudiante from './tablas/TablaEstudiante';
+import TablaProfesores from './tablas/TablaProfesor';
+import TablaTarea from './tablas/TablaTarea';
+import {useState}from 'react';
 
 
-const TabPanel = ({ value, index, children }) => {
-  return (
-    <div role="tabpanel" hidden={value !== index}>
-      {value === index && (
-        <div>
-          {children}
-        </div>
-      )}
-    </div>
-  );
-};
+const tabEstudiantes = () => (
+  <View>
+    <TablaEstudiante/>
+  </View>
+);
+
+const tabProfesores = () => (
+  <View>
+    <TablaProfesores/>
+  </View>
+);
+
+const tabTareas = () => (
+  <View>
+    <TablaTarea/>
+  </View>
+);
+
+const tabClases = () => (
+  <View>
+    <TablaClase/>
+  </View>
+);
+
+const renderScene = SceneMap({
+  first: tabEstudiantes,
+  second: tabProfesores,
+  third: tabTareas,
+  fourth: tabClases
+});
+
+const initialLayout = { width: Dimensions.get('window').width };
 
 const PanelAdmin = () => {
-  const [selectedTab, setSelectedTab] = React.useState(0);
+  const [index, setIndex] = useState(0);
+  const [routes] = useState([
+    { key: 'first', title: 'Estudiantes' },
+    { key: 'second', title: 'Profesores' },
+    { key: 'third', title: 'Tareas' },
+    { key: 'fourth', title: 'Clases' },
+  ]);
 
-  const handleTabChange = (event, newSelectedTab) =>{
-    setSelectedTab(newSelectedTab); // Cambia el valor del tab 
-  }
-
-    return (
-      <View id="Administracion">
-      <Box>
-      <Tabs 
-        value={selectedTab}
-        onChange={handleTabChange}
-        variant="scrollable"
-        scrollButtons={false}>
-        <Tab label="Estudiantes"  aria-label='Gestión estudiantes'/>
-        <Tab label="Profesores"  aria-label='Gestión profesores'/>
-        <Tab label="Tareas"  aria-label='Gestión tareas'/>
-        <Tab label="Clases"  aria-label='Gestión clases'/>
-      </Tabs>
-      </Box>
-      <TabPanel value={selectedTab} index={0}>
-        <TablasAdmin nombre='estudiantes'/>
-      </TabPanel>
-      <TabPanel value={selectedTab} index={1}>
-        <TablasAdmin nombre='profesores'/>
-      </TabPanel>
-      <TabPanel value={selectedTab} index={2}>
-        <TablasAdmin nombre='tareas'/>
-      </TabPanel>
-      <TabPanel value={selectedTab} index={3}>
-        <TablasAdmin nombre='clases'/>
-      </TabPanel>
-      </View>
-    )
-  }
+  return (
+    <TabView
+      navigationState={{ index, routes }}
+      renderScene={renderScene}
+      onIndexChange={setIndex}
+      initialLayout={initialLayout}
+    />
+  );
+};
 
 export default PanelAdmin;
