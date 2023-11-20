@@ -1,7 +1,8 @@
 import { Platform, StyleSheet, View } from 'react-native';
 import { useEffect, useState } from 'react';
-import { DataTable} from 'react-native-paper';
+import { DataTable, FAB } from 'react-native-paper';
 import axios from 'axios';
+import { useNavigate } from 'react-router-native';
 
 const Cabecera = () => {
         return(
@@ -25,6 +26,11 @@ const useHost = () => {
 const TablaTarea = () => {
   const [filas, setFilas] = useState([]);
   const host = useHost();
+  const navigate = useNavigate();
+
+  const handleAdd = () => {
+    navigate('/admin/creartarea');
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,9 +58,19 @@ const TablaTarea = () => {
             <DataTable.Cell>{item.tipo}</DataTable.Cell>
             <DataTable.Cell>{item.nombre}</DataTable.Cell>
             <DataTable.Cell>{item.descripcion}</DataTable.Cell>
-          </DataTable.Row>
+            </DataTable.Row>
         ))}
+
+        
+        {/* Implementar paginación */}
+
+
       </DataTable>
+      <FAB
+        icon="plus"
+        style={styles.fabStyle}
+        onPress={() => handleAdd()}
+      />
     </View>
     );
 };
@@ -62,6 +78,11 @@ const TablaTarea = () => {
 const styles = StyleSheet.create({
   table: {
     margin: 10,
+    },
+    fabStyle: {
+     	bottom: -250, 
+      right: 16,
+      position: 'absolute',
     }
 });
 

@@ -38,6 +38,7 @@
     "react-native-tab-view": "^3.5.2",
     "react-native-web": "~0.19.6",
     "react-router-native": "^6.18.0",
+    "react-select": "^5.8.0",
     "styled-components": "^6.1.1",
     "telnet": "^0.0.1"
   },
