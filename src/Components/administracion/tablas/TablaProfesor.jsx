@@ -1,18 +1,21 @@
-import { FlatList, Platform, StyleSheet, Text ,View } from 'react-native';
-import {useEffect, useState } from 'react';
+import { DataTable, FAB, IconButton} from 'react-native-paper';
+import { Platform, StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-native';
 
 const Cabecera = () => {
-        return(
-        <View style={styles.header}>
-            <Text style={styles.headerCell}>ID</Text>
-            <Text style={styles.headerCell}>Nombre</Text>
-            <Text style={styles.headerCell}>Apellido 1</Text>
-            <Text style={styles.headerCell}>Apellido 2</Text>
-            <Text style={styles.headerCell}>Fecha nacimiento</Text>
-            <Text style={styles.headerCell}>Administrador</Text>
-        </View>
-        );
+  return (
+    <DataTable.Header>
+      <DataTable.Title>ID</DataTable.Title>
+      <DataTable.Title>Nombre</DataTable.Title>
+      <DataTable.Title>Apellido 1</DataTable.Title>
+      <DataTable.Title>Apellido 2</DataTable.Title>
+      <DataTable.Title>Fecha nacimiento</DataTable.Title>
+      <DataTable.Title>Administrador</DataTable.Title>
+      <DataTable.Title>Acciones</DataTable.Title>
+    </DataTable.Header>
+  );
 };
 
 const useHost = () => {
@@ -24,44 +27,81 @@ const useHost = () => {
 };
 
 const TablaProfesor = () => {
-    const [filas, setFilas] = useState([]);
-    const host = useHost();
+  const [filas, setFilas] = useState([]);
+  const [pagina, setPagina] = useState(1);
+  const [itemsPorPagina] = useState(10); // Ajustar preferencia
+  const host = useHost();
+  const navigate = useNavigate();
 
-    useEffect(() => {
+  const handleAdd = () => { // Función añadir
+    navigate('/admin/crearprofe');
+  };
+
+  const handleDelete = (id) => { // Función borrar
+    axios.delete(`${useHost()}/borrarProfe/${id}`)
+    .then((response) => {
+      navigate('/confirmaciones', { state: { mensaje: 'Profesor eliminado con éxito!' } });
+      })
+      .catch((error) => console.error('Error al eliminar:', error));
+  };
+
+	const handleEdit = (ide) => {
+		navigate('/admin/editarprofe', { state: { id: ide }})
+	};
+
+  const handlePageChange = (page) => {  
+    setPagina(page);
+  };
+
+  useEffect(() => {
     const fetchData = async () => {
-        try {
+      try {
         const response = await axios.get(host);
         const resultado = response.data[0];
-        setFilas(resultado);
-        } catch (error) {
+        // Aplicar la paginación
+        const inicio = (pagina - 1) * itemsPorPagina;
+        const fin = inicio + itemsPorPagina;
+        const filasPaginadas = resultado.slice(inicio, fin);
+        setFilas(filasPaginadas);
+      } catch (error) {
         console.error('Error al realizar la solicitud:', error);
-        }
+      }
     };
 
     fetchData();
-    }, [host]); // Agregar `host` como dependencia para que useEffect se ejecute cuando cambie
-
-    const renderItem = ({ item }) => (
-    <View style={styles.row}>
-        <Text style={styles.cell}>{item.id}</Text>
-        <Text style={styles.cell}>{item.nombre}</Text>
-        <Text style={styles.cell}>{item.apellido1}</Text>
-        <Text style={styles.cell}>{item.apellido2}</Text>
-        <Text style={styles.cell}>{item.fecha_nac}</Text>
-        <Text style={styles.cell}>{item.admin}</Text>
-    </View>
-    );
+  }, [host, pagina]); // Agregar `host` como dependencia para que useEffect se ejecute cuando cambie
 
     return (
-    <View style={styles.table}>
-        {/* Encabezado de la tabla */}
-        <Cabecera />
-        {/* Datos de la tabla */}
-        <FlatList 
-        data={filas}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        />
+      <View style={styles.table}>
+      {/* Encabezado de la tabla */}
+      <Cabecera />
+      {/* Datos de la tabla */}
+      <DataTable>
+        {filas.map((item) => (
+          <DataTable.Row key={item.id}>
+            <DataTable.Cell>{item.id}</DataTable.Cell>
+            <DataTable.Cell>{item.nombre}</DataTable.Cell>
+            <DataTable.Cell>{item.apellido1}</DataTable.Cell>
+            <DataTable.Cell>{item.apellido2}</DataTable.Cell>
+            <DataTable.Cell>{item.fecha_nac}</DataTable.Cell>
+            <DataTable.Cell>{item.admin}</DataTable.Cell>
+            {/* Botones de las filas */}
+            <IconButton icon="pencil" onPress={() => handleEdit(item.id)} />
+            <IconButton icon="delete" onPress={() => handleDelete(item.id)} />
+          </DataTable.Row>
+        ))}
+        <DataTable.Pagination
+        page={pagina} /* Página actual */
+        numberOfPages={Math.ceil(filas.length / itemsPorPagina)} /* Paginas = Filas/itemsXPagina */
+        onPageChange={handlePageChange}
+        label={`${pagina} de ${Math.ceil(filas.length / itemsPorPagina)}`} // Etiqueta
+      />
+      </DataTable>
+      <FAB
+        icon="plus"
+        style={styles.fabStyle}
+        onPress={() => handleAdd()}
+      />
     </View>
     );
 };
@@ -69,26 +109,12 @@ const TablaProfesor = () => {
 const styles = StyleSheet.create({
   table: {
     margin: 10,
-  },
-  header: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    paddingVertical: 5,
-  },
-  headerCell: {
-    flex: 1,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  row: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    paddingVertical: 5,
-  },
-  cell: {
-    flex: 1,
-    textAlign: 'center',
-  },
+    },
+    fabStyle: {
+     	bottom: -250, // Modificar posición
+      right: 16,
+      position: 'absolute',
+    }
 });
 
 export default TablaProfesor;

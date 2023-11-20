@@ -3,6 +3,7 @@ import PanelAdmin from './PanelAdmin';
 import StyledText from '../StyledText';
 import { useNavigate } from 'react-router-native';
 
+
 const Admin = ()=>{
     
     const navigate = useNavigate();

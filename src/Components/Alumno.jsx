@@ -1,4 +1,4 @@
-import {Pressable, StyleSheet, Text, View} from 'react-native'
+import {Image, Pressable, StyleSheet, Text, View} from 'react-native'
 import { useNavigate } from 'react-router-native';
 
 
@@ -12,6 +12,7 @@ const Alumno = ()=>{
 
     return(
         <View>
+            <Image style={styles.image} source={require('../../data/img/LogoColegio.png')}/>
             <Text>
                 WORKING ON IT... (ALUMNO)
             </Text>

@@ -14,6 +14,9 @@ web-build/
 #vscode workspace
 *.code-workspace
 
+#dependencias
+package-lock.*
+
 # Native
 *.orig.*
 *.jks
