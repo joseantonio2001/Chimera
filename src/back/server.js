@@ -3,6 +3,8 @@ const dotenv = require('dotenv'); // Uso dotenv para mantener seguro datos vulne
 const cors = require('cors'); // Uso CORS para poder utilizar la API desde la app (Seguridad)
 const mysql = require('mysql2');
 const app = express();
+const multer = require('multer');
+const path = require('path');
 
 app.use(cors());
 app.use(express.json());
@@ -941,6 +943,30 @@ app.delete('/tareas/borrarTarea/:id', async (req, res) => {
   }
   console.log('Tarea eliminada con éxito en la base de datos!');
   res.status(201).json({ message: ' Tarea eliminada con éxito' });
+});
+
+// Subir archivos
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Files will be stored in the 'uploads' directory
+  },
+  filename: function (req, file, cb) {
+    console.log(file.originalname);
+    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+  },
+});
+
+// Initialize upload middleware
+const upload = multer({ storage });
+
+// POST endpoint for file upload
+app.post('/upload', upload.single('file'), (req, res) => {
+  console.log('Helloooooo');
+  console.log(req.file);
+  if (!req.file) {
+    return res.status(400).send('No file uploaded');
+  }
+  res.send('File uploaded successfully');
 });
 
 app.listen(5050, () => { // Inicia el servidor en el puerto 5050
