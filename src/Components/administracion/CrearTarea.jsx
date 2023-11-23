@@ -24,12 +24,13 @@ const CrearTarea = ()=>{
         navigate(enlace);
     };
 
-    const [selectedTipo, setSelectedTipo] = useState('');
+    const [selectedTipo, setSelectedTipo] = useState([]);
+    // const [addedTipo, setAddedTipo] = useState([]);
 
     const opciones = [
         { name: 'Normal', id: '0' }, 
         { name: 'Comanda', id: '1' }, 
-        { mane: 'Pedido de material', id: '2' },
+        { name: 'Pedido de material', id: '2' }, 
     ];
 
     const [nombre, setNombre] = useState('');
@@ -73,19 +74,29 @@ const CrearTarea = ()=>{
             />
 
             {/* Tipo */}
-            <StyledMultiSelect
+            <StyledMultiSelect 
+                // style = {styles.select}
                 items={opciones}
                 uniqueKey="id"
+                canAddItems={false}
                 hasSelectAll={false}                // deshabilita la opción "Seleccionar todo"
-                multi={false}                       // habilita la selección única
-                disableSearch={false}                 // Deshabilita la búsqueda
-                onSelectedItemsChange={selectedItems => setSelectedTipo(selectedItems[0])}
+                single={true}                       // habilita la selección única            
+                selectText="Tipo de tarea"
+                searchInputPlaceholderText="Buscar..."
+                onSelectedItemsChange={selectedItems => setSelectedTipo(selectedItems)}
                 selectedItems={selectedTipo}
-                //hideSubmitButton
-            />
-            {/* <p>Opción seleccionada: {selected.length > 0 ? selected[0].label : 'Ninguna'}</p> */}
-    
+                
+                // IMPLEMENTAR EL PODER AÑADIR ALGUN 'TIPO' DE TAREA 
+                // canAddItems={true}
+                // onAddItem={addedItems => setAddedTipo(addedItems)}
 
+                hideSubmitButton
+            />
+            <View>
+            {/* selectedTipo.map((numero) => (
+                // <Text key={numero}>{numero}</Text>
+            )) */ }
+            </View>
             {/* Descripción */}
             <StyledTextInput
                 label="Descripcion"
@@ -119,6 +130,26 @@ const CrearTarea = ()=>{
 }
 
 const styles=StyleSheet.create({
+    select: {
+        borderRadius: 5,
+        marginTop: 15,
+        marginBottom: 15,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        width: 200,
+        height: 50,
+        justifyContent: 'center',
+        alignSelf: 'center',
+        borderColor: '#999',
+        // borderWidth: 1,
+        // borderTopWidth: 0.2, // Elimina el borde superior
+        // borderBottomWidth: 0.2, // Elimina el borde inferior
+        // borderLeftWidth: 0.2, // Aplica borde en el lado izquierdo
+        // borderRightWidth: 0.2, // Aplica borde en el lado derecho
+    },
+    error: {
+        borderColor: 'red',
+    },
     image:{
         width: 600,
         height: 200,
