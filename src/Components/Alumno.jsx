@@ -1,6 +1,7 @@
 import React from 'react'
 import {Text, View, Button, StyleSheet, Image} from 'react-native'
 import { useNavigate } from 'react-router-native';
+import StyledText from './StyledText';
 
 
 const Alumno = ()=>{
@@ -14,9 +15,9 @@ const Alumno = ()=>{
     return(
         <View>
             <Image style={styles.image} source={require('../../data/img/LogoColegio.png')}/>
-            <Text>
+            <StyledText style={styles.text}>
                 WORKING ON IT... (ALUMNO)
-            </Text>
+            </StyledText>
             <View style={styles.button}>
                 <Button title='Volver a Inicio' onPress={() => handleButtonClick('/')}/>
             </View>

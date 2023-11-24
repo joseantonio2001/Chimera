@@ -32,7 +32,7 @@ const Profesor = ()=>{
     useEffect(() => {
         getProfes();
       }, [])
-
+      
     return(
         <View>
             <Image style={styles.image} source={require('../../data/img/LogoColegio.png')}/>
@@ -84,7 +84,6 @@ const styles=StyleSheet.create({
         alignSelf: 'center'
     }
 })
-
 
 
 export default Profesor

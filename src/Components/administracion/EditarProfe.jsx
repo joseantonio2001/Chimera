@@ -76,11 +76,11 @@ const EditarProfe = ()=>{
         })
         .then((response) => {
             // Maneja la respuesta exitosa
-            navigate('/confirmacioncrearusuario', { state: { mensaje: '¡Profesor creado con éxito!' } });
+            navigate('/confirmacioncrearusuario', { state: { mensaje: '¡Profesor editado con éxito!' } });
         })
         .catch((error) => {
             // Maneja los errores
-            navigate('/confirmacioncrearusuario', { state: { mensaje: 'Error en la creación del profesor',error } });
+            navigate('/confirmacioncrearusuario', { state: { mensaje: 'Error en la edición del profesor',error } });
         });
         
     };
