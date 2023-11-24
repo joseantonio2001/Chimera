@@ -1,12 +1,34 @@
-import React, { useState, useEffect } from 'react'; // Añade 'useEffect'
-import { Text, Picker, View, Button, StyleSheet, Image } from 'react-native';
-import { useNavigate } from 'react-router-native';
-import axios from 'axios';
+import {  Image, Platform, Pressable , StyleSheet, Text, View} from 'react-native'
+import { useEffect, useState } from 'react'; // Añade 'useEffect'
+import { Picker } from '@react-native-picker/picker';
+import StyledMultiSelect from '../StyledMultiSelect';
 import StyledText from '../StyledText';
 import StyledTextInput from '../StyledTextInput';
-import StyledMultiSelect from '../StyledMultiSelect';
+import axios from 'axios';
+import { useNavigate } from 'react-router-native';
 
-
+const useHost = (campo) => {
+    switch(campo){
+        case 'estudiantes':
+            if (Platform.OS === 'android') {
+                return 'http://10.0.2.2:5050/estudiantes';
+              } else {
+                return 'http://localhost:5050/estudiantes';
+              }
+        case 'profesores':
+            if (Platform.OS === 'android') {
+                return 'http://10.0.2.2:5050/profesores';
+              } else {
+                return 'http://localhost:5050/profesores';
+              }
+        case 'clases':
+            if (Platform.OS === 'android') {
+                return 'http://10.0.2.2:5050/clases';
+              } else {
+                return 'http://localhost:5050/clases';
+              }
+    }
+};
 
 
 const CrearAula = () => {
@@ -26,14 +48,14 @@ const CrearAula = () => {
 
     useEffect( () => {
         // Realiza una solicitud GET al servidor para obtener la lista de profesores
-        axios.get('http://localhost:5050/profesores')
+        axios.get(`${useHost('profesores')}`)
             .then((response) => {
                 setProfesores(response.data[0]); // Almacena la lista de profesores en el estado
             })
             .catch((error) => {
                 console.error('Error al obtener la lista de profesores: ' + error);
             });
-        axios.get('http://localhost:5050/estudiantes')
+        axios.get(`${useHost('estudiantes')}`)
             .then((response) => {
                 setEstudiantes(response.data[0]); // Almacena la lista de estudiantes en el estado
             })
@@ -44,18 +66,19 @@ const CrearAula = () => {
 
     const handleCreateAula = () => {
         // Realiza una solicitud POST al servidor backend para crear un alumno
-        axios.post('http://localhost:5050/clases/crearAula', {
+        axios.post(`${useHost('clases')}/crearAula`, {
+            id,
             capacidad,
             id_profesor: selectedProfesor,
             estudiantes: selectedEstudiantes
         })
             .then((response) => {
                 // Maneja la respuesta exitosa
-                navigate('/confirmacioncrearaula', { state: { mensaje: 'Aula creada con éxito!' } });
+                navigate('/confirmaciones', { state: { mensaje: 'Clase creada con éxito!' } });
             })
             .catch((error) => {
                 // Maneja los errores
-                navigate('/confirmacioncrearaula', { state: { mensaje: 'Error en la creación del aula', error } });
+                navigate('/confirmaciones', { state: { mensaje: 'Error en la creación del aula', error } });
             });
 
     };
@@ -65,9 +88,16 @@ const CrearAula = () => {
             <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')} />
             <StyledText style={styles.titleText}>Crear un Nuevo Alumno</StyledText>
 
+            <StyledText style={styles.text}>Identificador del Aula:</StyledText>
+            <StyledTextInput
+                label="ID"
+                value={id}
+                onChangeText={text => setId(text)}
+            />
+
             <StyledText style={styles.text}>Capacidad del Aula:</StyledText>
             <StyledTextInput
-                placeholder="Capacidad"
+                label="Capacidad"
                 value={capacidad}
                 onChangeText={text => setCapacidad(text)}
             />
@@ -79,10 +109,6 @@ const CrearAula = () => {
                 selectedValue={selectedProfesor}
                 onValueChange={(itemValue, itemIndex) => setSelectedProfesor(itemValue)}
             >
-                <Picker.Item
-                    label="Seleccione profesor"
-                    value="" // O cualquier otro valor que desees como un valor nulo
-                />
                 {profesores.map((profesor) => (
                     <Picker.Item
                         key={profesor.id}
@@ -106,63 +132,78 @@ const CrearAula = () => {
 
 
             <View style={styles.button}>
-                <Button title="Crear Aula" onPress={handleCreateAula} />
+                <Pressable style={styles.pressableButton} onPress={handleCreateAula}>
+                    <Text style={styles.pressableText}>Crear clase</Text>
+                </Pressable> 
             </View>
 
             <View style={styles.button}>
-                <Button title='Volver al menú de administración' onPress={() => handleButtonClick('/admin')} />
+                <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/admin')}>
+                    <Text style={styles.pressableText}>Volver atrás</Text>
+                </Pressable> 
             </View>
 
         </View>
 
     )
 }
-const styles = StyleSheet.create({
-    image: {
+
+const styles=StyleSheet.create({
+    image:{
         width: 600,
         height: 200,
         borderRadius: 4,
         alignSelf: 'center',
         paddingVertical: 10
     },
-    button: {
-        width: 200,
-        height: 40,
-        justifyContent: 'center',
-        alignSelf: 'center',
-        paddingVertical: 10,
-        marginBottom: 15,
-        marginTop: 15
-    },
-    titleText: {
+    text:{
         flex: 1,
         justifyContent: 'center', // Centra horizontalmente
-        textAlign: 'center',
-        fontSize: 20,
-        fontWeight: '700',
-        marginTop: 20,
-        marginBottom: 20
-    },
-    text: {
-        flex: 1,
-        justifyContent: 'center', // Centra horizontalmente
-        textAlign: 'center',
+        textAlign: 'center', 
         fontSize: 15,
         marginTop: 10,
         marginBottom: 10,
         fontWeight: 'bold'
-    }, mensajeError: {
+    },
+    mensajeError: {
         fontSize: 16,
         color: 'red', // Puedes cambiar el color a tu preferencia
         textAlign: 'center',
         marginTop: 10,
-    }, mensajeExito: {
+    },mensajeExito: {
         fontSize: 16,
         color: 'black', // Puedes cambiar el color a tu preferencia
         textAlign: 'center',
         marginTop: 10,
-    }
-
+    },
+    pressableButton: {
+        width: 200,
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignSelf: 'center',
+        backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
+        borderRadius: 10,
+        elevation: 3, // Sombra para un efecto de elevación
+        marginBottom: 15,
+        marginTop: 15,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+    },
+    headerText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        color: '#333',  // Un tono de gris oscuro, puedes ajustarlo según tus preferencias
+        marginTop: 20,
+        marginBottom: 10,
+    },
+    pressableText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold', // Texto en negrita
+        textAlign: 'center',
+    },  
 })
 
 const pickerStyles = StyleSheet.create({

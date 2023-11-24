@@ -46,7 +46,7 @@ const Profesor = ()=>{
             ))}
 
             
-            <View style={styles.button}>
+            <View style={styles.pressableButton}>
                 <Button title='Volver a Inicio' onPress={() => handleButtonClick('/')}/>
             </View>
         </View>
@@ -62,14 +62,19 @@ const styles=StyleSheet.create({
         paddingVertical: 10,
         marginBottom: 100
     },
-    button: {
-        width:200, 
-        height: 40,
+    pressableButton: {
+        width: 200,
+        height: 50,
         justifyContent: 'center',
+        alignItems: 'center',
         alignSelf: 'center',
-        paddingVertical: 10,
+        backgroundColor: '#049CDC',  // Un verde fresco, puedes cambiarlo según tus preferencias
+        borderRadius: 10,
+        elevation: 3, // Sombra para un efecto de elevación
         marginBottom: 15,
-        marginTop: 150
+        marginTop: 50,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
     },
     text: {
         flex: 1,

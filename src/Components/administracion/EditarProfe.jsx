@@ -1,13 +1,19 @@
-import React, {useState, useEffect} from 'react'
-import { View, Button, StyleSheet, Image, Switch} from 'react-native'
-import { useNavigate, useLocation } from 'react-router-native';
+import {  Image, Platform, Pressable , StyleSheet, Text, View} from 'react-native'
+import { useEffect, useState} from 'react'
+import { useLocation, useNavigate } from 'react-router-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import StyledText from '../StyledText';
-import axios from 'axios';
 import StyledTextInput from '../StyledTextInput';
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
+import { Switch } from 'react-native-paper';
+import axios from 'axios';
 
+const useHost = () => {
+    if (Platform.OS === 'android') {
+      return 'http://10.0.2.2:5050/profesores';
+    } else {
+      return 'http://localhost:5050/profesores';
+    }
+};
 
 const EditarProfe = ()=>{
     const navigate = useNavigate();
@@ -22,17 +28,27 @@ const EditarProfe = ()=>{
     const [nombre, setNombre] = useState('');
     const [apellido1, setApellido1] = useState('');
     const [apellido2, setApellido2] = useState('');
-    const [contraseña, setContraseña] = useState('');
     const [admin, setAdmin] = useState(false);
-    const [selectedDate, setSelectedDate] = useState('');
-    const [fechaNacimiento, setFechaNacimiento] = useState(Date);
-    const [fechaNacimientoBD, setFechaNacimientoBD] = useState(Date);
+     /* Diferencia entre fechas debido a que en BD se introduce cómo string */
+     const [date, setDate] = useState(new Date());
+     const [bdDate, setbdDate] = useState(''); 
+     const [showDate, setShowDate] = useState(false);
+ 
+     const onChange = (event, selectedDate) => {
+         setShowDate(false);
+         setDate(selectedDate); // Fecha componente
+         setbdDate((date.toISOString().split('T')[0])); // Fecha BD
+     };
+ 
+     const showDatePicker = () => {
+         setShowDate(true);
+     }
 
     const toggleAdmin = () => {
         setAdmin(!admin);
     };
     const getDatosProfe = () => {
-        axios.get(`http://localhost:5050/profesores/${id}`)
+        axios.get(`${useHost()}/${id}`)
             .then((response) => {
                 const resultado = response.data[0];
                 if (resultado && resultado.length > 0 && Array.isArray(resultado)) {
@@ -41,16 +57,9 @@ const EditarProfe = ()=>{
                         setApellido1(profe.apellido1);
                         setApellido2(profe.apellido2);
                         setAdmin(profe.admin);
+                        if(admin) toggleAdmin();
+                        setbdDate(profe.fecha_nac.split('T')[0]);
                         
-                        const fechaNacimientoDB = new Date(profe.fecha_nac);
-                        setFechaNacimientoBD(profe.fecha_nac);
-    
-                        const año = fechaNacimientoDB.getFullYear();
-                        const mes = String(fechaNacimientoDB.getMonth() + 1).padStart(2, '0');
-                        const dia = String(fechaNacimientoDB.getDate()).padStart(2, '0');
-                        const fechaFormateada = `${año}/${mes}/${dia}`;
-    
-                        setFechaNacimiento(fechaFormateada);
                     });
                 }
             })
@@ -61,26 +70,22 @@ const EditarProfe = ()=>{
     };
 
     const handleEditProfe = () => {
-        const fechaNacimientoAEnviar = selectedDate || fechaNacimientoBD;
-        const fechaFormateada = dayjs(fechaNacimientoAEnviar).format('YYYY-MM-DD');
-        console.log('Fecha a insertar en BD; ', fechaFormateada);
-        
         // Realiza una solicitud POST al servidor backend para crear un alumno
-        axios.put('http://localhost:5050/profesores/actualizarProfe', {
+        axios.put(`${useHost()}/actualizarProfe`, {
             id,
             nombre,
             apellido1,
             apellido2,
             admin,
-            fechaNac: fechaFormateada
+            fechaNac: bdDate
         })
         .then((response) => {
             // Maneja la respuesta exitosa
-            navigate('/confirmacioncrearusuario', { state: { mensaje: '¡Profesor creado con éxito!' } });
+            navigate('/confirmaciones', { state: { mensaje: '¡Profesor creado con éxito!' } });
         })
         .catch((error) => {
             // Maneja los errores
-            navigate('/confirmacioncrearusuario', { state: { mensaje: 'Error en la creación del profesor',error } });
+            navigate('/confirmaciones', { state: { mensaje: 'Error en la creación del profesor',error } });
         });
         
     };
@@ -96,33 +101,36 @@ const EditarProfe = ()=>{
             
             <StyledText style={styles.text}>Nombre y apellidos:</StyledText>
             <StyledTextInput
-                placeholder="Nombre"
+                label="Nombre"
                 value={nombre}
                 onChangeText={text => setNombre(text)}
             />
             <StyledTextInput
-                placeholder="Apellido 1"
+                label="Apellido 1"
                 value={apellido1}
                 onChangeText={text => setApellido1(text)}
             />
             <StyledTextInput
-                placeholder="Apellido 2"
+                label="Apellido 2"
                 value={apellido2}
                 onChangeText={text => setApellido2(text)}
             />
-            <StyledText style={styles.text}>La fecha actual de nacimiento es {fechaNacimiento}. Si desea cambiarla introduzca una nueva:</StyledText>
+            <StyledText style={styles.text}>La fecha actual de nacimiento es {date.toString()}. Si desea cambiarla introduzca una nueva:</StyledText>
             <StyledText style={styles.text}>Fecha de nacimiento: [AAAA/MM/DD]</StyledText>
-            <View style={styles.calendarContainer}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker 
-                        label="Selecciona una fecha"
-                        format="YYYY/MM/DD"
-                        style={styles.calendar}
-                        value={selectedDate}
-                        onChange={(selectedDate) => setSelectedDate(selectedDate)}
-                        renderInput={(props) => <StyledTextInput {...props} />}
-                    />
-                </LocalizationProvider>
+            <View>
+                <Pressable style={styles.pressableButton} onPress={showDatePicker}>
+                    <Text style={styles.pressableText}>Seleccionar fecha</Text>
+                </Pressable>
+                {showDate && (
+                <DateTimePicker
+                testID="dateTimePicker"
+                value={date}
+                mode="date"
+                display="default"
+                format={'YYYY-MM-DD'}
+                onChange={onChange}
+                />
+                )}
             </View>
             <StyledText style={styles.text}>Perfil de administración: </StyledText>
             <Switch style={styles.switch}
@@ -133,17 +141,22 @@ const EditarProfe = ()=>{
             />
 
             <View style={styles.button}>
-                <Button title="Editar Profesor" onPress={handleEditProfe} />
+                <Pressable style={styles.pressableButton} onPress={handleEditProfe} >
+                    <Text style={styles.pressableText}>Editar profesor</Text>
+                </Pressable>
             </View>
 
             <View style={styles.button}>
-                <Button title='Volver al menú de administración' onPress={() => handleButtonClick('/admin')}/>
+                <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/admin')}>
+                    <Text style={styles.pressableText}>Volver atrás</Text>
+                </Pressable> 
             </View>
             
         </View>
         
     )
 }
+
 const styles=StyleSheet.create({
     image:{
         width: 600,
@@ -151,24 +164,6 @@ const styles=StyleSheet.create({
         borderRadius: 4,
         alignSelf: 'center',
         paddingVertical: 10
-    },
-    button: {
-        width:200, 
-        height: 40,
-        justifyContent: 'center',
-        alignSelf: 'center',
-        paddingVertical: 10,
-        marginBottom: 15,
-        marginTop: 15
-    },
-    titleText: {
-        flex: 1,
-        justifyContent: 'center', // Centra horizontalmente
-        textAlign: 'center', 
-        fontSize: 20,
-        fontWeight: '700',
-        marginTop: 20,
-        marginBottom: 20
     },
     text:{
         flex: 1,
@@ -178,7 +173,8 @@ const styles=StyleSheet.create({
         marginTop: 10,
         marginBottom: 10,
         fontWeight: 'bold'
-    },mensajeError: {
+    },
+    mensajeError: {
         fontSize: 16,
         color: 'red', // Puedes cambiar el color a tu preferencia
         textAlign: 'center',
@@ -189,24 +185,34 @@ const styles=StyleSheet.create({
         textAlign: 'center',
         marginTop: 10,
     },
-    switch:{
-        alignSelf:'center'
-    },
-    calendar:{
-        maxWidth: 150,
-        height: 40,
+    pressableButton: {
+        width: 200,
+        height: 50,
         justifyContent: 'center',
+        alignItems: 'center',
         alignSelf: 'center',
+        backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
+        borderRadius: 10,
+        elevation: 3, // Sombra para un efecto de elevación
+        marginBottom: 15,
+        marginTop: 15,
+        paddingHorizontal: 20,
         paddingVertical: 10,
-        marginBottom: 15,
-        marginTop: 1
     },
-    calendarContainer: {
-        maxWidth: 250,
-        alignSelf: 'center',
-        marginBottom: 15,
-        marginTop: 1,
-      }
+    headerText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        color: '#333',  // Un tono de gris oscuro, puedes ajustarlo según tus preferencias
+        marginTop: 20,
+        marginBottom: 10,
+    },
+    pressableText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold', // Texto en negrita
+        textAlign: 'center',
+    },  
 })
 
 

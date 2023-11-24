@@ -1,30 +1,30 @@
-import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
-import PanelAdmin from './PanelAdmin';
+import {Image, Pressable, StyleSheet,Text, View } from 'react-native'
+import {  useLocation, useNavigate } from 'react-router-native';
 import StyledText from '../StyledText';
-import { useNavigate } from 'react-router-native';
 
 
-const Admin = ()=>{
-    
+function confirmAccion (props){
     const navigate = useNavigate();
     
         const handleButtonClick = (enlace) => {
         
         navigate(enlace);
     };
+    const { state } = useLocation();
+    const mensaje = state ? state.mensaje : '';
 
     return(
-        <View style={{flex: 1}} /* Para tab visible definir esto o altura del componente parent */>
+        <View>
             <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
-            <StyledText style={styles.headerText}>MENÚ DE ADMINISTRACIÓN</StyledText>
-            <PanelAdmin/>
-            <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/')}>
-                <Text style={styles.pressableText}>Volver a inicio</Text>
+            <StyledText style={styles.headerText}>{mensaje}</StyledText>
+            <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/admin')}>
+                <Text style={styles.pressableText}>Volver al menú</Text>
             </Pressable>
         </View>
         
     )
 }
+
 const styles=StyleSheet.create({
     image:{
         width: 600,
@@ -39,7 +39,7 @@ const styles=StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
-        backgroundColor: '#049CDC',  // Un verde fresco, puedes cambiarlo según tus preferencias
+        backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
         borderRadius: 10,
         elevation: 3, // Sombra para un efecto de elevación
         marginBottom: 15,
@@ -63,8 +63,4 @@ const styles=StyleSheet.create({
     },    
 })
 
-
-
-
-
-export default Admin
+export default confirmAccion;

@@ -1,10 +1,32 @@
-import React, { useState, useEffect } from 'react'; // Añade 'useEffect'
-import { Text, View, Button, StyleSheet, Image, FlatList } from 'react-native';
-import { useNavigate } from 'react-router-native';
-import { useLocation } from 'react-router-native';
-import axios from 'axios';
-import StyledText from '../StyledText';
+import {  Image, Platform, Pressable , StyleSheet, Text, View} from 'react-native'
+import { useEffect, useState} from 'react'
+import { useLocation, useNavigate } from 'react-router-native';
 import StyledMultiSelect from '../StyledMultiSelect';
+import StyledText from '../StyledText';
+import axios from 'axios';
+
+const useHost = (campo) => {
+  switch(campo){
+      case 'estudiantes':
+          if (Platform.OS === 'android') {
+              return 'http://10.0.2.2:5050/estudiantes';
+            } else {
+              return 'http://localhost:5050/estudiantes';
+            }
+      case 'profesores':
+          if (Platform.OS === 'android') {
+              return 'http://10.0.2.2:5050/profesores';
+            } else {
+              return 'http://localhost:5050/profesores';
+            }
+      case 'clases':
+          if (Platform.OS === 'android') {
+              return 'http://10.0.2.2:5050/clases';
+            } else {
+              return 'http://localhost:5050/clases';
+            }
+  }
+};
 
 const EditarClase = () => {
   const navigate = useNavigate();
@@ -13,7 +35,7 @@ const EditarClase = () => {
 
         navigate(enlace);
     };
- 
+
   const { state } = useLocation();
   const claseId = state ? state.idClase : ''; 
   const [clase, setClase] = useState(null);
@@ -23,7 +45,7 @@ const EditarClase = () => {
 
   useEffect(() => {
     // Obtener información de la clase con el ID proporcionado
-    axios.get(`http://localhost:5050/clases/${claseId}`)
+    axios.get(`${useHost('clases')}/${claseId}`)
       .then((response) => {
             console.log('Respuesta de la API para la clase:', response.data);
 
@@ -34,7 +56,7 @@ const EditarClase = () => {
       });
 
     // Obtener la lista de alumnos de la base de datos
-    axios.get('http://localhost:5050/estudiantes')
+    axios.get(`${useHost('estudiantes')}`)
       .then((response) => {
         setEstudiantes(response.data[0]); // Almacena la lista de estudiantes en el estado
       })
@@ -42,7 +64,7 @@ const EditarClase = () => {
         console.error('Error al obtener la lista de estudiantes:', error);
       });
       // Obtener la lista de estudiatnes de esa clase
-      axios.get(`http://localhost:5050/estudiantes/clases/${claseId}`)
+      axios.get(`${useHost('estudiantes')}/clases/${claseId}`)
       .then((response) => {
         setEstudiantesClase(response.data[0]);  
       })
@@ -54,41 +76,41 @@ const EditarClase = () => {
   const handleAñadirAlumno = () => {
 
     if (clase && clase.length > 0 && clase[0].capacidad && selectedEstudiantes.length > clase[0].capacidad - estudiantesClase.length) {
-      navigate('/confirmacioncrearusuario', { state: { mensaje: 'No se han podido incluir los alumnos en el CrearAula, esta está demasiado llena' } });
+      navigate('/confirmaciones', { state: { mensaje: 'No se han podido incluir los alumnos en el CrearAula, esta está demasiado llena' } });
     }
-    axios.post('http://localhost:5050/clases/aniadealumnos',{
+    axios.post(`${useHost('clases')}/aniadealumnos`,{
       claseId,
       estudiantes: selectedEstudiantes
     })
     .then((response) => {
       console.log('Respuesta del servidor:', response);
       // Maneja la respuesta exitosa
-      navigate('/confirmacioncrearusuario', { state: { mensaje: 'Alumnos añadidos con exito!' } });
+      navigate('/confirmaciones', { state: { mensaje: 'Alumnos añadidos con exito!' } });
     })
     .catch((error) => {
         // Maneja los errores
-        navigate('/confirmacioncrearusuario', { state: { mensaje: 'Error al añadir los alumnos al aula', error } });
+        navigate('/confirmaciones', { state: { mensaje: 'Error al añadir los alumnos al aula', error } });
     });
     };
 
     const handleQuitarAlumno = () => {
       if (selectedEstudiantes.length === 0) {
-        navigate('/confirmacioncrearusuario', { state: { mensaje: 'Selecciona estudiantes para quitar del aula.' } });
+        navigate('/confirmaciones', { state: { mensaje: 'Selecciona estudiantes para quitar del aula.' } });
         return;
       }
   
-      axios.post('http://localhost:5050/clases/quitaralumnos', {
+      axios.post(`${useHost('clases')}/quitaralumnos`, {
         claseId,
         estudiantes: selectedEstudiantes
       })
         .then((response) => {
           console.log('Respuesta del servidor:', response);
           // Maneja la respuesta exitosa
-          navigate('/confirmacioncrearusuario', { state: { mensaje: 'Alumnos quitados con éxito!' } });
+          navigate('/confirmaciones', { state: { mensaje: 'Estudiantes quitados con éxito!' } });
         })
         .catch((error) => {
           // Maneja los errores
-          navigate('/confirmacioncrearusuario', { state: { mensaje: 'Error al quitar los alumnos del aula', error } });
+          navigate('/confirmaciones', { state: { mensaje: 'Error al quitar los estudiantes del aula', error } });
         });
     };
   
@@ -124,9 +146,11 @@ const EditarClase = () => {
         hideSubmitButton
       />
 
-      <View style={styles.button}>
-        <Button title="Quitar del aula" onPress={handleQuitarAlumno} />
-      </View>
+    <View style={styles.button}>
+                <Pressable style={styles.pressableButton} onPress={handleQuitarAlumno}>
+                    <Text style={styles.pressableText}>Quitar del aula</Text>
+                </Pressable> 
+            </View>
     <Text style={styles.text}>Estudiantes a añadir:</Text>
     <StyledMultiSelect
       items={estudiantesDisponibles.map((estudiante) => ({
@@ -143,10 +167,14 @@ const EditarClase = () => {
       
 
       <View style={styles.button}>
-          <Button title="Añadir al aula" onPress={handleAñadirAlumno} />
+          <Pressable style={styles.pressableButton} onPress={handleAñadirAlumno}>
+              <Text style={styles.pressableText}>Añadir al aula</Text>
+          </Pressable> 
        </View>
       <View style={styles.button}>
-        <Button title='Volver al menú de administración' onPress={() => handleButtonClick('/admin')} />
+        <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/admin')}>
+            <Text style={styles.pressableText}>Volver atrás</Text>
+        </Pressable> 
       </View>
    </View>
 
@@ -154,53 +182,63 @@ const EditarClase = () => {
   )
 }
 
-const styles = StyleSheet.create({
-  image: {
+const styles=StyleSheet.create({
+  image:{
       width: 600,
       height: 200,
       borderRadius: 4,
       alignSelf: 'center',
       paddingVertical: 10
   },
-  button: {
-      width: 200,
-      height: 40,
-      justifyContent: 'center',
-      alignSelf: 'center',
-      paddingVertical: 10,
-      marginBottom: 15,
-      marginTop: 15
-  },
-  titleText: {
+  text:{
       flex: 1,
       justifyContent: 'center', // Centra horizontalmente
-      textAlign: 'center',
-      fontSize: 20,
-      fontWeight: '700',
-      marginTop: 20,
-      marginBottom: 20
-  },
-  text: {
-      flex: 1,
-      justifyContent: 'center', // Centra horizontalmente
-      textAlign: 'center',
+      textAlign: 'center', 
       fontSize: 15,
       marginTop: 10,
       marginBottom: 10,
       fontWeight: 'bold'
-  }, mensajeError: {
+  },
+  mensajeError: {
       fontSize: 16,
       color: 'red', // Puedes cambiar el color a tu preferencia
       textAlign: 'center',
       marginTop: 10,
-  }, mensajeExito: {
+  },mensajeExito: {
       fontSize: 16,
       color: 'black', // Puedes cambiar el color a tu preferencia
       textAlign: 'center',
       marginTop: 10,
-  }
-
-});
+  },
+  pressableButton: {
+      width: 200,
+      height: 50,
+      justifyContent: 'center',
+      alignItems: 'center',
+      alignSelf: 'center',
+      backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
+      borderRadius: 10,
+      elevation: 3, // Sombra para un efecto de elevación
+      marginBottom: 15,
+      marginTop: 15,
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+  },
+  headerText: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      color: '#333',  // Un tono de gris oscuro, puedes ajustarlo según tus preferencias
+      marginTop: 20,
+      marginBottom: 10,
+  },
+  pressableText: {
+      color: 'white',
+      fontSize: 18,
+      fontWeight: 'bold', // Texto en negrita
+      textAlign: 'center',
+  },  
+})
 
 
 

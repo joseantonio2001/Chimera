@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-dotenv.config({ path:'../../.env' }); // Modificar en caso de null@172... a la conexion de api
+dotenv.config({ path:'.env' }); // Revisar siempre si no va bien conexión a BD
 
 const dbConfig = {
   host: process.env.DB_HOST,

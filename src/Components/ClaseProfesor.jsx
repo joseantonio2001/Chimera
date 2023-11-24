@@ -86,7 +86,7 @@ const ClaseProfesor = ()=>{
                     <StyledText styles={styles.text} key={alumno.id}>ID {alumno.id}: {alumno.nombre} {alumno.apellido1} {alumno.apellido2}</StyledText>
                 </View>
             ))}
-            <View style={styles.button}>
+            <View style={styles.pressableButton}>
                 <Button title='Volver' onPress={() => handleButtonClick('/profesor')}/>
             </View>
         </View>
@@ -102,14 +102,19 @@ const styles=StyleSheet.create({
         paddingVertical: 10,
         marginBottom: 100
     },
-    button: {
-        width:200, 
-        height: 40,
+    pressableButton: {
+        width: 100,
+        height: 50,
         justifyContent: 'center',
+        alignItems: 'center',
         alignSelf: 'center',
-        paddingVertical: 10,
+        backgroundColor: '#049CDC',  // Un verde fresco, puedes cambiarlo según tus preferencias
+        borderRadius: 10,
+        elevation: 3, // Sombra para un efecto de elevación
         marginBottom: 15,
-        marginTop: 150
+        marginTop: 50,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
     },
     text: {
         flex: 1,
