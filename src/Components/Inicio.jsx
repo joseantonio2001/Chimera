@@ -23,9 +23,6 @@ const Inicio = ()=>{
                     <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/admin')}>
                         <Text style={styles.pressableText}>Administrador</Text>
                     </Pressable>
-                    <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/subirarchivo')}>
-                        <Text style={styles.pressableText}>Archivos</Text>
-                    </Pressable>
                 </View>
         </View>
         

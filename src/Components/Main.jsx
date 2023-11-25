@@ -29,7 +29,6 @@ const Main = ()=>{
                     <Route path='/admin/crearclase' exact element={<CrearAula/>} />
                     <Route path='/admin/editarclase' exact element={<EditarClase/>}/> 
                     <Route path='/confirmaciones' exact element={<Confirmaciones/>}/>
-                    <Route path='/subirarchivo' exact element={<UploadFiles/>} />
                 </Routes>
             </View>
         </NativeRouter>
