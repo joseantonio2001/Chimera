@@ -1,14 +1,15 @@
-import {  Image, Platform, Pressable , StyleSheet, Text, View} from 'react-native'
-import DateTimePicker from '@react-native-community/datetimepicker';
+import {  Dimensions, Image, Platform, Pressable , StyleSheet, Text, View} from 'react-native'
 import StyledText from '../StyledText';
 import StyledMultiSelect from '../StyledMultiSelect';
-import MultiSelect from 'react-native-multiple-select';
 import StyledTextInput from '../StyledTextInput';
-import { TextInput } from 'react-native-paper';
 import axios from 'axios';
 import { useNavigate } from 'react-router-native';
 import {useState} from 'react'
+import TablaPaso from './tablas/TablaPaso';
+import { SceneMap,TabView } from 'react-native-tab-view';
 
+
+// SIMULADOR EN WEB Y ANDROID
 const useHost = () => {
     if (Platform.OS === 'android') {
       return 'http://10.0.2.2:5050/estudiantes';
@@ -19,32 +20,55 @@ const useHost = () => {
 
 const CrearTarea = ()=>{
 
+    const [nombre, setNombre] = useState('');
+    const [descripcion, setDescripcion] = useState('');
+    const [numPaso, setNumPaso] = useState(1);
+    const [portada, setPortada] = useState('');
+    const [selectedTipo, setSelectedTipo] = useState([]);
+    const [index, setIndex] = useState(0);
+    const [routes] = useState([
+      { key: 'first', title: 'Pasos de la tarea' },
+    ]);
+
+    // NAVEGACIÓN
     const navigate = useNavigate();
         const handleButtonClick = (enlace) => {
         navigate(enlace);
     };
 
-    const [selectedTipo, setSelectedTipo] = useState([]);
-    // const [addedTipo, setAddedTipo] = useState([]);
-
+    // SELECTOR PARA TIPO DE TAREA
     const opciones = [
         { name: 'Normal', id: '0' }, 
         { name: 'Comanda', id: '1' }, 
         { name: 'Pedido de material', id: '2' }, 
     ];
 
-    const [nombre, setNombre] = useState('');
-    const [descripcion, setDescripcion] = useState('');
-    const [tipo, setTipo] = useState('');
-    const [numPaso, setNumPaso] = useState(1);
-    const [portada, setPortada] = useState('');
+    // PROPIEDADES PARA TABLA
+    const initialLayout = { 
+        marginBottom: 10,
+        // width: 100,
+        height: 200,
+        color: '#333', 
+     };
+
+    // TABLA PASOS
+    const tabPasos = () => (
+        <View>
+          <TablaPaso/>
+        </View>
+    );
     
+    const renderScene = SceneMap({
+        first: tabPasos,
+    });
+    
+     // CONEXIÓN BD PARA CREAR TAREA
     const handleCreateTarea = () => {
         // Realiza una solicitud POST al servidor backend para crear una tarea
         axios.post(`${useHost()}/crearTarea`, {
             nombre,
             descripcion,
-            tipo
+            selectedTipo
             // portada
         })
         .then((response) => {
@@ -58,8 +82,7 @@ const CrearTarea = ()=>{
         });
     };
 
-
-
+    
     return(
         <View>
             <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
@@ -68,14 +91,15 @@ const CrearTarea = ()=>{
             
             {/* Nombre */}
             <StyledTextInput
+                style={styles.textInput}
                 label="Nombre"
                 value={nombre}
                 onChangeText={text => setNombre(text)}
             />
 
             {/* Tipo */}
-            <StyledMultiSelect 
-                // style = {styles.select}
+            <StyledMultiSelect
+                style={[styles.StyledMultiSelect, {width: 700}]}
                 items={opciones}
                 uniqueKey="id"
                 canAddItems={false}
@@ -85,67 +109,49 @@ const CrearTarea = ()=>{
                 searchInputPlaceholderText="Buscar..."
                 onSelectedItemsChange={selectedItems => setSelectedTipo(selectedItems)}
                 selectedItems={selectedTipo}
-                
-                // IMPLEMENTAR EL PODER AÑADIR ALGUN 'TIPO' DE TAREA 
-                // canAddItems={true}
-                // onAddItem={addedItems => setAddedTipo(addedItems)}
-
                 hideSubmitButton
             />
-            <View>
-            {/* selectedTipo.map((numero) => (
-                // <Text key={numero}>{numero}</Text>
-            )) */ }
-            </View>
+
             {/* Descripción */}
             <StyledTextInput
+                style={styles.textInput}
                 label="Descripcion"
                 value={descripcion}
                 onChangeText={text => setDescripcion(text)}
             />
 
-            <StyledText style={styles.text}>Pasos de la tarea:</StyledText>
+            <TabView
+                style={styles.tab} 
+                navigationState={{ index, routes }}
+                renderScene={renderScene}
+                onIndexChange={setIndex}
+                initialLayout={initialLayout}
+            />
             
-            <View style={styles.button}>
-                <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/crearpaso')}>
-                    <Text style={styles.pressableText}>Añadir Paso</Text>
-                </Pressable> 
-            </View>
-            
-            <View style={styles.button}>
-                <Pressable style={styles.pressableButton} onPress={handleCreateTarea}>
-                    <Text style={styles.pressableText}>Crear Tarea</Text>
-                </Pressable> 
-            </View>
+            <Pressable style={styles.pressableButton} onPress={handleCreateTarea}>
+                <Text style={styles.pressableText}>Crear Tarea</Text>
+            </Pressable> 
 
-            <View style={styles.button}>
-                <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/admin')}>
-                    <Text style={styles.pressableText}>Volver atrás</Text>
-                </Pressable> 
-            </View>
-            
+            <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/admin')}>
+                <Text style={styles.pressableText}>Volver atrás</Text>
+            </Pressable>  
+
         </View>
         
     )
 }
 
 const styles=StyleSheet.create({
-    select: {
-        borderRadius: 5,
-        marginTop: 15,
-        marginBottom: 15,
+    tab: {
+        marginTop: 10,
         paddingHorizontal: 20,
-        paddingVertical: 10,
-        width: 200,
-        height: 50,
+        paddingVertical: 20,
+        marginBottom: 30,
+        width: 700,
         justifyContent: 'center',
-        alignSelf: 'center',
+        alignSelf: 'center',  
         borderColor: '#999',
-        // borderWidth: 1,
-        // borderTopWidth: 0.2, // Elimina el borde superior
-        // borderBottomWidth: 0.2, // Elimina el borde inferior
-        // borderLeftWidth: 0.2, // Aplica borde en el lado izquierdo
-        // borderRightWidth: 0.2, // Aplica borde en el lado derecho
+        backgroundColor: '#EAF2F8',
     },
     error: {
         borderColor: 'red',
@@ -165,6 +171,18 @@ const styles=StyleSheet.create({
         marginTop: 10,
         marginBottom: 10,
         fontWeight: 'bold'
+    },
+    textInput: {
+        borderRadius: 5,
+        borderWidth: 1,
+        borderColor: '#999',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        marginTop: 5,
+        marginBottom: 5,
+        width: 700,
+        justifyContent: 'center',
+        alignSelf: 'center',   
     },
     mensajeError: {
         fontSize: 16,
@@ -188,7 +206,7 @@ const styles=StyleSheet.create({
         borderRadius: 10,
         elevation: 3, // Sombra para un efecto de elevación
         marginBottom: 15,
-        marginTop: 15,
+        // marginTop: 10,
         paddingHorizontal: 20,
         paddingVertical: 10,
     },
