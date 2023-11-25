@@ -1,82 +1,52 @@
 import * as DocumentPicker from 'expo-document-picker';
-import {useEffect, useState} from "react"
-import {View, Text, Button} from "react-native";
-import axios from "axios";
+import { View, Text, Button } from 'react-native';
+import axios from 'axios';
 
 const UploadFiles = () => {
-    const [selectedDocument, setSelectedDocument] = useState(null);
+  const selectAndUpload = async () => {
+    try {
+      const docRes = await DocumentPicker.getDocumentAsync({
+        type: '*/*'
+      });
 
-    useEffect(() => {
+      const formData = new FormData();
+      const assets = docRes.assets;
+      if (!assets) return;
 
-      console.log('Estado actual:', selectedDocument);
-    }, [selectedDocument]);
+      const file = assets[0];
 
-    const pickDocument = async () => {
-      try {
-        const document = await DocumentPicker.getDocumentAsync({
-          type: '*/*',
-          copyToCacheDirectory: true,
-        });
-        console.log('Documento seleccionado:', document);
+      const myFile = {
+        name: file.name,
+        uri: file.uri,
+        type: file.mimeType,
+        size: file.size
+      };
 
-        if (document) {
-          console.log('Document:', document);
-          setSelectedDocument(document.assets[0]);
-          console.log('SelectedDocument:', selectedDocument);
-        } else {
-          setSelectedDocument(null);
+      const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+          resolve(xhr.response);
+        };
+        xhr.onerror = function () {
+          reject(new TypeError('Network request failed'));
+        };
+        xhr.responseType = 'blob';
+        xhr.open('GET', file.uri, true);
+        xhr.send(null);
+      });
+
+      formData.append('file', blob, file.name);
+
+      const { data } = await axios.post('http://localhost:5050/upload', formData, {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'multipart/form-data'
         }
-      } catch (error) {
-        console.error('Error seleccionando documento:', error);
-      }
-    };
-
-    const uploadToBackend = async () => {
-      console.log('SelectedDocument:', selectedDocument);
-      if (selectedDocument) {
-        console.log('SelectedDocument uri: ' + selectedDocument.uri);
-        try {
-          const formData = new FormData();
-          const file = {
-            uri: selectedDocument.uri,
-            name: selectedDocument.name,
-            type: selectedDocument.type,
-          };
-
-          // Create a new Blob object from the file data
-          console.log(file.uri);
-          const blob = await new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.onload = function() {
-              resolve(xhr.response);
-            };
-            xhr.onerror = function() {
-              reject(new TypeError('Network request failed'));
-            };
-            xhr.responseType = 'blob';
-            xhr.open('GET', file.uri, true);
-            xhr.send(null);
-          });
-
-          // Append the Blob object to the FormData
-          formData.append('file', blob, file.name);
-
-          console.log('FormData:', formData);
-
-          const response = await axios.post('http://localhost:5050/upload', formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          });
-
-          console.log('Respuesta del backend:', response.data);
-        } catch (error) {
-          console.error('Error al enviar el archivo al backend:', error);
-        }
-      } else {
-        console.log('Por favor, selecciona un archivo primero');
-      }
-    };
+      });
+    } catch (error) {
+      console.log('Error while selecting file: ', error);
+    }
+  };
 };
 
 export default UploadFiles;
