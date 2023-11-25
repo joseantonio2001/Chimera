@@ -77,20 +77,6 @@ const UploadFiles = () => {
         console.log('Por favor, selecciona un archivo primero');
       }
     };
-
-    return (
-    <View style={{alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
-      <Button title="Seleccionar documento" onPress={pickDocument} />
-      {selectedDocument && (
-        <View style={{ marginTop: 20 }}>
-          <Text>Nombre: {selectedDocument.name}</Text>
-          <Text>Tipo: {selectedDocument.type}</Text>
-          <Text>Tamaño: {selectedDocument.size / 1024} KB</Text>
-            <Button title="Subir documento" onPress={uploadToBackend} />
-        </View>
-      )}
-    </View>
-  );
 };
 
 export default UploadFiles;
