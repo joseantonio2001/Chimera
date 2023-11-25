@@ -960,13 +960,25 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // POST endpoint for file upload
-app.post('/upload', upload.single('file'), (req, res) => {
-  console.log('Helloooooo');
-  console.log(req.file);
-  if (!req.file) {
-    return res.status(400).send('No file uploaded');
+app.post('/upload', upload.single('file'), async (req, res) => {
+  try{
+    const connection = await abrirConexion();
+    const { path } = req.file;
+    const query1 = 'INSERT INTO media (ruta) VALUES (?)';
+    await connection.promise().query(query1, [path], (err, result) => {
+    if (err) {
+      console.error('Error al insertar elemento: ' + err);
+      res.status(500).json({ error: 'Error al insertar elemento en la base de datos' });
+      return;
+    }
+    console.log('Elemento insertado con éxito en inventario');
+    res.status(201).json({ message: 'Elemento insertado con éxito' });
+    });
+    connection.end();
+  } catch (error){
+    console.error('Error al introducir elemento:', error);
+    res.status(500).json({ error: 'Error al introducir elemento' });
   }
-  res.send('File uploaded successfully');
 });
 
 app.listen(5050, () => { // Inicia el servidor en el puerto 5050
