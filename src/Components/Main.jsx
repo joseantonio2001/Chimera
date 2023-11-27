@@ -9,6 +9,7 @@ import EditarAlumno from './administracion/EditarAlumno.jsx';
 import EditarClase from './administracion/EditarClase.jsx';
 import EditarProfe from './administracion/EditarProfe.jsx';
 import ClaseProfesor from './ClaseProfesor.jsx';
+import AlumnoTareas from './AlumnoTareas.jsx';
 import Profesor from './Profesor.jsx';
 import Inicio from './Inicio.jsx';
 import {View} from 'react-native';
@@ -23,6 +24,7 @@ const Main = ()=>{
                 <Routes>
                     <Route path='/' exact element={<Inicio/>} />
                     <Route path='/estudiante' exact element={<Alumno/>} />
+                    <Route path='/tareasestudiante' exact element={<AlumnoTareas/>} />
                     <Route path='/profesor' exact element={<Profesor/>} />
                     <Route path='/claseprofesor' exact element={<ClaseProfesor/>} />
                     <Route path='/admin' exact element={<Admin/>} />

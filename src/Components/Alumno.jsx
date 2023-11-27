@@ -1,35 +1,61 @@
-import {Image, Pressable, StyleSheet, Text, View} from 'react-native'
+// Estudiantes.js
+import React, { useState, useEffect } from 'react';
+import { Text, TouchableOpacity, View, Button, StyleSheet, Image } from 'react-native';
 import { useNavigate } from 'react-router-native';
+import StyledText from './StyledText';
+import axios from 'axios';
 
-
-const Alumno = ()=>{
+const Estudiantes = () => {
+    const [estudiantes, setEstudiantes] = useState([]);
     const navigate = useNavigate();
-    
-        const handleButtonClick = (enlace) => {
-        
-        navigate(enlace);
+
+    const handleButtonClick = (enlace, id) => {
+        navigate(enlace, { state: { id: id } });
     };
 
-    return(
+    const getEstudiantes = () => {
+        axios.get(`http://localhost:5050/estudiantes`)
+            .then((response) => {
+                const resultado = response.data[0];
+                if (resultado && resultado.length > 0 && Array.isArray(resultado)) {
+                    setEstudiantes(resultado);
+                }
+            })
+            .catch((error) => {
+                console.error('Error en la solicitud GET de estudiantes:', error);
+            });
+    };
+
+    useEffect(() => {
+        getEstudiantes();
+    }, []);
+
+    return (
         <View>
-            <Image style={styles.image} source={require('../../data/img/LogoColegio.png')}/>
-            <Text>
-                WORKING ON IT... (ALUMNO)
-            </Text>
-            <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/')}>
-                        <Text style={styles.pressableText}>Volver a inicio</Text>
-            </Pressable>
+            <Image style={styles.image} source={require('../../data/img/LogoColegio.png')} />
+            <StyledText style={styles.text}>Seleccione un estudiante para ver información de este: </StyledText>
+            {estudiantes.map((estudiante) => (
+                <View style={styles.view} key={estudiante.id}>
+                    <TouchableOpacity onPress={() => handleButtonClick('/tareasestudiante', estudiante.id)}>
+                        <StyledText styles={styles.text}>ID {estudiante.id}: {estudiante.nombre} {estudiante.apellido1} {estudiante.apellido2}</StyledText>
+                    </TouchableOpacity>
+                </View>
+            ))}
+            <View style={styles.pressableButton}>
+                <Button title='Volver a Inicio' onPress={() => handleButtonClick('/')} />
+            </View>
         </View>
-        
-    )
-}
-const styles=StyleSheet.create({
-    image:{
+    );
+};
+
+const styles = StyleSheet.create({
+    image: {
         width: 600,
         height: 200,
         borderRadius: 4,
         alignSelf: 'center',
-        paddingVertical: 10
+        paddingVertical: 10,
+        marginBottom: 100
     },
     pressableButton: {
         width: 200,
@@ -37,31 +63,26 @@ const styles=StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
-        backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
+        backgroundColor: '#049CDC',  // Un verde fresco, puedes cambiarlo según tus preferencias
         borderRadius: 10,
         elevation: 3, // Sombra para un efecto de elevación
         marginBottom: 15,
-        marginTop: 15,
+        marginTop: 50,
         paddingHorizontal: 20,
         paddingVertical: 10,
     },
-    headerText: {
-        fontSize: 24,
-        fontWeight: 'bold',
+    text: {
+        flex: 1,
+        justifyContent: 'center', // Centra horizontalmente
         textAlign: 'center',
-        color: '#333',  // Un tono de gris oscuro, puedes ajustarlo según tus preferencias
+        fontSize: 20,
+        fontWeight: '700',
         marginTop: 20,
-        marginBottom: 10,
+        marginBottom: 20
     },
-    pressableText: {
-        color: 'white',
-        fontSize: 18,
-        fontWeight: 'bold', // Texto en negrita
-        textAlign: 'center',
-    },    
+    view: {
+        alignSelf: 'center'
+    }
 })
 
-
-
-
-export default Alumno
+export default Estudiantes;
