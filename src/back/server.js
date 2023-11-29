@@ -3,9 +3,12 @@ const dotenv = require('dotenv'); // Uso dotenv para mantener seguro datos vulne
 const cors = require('cors'); // Uso CORS para poder utilizar la API desde la app (Seguridad)
 const mysql = require('mysql2');
 const app = express();
+const fs = require('fs');
+
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static('./uploads'));
 
 dotenv.config({ path:'.env' }); // Revisar siempre si no va bien conexión a BD
 
@@ -282,7 +285,7 @@ app.get('/pasos/:id', async (req, res) => { // GET Pasos
   try {
     const connection = await abrirConexion();
     const id = req.params.id;
-    const queryPasos = 'SELECT * FROM pasos WHERE id = ?';
+    const queryPasos = 'SELECT * FROM pasos WHERE id_tarea = ?';
     const [resultado] = await connection.promise().query(queryPasos, [id]);
     connection.end(); // Libera recursos BD
     res.json([resultado]); // Resultado servido en HTTP formato JSON
@@ -957,6 +960,61 @@ app.delete('/tareas/borrarTarea/:id', async (req, res) => {
   }
   console.log('Tarea eliminada con éxito en la base de datos!');
   res.status(201).json({ message: ' Tarea eliminada con éxito' });
+});
+
+// Get de todas las imágenes una tarea
+
+app.post('/obtener_imagenes', async (req, res) => {
+  try {
+    const connection = await abrirConexion();
+    const { ids } = req.body;
+    const imagesNew = [];
+    for (const id of ids) {
+      const query = 'SELECT * FROM media WHERE id = ?';
+      const [resultado] = await connection.promise().query(query, [id]);
+      imagesNew.push({ id: resultado[0].id, url: resultado[0].ruta.replace('uploads/', '') });
+    }
+    console.log(imagesNew);
+
+    res.json(imagesNew);
+  } catch (error) {
+    console.error('Error al obtener pasos:', error);
+    res.status(500).json({ error: 'Error al obtener pasos' });
+  }
+});
+
+
+
+app.get('/uploads/:name', (req, res) => {
+  const name = req.params.name;
+  const filePath = 'uploads/'+name;
+  const extension = filePath.split('.')[1];
+  const contentType = 'image/'+extension;
+  // Comprueba exista el archivo
+  console.log(fs.existsSync(filePath));
+  if(fs.existsSync(filePath)){
+    fs.readFile(filePath,(err, content) => { // lee archivo asíncronamente
+      if(err){
+        res.writeHead(404, {
+          "Content-Type": "text/plain"
+      });
+      res.end("404 Not Found");
+      return;
+      }else{
+        res.writeHead(200, {
+          "Content-Type": contentType
+      });
+        console.log(content);
+        res.end(content);
+      }
+    });
+  }else{
+    res.writeHead(404, {
+      "Content-Type": "text/plain"
+  });
+  res.end("404 Not Found");
+  return;
+  }
 });
 
 app.listen(5050, () => { // Inicia el servidor en el puerto 5050
