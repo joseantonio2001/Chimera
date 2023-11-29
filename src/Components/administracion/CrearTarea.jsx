@@ -3,39 +3,71 @@ import StyledText from '../StyledText';
 import StyledMultiSelect from '../StyledMultiSelect';
 import StyledTextInput from '../StyledTextInput';
 import axios from 'axios';
-import { useNavigate } from 'react-router-native';
-import {useState} from 'react'
+import { useLocation, useNavigate } from 'react-router-native';
+import {useState, useEffect} from 'react'
 import TablaPaso from './tablas/TablaPaso';
 import { SceneMap,TabView } from 'react-native-tab-view';
-
 
 // SIMULADOR EN WEB Y ANDROID
 const useHost = () => {
     if (Platform.OS === 'android') {
-      return 'http://10.0.2.2:5050/estudiantes';
+      return 'http://10.0.2.2:5050/tareas';
     } else {
-      return 'http://localhost:5050/estudiantes';
+      return 'http://localhost:5050/tareas';
     }
 };
 
 const CrearTarea = ()=>{
-
-    const [nombre, setNombre] = useState('');
-    const [descripcion, setDescripcion] = useState('');
-    const [numPaso, setNumPaso] = useState(1);
-    const [portada, setPortada] = useState('');
-    const [selectedTipo, setSelectedTipo] = useState([]);
-    const [index, setIndex] = useState(0);
-    const [routes] = useState([
-      { key: 'first', title: 'Pasos de la tarea' },
-    ]);
 
     // NAVEGACIÓN
     const navigate = useNavigate();
         const handleButtonClick = (enlace) => {
         navigate(enlace);
     };
+    const { state } = useLocation();
+    const mensajeTarea = state ? state.mensajeTarea : '';
+    const hayTarea = state ? state.hayTarea : 0; // tarea q viene de CrearPasos
+    const nuevaTarea = state ? state.nuevaTarea : 0; // tarea q viene de TablaTarea
 
+    const [id, setId] = useState(-1);
+    const [nombre, setNombre] = useState('');
+    const [descripcion, setDescripcion] = useState('');
+    const [selectedTipo, setSelectedTipo] = useState([]);
+    const [datosGuardados, setDatosGuardados] = useState(false); // tarea medio guardada
+
+    const [numPaso, setNumPaso] = useState(1);
+    const [portada, setPortada] = useState('');
+    const [video, setVideo] = useState('');
+
+
+    const [index, setIndex] = useState(0);
+    const [routes] = useState([
+      { key: 'first', title: 'Pasos de la tarea' },
+    ]);
+
+    useEffect(() => {
+        getIdTarea();
+    }, [])
+
+    useEffect(() => {
+        getDatosTarea();
+    }, [])
+
+    useEffect(() => { // Se guarda bien el id, lo imprime por consola al conseguirlo en getIdTarea
+        console.log('Guardado el ID en la bd (creartarea):', id)
+    }, [id])
+
+    useEffect(() => {
+        console.log('Id de la tarea que me llega de crearpaso (crearTarea): ', hayTarea);
+    }, [hayTarea])
+
+    useEffect(() => {
+        console.log('Id de la tarea que me llega de tablatareas (crearTarea): ', nuevaTarea);
+    }, [nuevaTarea])
+
+    useEffect(() => {
+        console.log('actualizando selectedTIpo (crearTarea): ', selectedTipo);
+    }, [selectedTipo])
     // SELECTOR PARA TIPO DE TAREA
     const opciones = [
         { name: 'Normal', id: '0' }, 
@@ -54,90 +86,169 @@ const CrearTarea = ()=>{
     // TABLA PASOS
     const tabPasos = () => (
         <View>
-          <TablaPaso/>
+          <TablaPaso idTarea={id.toString()} paso={numPaso.toString()}/>
         </View>
     );
     
     const renderScene = SceneMap({
         first: tabPasos,
     });
-    
-     // CONEXIÓN BD PARA CREAR TAREA
-    const handleCreateTarea = () => {
-        // Realiza una solicitud POST al servidor backend para crear una tarea
+
+     // CONEXIÓN BD PARA GUARDAR TAREA
+     const handleGuardarTarea = () => {
+        if (!nombre || !selectedTipo[0] || !descripcion){
+            navigate('/confirmaciones', { state: { mensaje: 'Es necesario introducir el nombre, tipo y descripcion de la tarea', 
+            ruta : '/admin/creartarea', mensajeBoton : 'Volver a la tarea'} });
+            return;
+        }
+        // Realiza una solicitud POST al servidor backend para crear un alumno
         axios.post(`${useHost()}/crearTarea`, {
             nombre,
             descripcion,
-            selectedTipo
-            // portada
+            video,
+            portada,
+            tipo : parseInt(selectedTipo[0])
         })
         .then((response) => {
             // Maneja la respuesta exitosa
-            navigate('/confirmaciones', { state: { mensaje: '¡Tarea creada con éxito!' } });
+            getIdTarea();
+            setDatosGuardados(true);
         })
         .catch((error) => {
             // Maneja los errores
-            console.error("Error al crear tarea: ",error);
-            navigate('/confirmaciones', { state: { mensaje: 'Error en la creación de la tarea', error } });
+            navigate('/confirmaciones', { state: { mensaje: 'Error en la creación del aula', error } });
         });
     };
 
-    
-    return(
-        <View>
-            <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
-            
-            <StyledText style={styles.headerText}>CREAR NUEVA TAREA</StyledText>
-            
-            {/* Nombre */}
-            <StyledTextInput
-                style={styles.textInput}
-                label="Nombre"
-                value={nombre}
-                onChangeText={text => setNombre(text)}
-            />
+    const handleCreateTarea = () =>{
+        navigate('/admin');
+    }
 
-            {/* Tipo */}
-            <StyledMultiSelect
-                style={[styles.StyledMultiSelect, {width: 700}]}
-                items={opciones}
-                uniqueKey="id"
-                canAddItems={false}
-                hasSelectAll={false}                // deshabilita la opción "Seleccionar todo"
-                single={true}                       // habilita la selección única            
-                selectText="Tipo de tarea"
-                searchInputPlaceholderText="Buscar..."
-                onSelectedItemsChange={selectedItems => setSelectedTipo(selectedItems)}
-                selectedItems={selectedTipo}
-                hideSubmitButton
-            />
+    // ID de la tarea una vez guardada
+    const getIdTarea = () => {
+        console.log('getIdTarea')
+        axios.get(`${useHost()}/`)
+        .then((response) => {
+            const resultado = response.data[0];
+            if (resultado && resultado.length > 0 && Array.isArray(resultado)) {
+                resultado.forEach((tarea) => {
+                    if (tarea.nombre === nombre && tarea.descripcion === descripcion && tarea.tipo === parseInt(selectedTipo[0])){
+                        setId(tarea.id)
+                    }
+                });
+            }
+        })
+        .catch((error) => {
+            // Manejar los errores
+            console.error('Error en la solicitud GET:', error);
+        });
+    };
 
-            {/* Descripción */}
-            <StyledTextInput
-                style={styles.textInput}
-                label="Descripcion"
-                value={descripcion}
-                onChangeText={text => setDescripcion(text)}
-            />
+    // Datos de la tarea traidos por ID
+    const getDatosTarea = () => {
+        if (hayTarea !== 0){
+        console.log('getDatosTarea')
+        axios.get(`${useHost()}/${hayTarea}`)
+            .then((response) => {
+                console.log('Obtengo respuesta: tengo datos de la tarea');
+                const resultado = response.data[0];
+                if (resultado && resultado.length > 0 && Array.isArray(resultado)) {
+                    resultado.forEach((tarea) => {
+                        setNombre(tarea.nombre);
+                        setDescripcion(tarea.descripcion);
+                        const selector = [...selectedTipo, tarea.tipo]
+                        setSelectedTipo(selector);
+                    });
+                }
+                setDatosGuardados(true);
+                return true;
+            })
+            .catch((error) => {
+                // Manejar los errores
+                console.error('Error en la solicitud GET:', error);
+                return false;
+            });
 
-            <TabView
-                style={styles.tab} 
-                navigationState={{ index, routes }}
-                renderScene={renderScene}
-                onIndexChange={setIndex}
-                initialLayout={initialLayout}
-            />
-            
-            <Pressable style={styles.pressableButton} onPress={handleCreateTarea}>
-                <Text style={styles.pressableText}>Crear Tarea</Text>
-            </Pressable> 
+        }
+    };
 
-            <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/admin')}>
-                <Text style={styles.pressableText}>Volver atrás</Text>
-            </Pressable>  
+    const encontrarClavePorValor = (opciones, valorBuscado) => {
+        for (const opcion of opciones) {
+          if (parseInt(opcion.id) === valorBuscado) {
+            return opcion.name;
+          }
+        }
+        return null;
+    };
 
-        </View>
-        
+    /*
+    * LLEGA BIEN EL ID -> Solo falta llamar getDatosTarea de alguna manera
+    * NO ENTIENDO COMO PORQ NO VEULVE BN
+    * UNA VEZ QUE EL ID SE COJA BIEN REVISAR, PARA QUE SE HAGA COMO EN CREARPASO EN LUGAR
+    * DE COMO SE HACE EN CREARTAREA (EL PROBLEMA ES QUE EL ID DE getIdTarea lo guarda muy rapido)
+    */
+    return( 
+            <View>
+                <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
+                <View>       
+                        <StyledText style={styles.headerText}>NUEVA TAREA</StyledText>
+
+                        {/* Nombre */}
+                        <StyledTextInput
+                            style={styles.textInput}
+                            label="Nombre"
+                            value={nombre}
+                            onChangeText={text => setNombre(text)}
+                        />
+
+                        {/* Tipo */}
+                        <StyledMultiSelect
+                            style={[styles.StyledMultiSelect, {width: 700}]}
+                            items={opciones}
+                            uniqueKey="id" // CAMBIAR POR name PERO permitir en la bbdd que tipo de tarea sea str o 
+                                        // o bien cambiar en server el GET de tareas
+                            canAddItems={false}
+                            hasSelectAll={false}                // deshabilita la opción "Seleccionar todo"
+                            single={true}                       // habilita la selección única            
+                            selectText={selectedTipo.length > 0 ? encontrarClavePorValor(opciones, selectedTipo[0]) : "Tipo de tarea"}
+                            searchInputPlaceholderText="Buscar..."
+                            onSelectedItemsChange={selectedItems => setSelectedTipo(selectedItems)}
+                            selectedItems={selectedTipo}
+                            hideSubmitButton
+                        />
+                        <StyledTextInput
+                            style={styles.textInput}
+                            label="Descripcion"
+                            value={descripcion}
+                            onChangeText={text => setDescripcion(text)}
+                        />
+
+                        { !datosGuardados && (
+                            <Pressable style={[styles.pressableButton, { width: 400 }]} onPress={handleGuardarTarea}>
+                                <Text style={styles.pressableText}>Guardar cambios para añadir pasos</Text>
+                            </Pressable> 
+                        )}
+                        
+                        { datosGuardados && (
+                            <Pressable style={[styles.pressableButton, { width: 400 }]} onPress={handleGuardarTarea}>
+                                <Text style={styles.pressableText}>Actualizar cambios</Text>
+                            </Pressable> 
+                        )}
+                        { datosGuardados && (
+                            <TabView
+                                style={styles.tab} 
+                                navigationState={{ index, routes }}
+                                renderScene={renderScene}
+                                onIndexChange={setIndex}
+                                initialLayout={initialLayout}
+                            />
+                        )}
+                        
+                        <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/admin')}>
+                            <Text style={styles.pressableText}>Volver al inicio</Text>
+                        </Pressable>   
+                    </View>
+            </View>
     )
 }
 
@@ -205,8 +316,8 @@ const styles=StyleSheet.create({
         backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
         borderRadius: 10,
         elevation: 3, // Sombra para un efecto de elevación
-        marginBottom: 15,
-        // marginTop: 10,
+        marginBottom: 0,
+        marginTop: 20,
         paddingHorizontal: 20,
         paddingVertical: 10,
     },

@@ -1,10 +1,11 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import {Text, TextInput, View, Button, StyleSheet, Image} from 'react-native'
 import { useLocation, useNavigate } from 'react-router-native';
 // import ImagePicker from 'react-native-image-picker';
 import StyledText from '../StyledText';
 import axios from 'axios';
 import StyledTextInput from '../StyledTextInput';
+
 
 
 const CrearPaso = ()=>{
@@ -17,8 +18,9 @@ const CrearPaso = ()=>{
 
     // Traer de CrearTarea el id de la tarea y el numero de paso correspondiente
     const { state } = useLocation();
-    const idTarea = state ? state.id : '';
+    const idTarea = state ? state.idT : '';
     const nPaso = state ? state.numPaso : '';
+    const mensaje = "Actualizar cambios"
 
     // Input imagen y descripción
     const [imagen, setImagen] = useState('');
@@ -26,8 +28,9 @@ const CrearPaso = ()=>{
 
     
     const handleCreatePaso = () => {
+        navigate('/admin/creartarea', { state: { hayTarea: idTarea , mensajeTarea : mensaje} });
         // Realiza una solicitud POST al servidor backend para crear un alumno
-        axios.post('http://localhost:5050/pasos/crearPaso', {
+        /* axios.post('http://localhost:5050/pasos/crearPaso', {
             imagen,
             descripcion,
             idTarea,
@@ -41,8 +44,12 @@ const CrearPaso = ()=>{
             // Maneja los errores
             navigate('/confirmacioncreartarea', { state: { mensaje: 'Error en la creación del paso',error } });
         });
-        
+         */
     };
+
+    useEffect(() => {
+        console.log('Id de la tarea que me llega y que mando como "hayTarea" (crearPaso): ', idTarea);
+    }, [idTarea])
 
     return(
         <View>

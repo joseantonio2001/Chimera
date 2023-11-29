@@ -1,8 +1,9 @@
 import { Platform, StyleSheet, View } from 'react-native';
 import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-native';
 import { DataTable, FAB } from 'react-native-paper';
 import axios from 'axios';
-import { useNavigate } from 'react-router-native';
+import PropTypes from 'prop-types';
 
 const Cabecera = () => {
         return(
@@ -17,19 +18,22 @@ const Cabecera = () => {
 
 const useHost = () => {
   if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:5050/tareas';
+    return 'http://10.0.2.2:5050/pasos';
   } else {
-    return 'http://localhost:5050/tareas';
+    return 'http://localhost:5050/pasos';
   }
 };
 
-const TablaPaso = () => {
+const TablaPaso = (props) => {
   const [filas, setFilas] = useState([]);
   const host = useHost();
   const navigate = useNavigate();
+  const {idTarea, paso} = props;
+
+  const [numPaso, setNumPaso] = useState(0);
 
   const handleAdd = () => {
-    navigate('/admin/crearpaso'); // PASAR PARAMETROS ID_TAREA Y NUMERO DE PASO
+    navigate('/admin/crearpaso', {state : {idT : idTarea, numPaso : paso }}); // PASAR PARAMETROS ID_TAREA Y NUMERO DE PASO
   }
 
   useEffect(() => {
@@ -68,6 +72,11 @@ const TablaPaso = () => {
       />
     </View>
     );
+};
+
+TablaPaso.propTypes = {
+  idTarea: PropTypes.string.isRequired,
+  paso: PropTypes.string.isRequired
 };
 
 const styles = StyleSheet.create({

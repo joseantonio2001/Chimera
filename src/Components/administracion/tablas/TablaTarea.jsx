@@ -27,9 +27,10 @@ const TablaTarea = () => {
   const [filas, setFilas] = useState([]);
   const host = useHost();
   const navigate = useNavigate();
+  // const tarea = -1;
 
   const handleAdd = () => {
-    navigate('/admin/creartarea');
+    navigate('/admin/creartarea'); // , { state: { nuevaTarea: tarea } }
   }
 
   useEffect(() => {
