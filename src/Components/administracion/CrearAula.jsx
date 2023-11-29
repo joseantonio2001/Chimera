@@ -67,7 +67,6 @@ const CrearAula = () => {
     const handleCreateAula = () => {
         // Realiza una solicitud POST al servidor backend para crear un alumno
         axios.post(`${useHost('clases')}/crearAula`, {
-            id,
             capacidad,
             id_profesor: selectedProfesor,
             estudiantes: selectedEstudiantes
@@ -86,14 +85,7 @@ const CrearAula = () => {
     return (
         <View>
             <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')} />
-            <StyledText style={styles.titleText}>Crear un Nuevo Alumno</StyledText>
-
-            <StyledText style={styles.text}>Identificador del Aula:</StyledText>
-            <StyledTextInput
-                label="ID"
-                value={id}
-                onChangeText={text => setId(text)}
-            />
+            <StyledText style={styles.titleText}>Crear una nueva aula</StyledText>
 
             <StyledText style={styles.text}>Capacidad del Aula:</StyledText>
             <StyledTextInput
@@ -156,11 +148,21 @@ const styles=StyleSheet.create({
         alignSelf: 'center',
         paddingVertical: 10
     },
+    
     text:{
         flex: 1,
         justifyContent: 'center', // Centra horizontalmente
         textAlign: 'center', 
         fontSize: 15,
+        marginTop: 10,
+        marginBottom: 10,
+        fontWeight: 'bold'
+    },
+    titleText:{
+        flex: 1,
+        justifyContent: 'center', // Centra horizontalmente
+        textAlign: 'center', 
+        fontSize: 20,
         marginTop: 10,
         marginBottom: 10,
         fontWeight: 'bold'
@@ -182,7 +184,7 @@ const styles=StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
-        backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
+        backgroundColor: '#049CDC',  // Un verde fresco, puedes cambiarlo según tus preferencias
         borderRadius: 10,
         elevation: 3, // Sombra para un efecto de elevación
         marginBottom: 15,

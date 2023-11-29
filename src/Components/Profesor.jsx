@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'; // Añade 'useEffect'
-import {Text, TouchableOpacity,View, Button, StyleSheet, Image} from 'react-native'
+import {Text, TouchableOpacity,View, Button, StyleSheet, Image, Platform, Pressable} from 'react-native'
 import { useNavigate } from 'react-router-native';
 import StyledText from './StyledText';
 import axios from 'axios';
@@ -14,8 +14,16 @@ const Profesor = ()=>{
         navigate(enlace, { state: { id:id }});
     };
 
+    const useHost = () => {
+        if (Platform.OS === 'android') {
+        return 'http://10.0.2.2:5050/profesores';
+        } else {
+        return 'http://localhost:5050/profesores';
+        }
+    };
+
     const getProfes = () => {
-        axios.get(`http://localhost:5050/profesores`)
+        axios.get(useHost())
         .then((response) => {
             const resultado = response.data[0];
             if (resultado && resultado.length > 0 && Array.isArray(resultado)) {
@@ -31,24 +39,26 @@ const Profesor = ()=>{
 
     useEffect(() => {
         getProfes();
-      }, [])
+    }, [])
 
     return(
         <View>
             <Image style={styles.image} source={require('../../data/img/LogoColegio.png')}/>
-            <StyledText style={styles.text}>Seleccione un profesor para ver más información de su clase: </StyledText>
+            <View>
+                <Text style={styles.text}>Seleccione un profesor para ver más información de su clase: </Text>
+            </View>
             {profesores.map((profesor) => (
                     <View style={styles.view}>
                         <TouchableOpacity onPress={() => handleButtonClick('/claseprofesor', profesor.id)}>
-                            <StyledText styles={styles.text} key={profesor.id}>ID {profesor.id}: {profesor.nombre} {profesor.apellido1} {profesor.apellido2}</StyledText>
+                            <Text styles={styles.text} key={profesor.id}>ID {profesor.id}: {profesor.nombre} {profesor.apellido1} {profesor.apellido2}</Text>
                         </TouchableOpacity>
                     </View>
             ))}
 
             
-            <View style={styles.pressableButton}>
-                <Button title='Volver a Inicio' onPress={() => handleButtonClick('/')}/>
-            </View>
+            <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/')}>
+                <Text style={styles.pressableText}>Volver a inicio</Text>
+            </Pressable>
         </View>
         
     )
@@ -72,18 +82,24 @@ const styles=StyleSheet.create({
         borderRadius: 10,
         elevation: 3, // Sombra para un efecto de elevación
         marginBottom: 15,
-        marginTop: 50,
+        marginTop: 15,
         paddingHorizontal: 20,
         paddingVertical: 10,
     },
     text: {
-        flex: 1,
         justifyContent: 'center', // Centra horizontalmente
         textAlign: 'center', 
         fontSize: 20,
         fontWeight: '700',
         marginTop: 20,
-        marginBottom: 20
+        marginBottom: 20,
+        color: 'black'
+    },
+    pressableText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold', // Texto en negrita
+        textAlign: 'center',
     },
     view:{
         alignSelf: 'center'

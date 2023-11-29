@@ -5,6 +5,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import StyledText from '../StyledText';
 import StyledTextInput from '../StyledTextInput';
 import axios from 'axios';
+import dayjs from 'dayjs';
 
 const useHost = () => {
     if (Platform.OS === 'android') {
@@ -32,6 +33,7 @@ const EditarAlumno = ()=>{
     const [date, setDate] = useState(new Date());
     const [bdDate, setbdDate] = useState(''); 
     const [showDate, setShowDate] = useState(false);
+
 
     const changeDate = (event, selectedDate) => {
         setShowDate(false);
@@ -94,7 +96,6 @@ const EditarAlumno = ()=>{
         <View>
             <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
             <StyledText style={styles.titleText}>Editar Alumno ID: {id}</StyledText>
-            <StyledText>FechaBD {bdDate}</StyledText>
             <StyledText style={styles.text}>Nombre y apellidos:</StyledText>
             <StyledTextInput
                 label="Nombre"
@@ -112,7 +113,7 @@ const EditarAlumno = ()=>{
                 onChangeText={text => setApellido2(text)}
             />
 
-            <StyledText style={styles.text}>La fecha actual de nacimiento es {date.toString()}. Si desea cambiarla introduzca una nueva:</StyledText>
+            <StyledText style={styles.text}>La fecha actual de nacimiento es {dayjs(date).format('DD/MM/YYYY')}. Si desea cambiarla introduzca una nueva:</StyledText>
             <StyledText style={styles.text}>Fecha de nacimiento: [AAAA/MM/DD]</StyledText>
             <View>
                 <Pressable style={styles.pressableButton} onPress={showDatePicker}>
@@ -172,6 +173,15 @@ const styles=StyleSheet.create({
         marginBottom: 10,
         fontWeight: 'bold'
     },
+    titleText:{
+        flex: 1,
+        justifyContent: 'center', // Centra horizontalmente
+        textAlign: 'center', 
+        fontSize: 20,
+        marginTop: 10,
+        marginBottom: 10,
+        fontWeight: 'bold'
+    },
     mensajeError: {
         fontSize: 16,
         color: 'red', // Puedes cambiar el color a tu preferencia
@@ -189,7 +199,7 @@ const styles=StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
-        backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
+        backgroundColor: '#049CDC',  // Un verde fresco, puedes cambiarlo según tus preferencias
         borderRadius: 10,
         elevation: 3, // Sombra para un efecto de elevación
         marginBottom: 15,

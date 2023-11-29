@@ -6,6 +6,7 @@ import StyledText from '../StyledText';
 import StyledTextInput from '../StyledTextInput';
 import { Switch } from 'react-native-paper';
 import axios from 'axios';
+import dayjs from 'dayjs';
 
 const useHost = () => {
     if (Platform.OS === 'android') {
@@ -58,6 +59,7 @@ const EditarProfe = ()=>{
                         setApellido2(profe.apellido2);
                         setAdmin(profe.admin);
                         if(admin) toggleAdmin();
+                        setDate(new Date(profe.fecha_nac));
                         setbdDate(profe.fecha_nac.split('T')[0]);
                         
                     });
@@ -81,11 +83,11 @@ const EditarProfe = ()=>{
         })
         .then((response) => {
             // Maneja la respuesta exitosa
-            navigate('/confirmaciones', { state: { mensaje: '¡Profesor creado con éxito!' } });
+            navigate('/confirmaciones', { state: { mensaje: '¡Profesor editado con éxito!' } });
         })
         .catch((error) => {
             // Maneja los errores
-            navigate('/confirmaciones', { state: { mensaje: 'Error en la creación del profesor',error } });
+            navigate('/confirmaciones', { state: { mensaje: 'Error en la edición del profesor',error } });
         });
         
     };
@@ -97,7 +99,7 @@ const EditarProfe = ()=>{
     return(
         <View>
             <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
-            <StyledText style={styles.titleText}>Editar Prfesor ID: {id}</StyledText>
+            <StyledText style={styles.titleText}>Editar Profesor ID: {id}</StyledText>
             
             <StyledText style={styles.text}>Nombre y apellidos:</StyledText>
             <StyledTextInput
@@ -115,7 +117,7 @@ const EditarProfe = ()=>{
                 value={apellido2}
                 onChangeText={text => setApellido2(text)}
             />
-            <StyledText style={styles.text}>La fecha actual de nacimiento es {date.toString()}. Si desea cambiarla introduzca una nueva:</StyledText>
+            <StyledText style={styles.text}>La fecha actual de nacimiento es {dayjs(date).format('DD/MM/YYYY')}. Si desea cambiarla introduzca una nueva:</StyledText>
             <StyledText style={styles.text}>Fecha de nacimiento: [AAAA/MM/DD]</StyledText>
             <View>
                 <Pressable style={styles.pressableButton} onPress={showDatePicker}>
@@ -174,6 +176,15 @@ const styles=StyleSheet.create({
         marginBottom: 10,
         fontWeight: 'bold'
     },
+    titleText:{
+        flex: 1,
+        justifyContent: 'center', // Centra horizontalmente
+        textAlign: 'center', 
+        fontSize: 20,
+        marginTop: 10,
+        marginBottom: 10,
+        fontWeight: 'bold'
+    },
     mensajeError: {
         fontSize: 16,
         color: 'red', // Puedes cambiar el color a tu preferencia
@@ -191,7 +202,7 @@ const styles=StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
-        backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
+        backgroundColor: '#049CDC',  // Un verde fresco, puedes cambiarlo según tus preferencias
         borderRadius: 10,
         elevation: 3, // Sombra para un efecto de elevación
         marginBottom: 15,
@@ -212,7 +223,10 @@ const styles=StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold', // Texto en negrita
         textAlign: 'center',
-    },  
+    },
+    switch:{
+        alignSelf: 'center'
+    }
 })
 
 
