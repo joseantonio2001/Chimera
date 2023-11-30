@@ -147,10 +147,8 @@ const CrearTarea = ()=>{
     // Datos de la tarea traidos por ID
     const getDatosTarea = () => {
         if (hayTarea !== 0){
-        console.log('getDatosTarea')
         axios.get(`${useHost()}/${hayTarea}`)
             .then((response) => {
-                console.log('Obtengo respuesta: tengo datos de la tarea');
                 const resultado = response.data[0];
                 if (resultado && resultado.length > 0 && Array.isArray(resultado)) {
                     resultado.forEach((tarea) => {
@@ -181,12 +179,6 @@ const CrearTarea = ()=>{
         return null;
     };
 
-    /*
-    * LLEGA BIEN EL ID -> Solo falta llamar getDatosTarea de alguna manera
-    * NO ENTIENDO COMO PORQ NO VEULVE BN
-    * UNA VEZ QUE EL ID SE COJA BIEN REVISAR, PARA QUE SE HAGA COMO EN CREARPASO EN LUGAR
-    * DE COMO SE HACE EN CREARTAREA (EL PROBLEMA ES QUE EL ID DE getIdTarea lo guarda muy rapido)
-    */
     return( 
             <View>
                 <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>

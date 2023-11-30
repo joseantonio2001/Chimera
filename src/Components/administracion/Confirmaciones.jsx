@@ -1,33 +1,53 @@
 import {Image, Pressable, StyleSheet,Text, View } from 'react-native'
 import {  useLocation, useNavigate } from 'react-router-native';
 import StyledText from '../StyledText';
+import { useEffect, useState } from 'react';
 
 
-function confirmAccion (props){
+function confirmAccion (){
     const navigate = useNavigate();
-    
         const handleButtonClick = (enlace) => {
-        
         navigate(enlace);
     };
+    const[datosGuardados, setDatosGuardados] = useState(false);
     const { state } = useLocation();
     const mensaje = state ? state.mensaje : '';
     const ruta = state ? state.ruta : '';
     const mensajeBoton = state ? state.mensajeBoton : '';
 
+    const hayDatos = () => {
+        console.log('Mensaje: ', mensaje, '\nRuta', ruta,'\nMensaje para el boton: ', mensajeBoton);
+        return (ruta && mensajeBoton && ruta.length>0 && mensajeBoton.length>0);
+    }
+    useEffect(() => {
+        if (hayDatos()){
+            console.log(datosGuardados);
+            setDatosGuardados(true);
+        }
+    }, [state, mensaje, ruta, mensajeBoton])
+
     return(
         <View>
-            <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
-            <StyledText style={styles.headerText}>{mensaje}</StyledText>
-            {ruta === '' ? 
-            (<Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/admin')}>
-                <Text style={styles.pressableText}>Volver al menú</Text>
-            </Pressable>) :
-            (<Pressable style={styles.pressableButton} onPress={() => handleButtonClick(ruta)}>
-                <Text style={styles.pressableText}>{mensajeBoton}</Text>
-            </Pressable>)}
+            { datosGuardados && (
+                <View>
+                    <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
+                    <StyledText style={styles.headerText}>{mensaje}</StyledText>
+                    <Pressable style={styles.pressableButton} onPress={() => handleButtonClick(ruta)}>
+                        <Text style={styles.pressableText}>{mensajeBoton}</Text>
+                    </Pressable>
+                </View>
+            )}
+
+            { !datosGuardados && (
+                <View>
+                    <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
+                    <StyledText style={styles.headerText}>{mensaje}</StyledText>
+                    <Pressable style={styles.pressableButton} onPress={() => handleButtonClick(ruta)}>
+                        <Text style={styles.pressableText}>{mensajeBoton}</Text>
+                    </Pressable>
+                </View>
+            )}
         </View>
-        
     )
 }
 

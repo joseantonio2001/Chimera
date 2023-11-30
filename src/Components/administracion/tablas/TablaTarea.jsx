@@ -1,6 +1,6 @@
 import { Platform, StyleSheet, View } from 'react-native';
 import { useEffect, useState } from 'react';
-import { DataTable, FAB } from 'react-native-paper';
+import { DataTable, FAB , IconButton} from 'react-native-paper';
 import axios from 'axios';
 import { useNavigate } from 'react-router-native';
 
@@ -11,6 +11,7 @@ const Cabecera = () => {
           <DataTable.Title>Tipo</DataTable.Title>
           <DataTable.Title>Nombre</DataTable.Title>
           <DataTable.Title>Descripción</DataTable.Title>
+          <DataTable.Title>Acciones</DataTable.Title>
         </DataTable.Header>
         );
 };
@@ -32,6 +33,15 @@ const TablaTarea = () => {
   const handleAdd = () => {
     navigate('/admin/creartarea'); // , { state: { nuevaTarea: tarea } }
   }
+
+  const handleDelete = (id) => { // Función borrar
+    axios.delete(`${useHost()}/borrarTarea/${id}`)
+    .then((response) => {
+      navigate('/confirmaciones', { state: { mensaje: 'Tarea eliminada con éxito!', ruta : '/admin', mensajeBoton : 'Volver al menú'} });
+      })
+      .catch((error) => console.error('Error al eliminar:', error));
+  };
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,7 +69,8 @@ const TablaTarea = () => {
             <DataTable.Cell>{item.tipo}</DataTable.Cell>
             <DataTable.Cell>{item.nombre}</DataTable.Cell>
             <DataTable.Cell>{item.descripcion}</DataTable.Cell>
-            </DataTable.Row>
+            <IconButton icon="delete" onPress={() => handleDelete(item.id)} />
+          </DataTable.Row>
         ))}
 
         
