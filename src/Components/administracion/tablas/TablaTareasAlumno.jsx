@@ -35,13 +35,12 @@ const TablaTareasAlumno = ({ idClase, idProfesor }) => {
     try {
       const response = await axios.get(`${useHost()}/tareas/alumnoId/${idAlumno}`);
       const tareas = response.data; // No asumas que es un array
-
+      console.log(response.data);
       if (tareas && tareas.length > 0) {
-        console.log('Hay tareas', tareas);
+        console.log("Hay tareas.");
         // El alumno tiene tareas asignadas, devolver la lista de nombres unidos por comas
         return tareas.map((tarea) => tarea.nombre).join(', ');
       } else {
-        console.log('No hay tareas');
         // El alumno no tiene tareas asignadas
         return 'NINGUNA';
       }
@@ -51,13 +50,13 @@ const TablaTareasAlumno = ({ idClase, idProfesor }) => {
       throw error;
     }
   }
-
+  
 
 	const handleEdit = (idAlumno, nombreAlumno, apellido1Alumno, apellido2Alumno, idClase, idProfesor) => {
 		navigate('/admin/editartareasalumno', { state: { idAlumno, nombreAlumno, apellido1Alumno, apellido2Alumno, idClase, idProfesor}})
 	};
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page) => {  
     setPagina(page);
   };
 
@@ -65,7 +64,7 @@ const TablaTareasAlumno = ({ idClase, idProfesor }) => {
     try {
       const response = await axios.get(`${useHost()}/estudiantes/clases/${idClase}`);
       const resultado = response.data[0];
-
+      
       const alumnosConTareas = await Promise.all(
         resultado.map(async (alumno) => {
           const tareas = await getTareasAlumno(alumno.id);
@@ -76,8 +75,6 @@ const TablaTareasAlumno = ({ idClase, idProfesor }) => {
         })
       );
 
-      console.log('Alumnos con tareas:', alumnosConTareas);
-
       // Aplicar la paginación
       const inicio = (pagina - 1) * itemsPorPagina;
       const fin = inicio + itemsPorPagina;
@@ -87,13 +84,13 @@ const TablaTareasAlumno = ({ idClase, idProfesor }) => {
       console.error('Error en la solicitud GET:', error);
     }
   };
-
+  
   useEffect(() => {
     getAlumnos(idClase);
   }, [host, pagina, idClase]); // dependencia para que useEffect se ejecute cuando cambie
 
   return (
-
+    
     <View style={styles.table}>
       {/* Encabezado de la tabla */}
       <Cabecera />
@@ -148,7 +145,7 @@ const styles = StyleSheet.create({
   },
   accionesColumnTitle: {
     flex: 0.5,
-    flexDirection: 'row',
+    flexDirection: 'row',   
     justifyContent: 'flex-start', // Alineación a la izquierda
     paddingHorizontal: 0.5, // Espaciado horizontal entre los elementos (ajustado a 8)
     alignItems: 'center', // Alineación vertical

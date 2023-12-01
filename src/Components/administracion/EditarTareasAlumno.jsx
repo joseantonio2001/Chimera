@@ -36,7 +36,7 @@ const EditarTareasAlumno = ()=>{
 
 
     const getTareasAlumno = async (idAlumno) => {
-          axios.get(`${useHost()}/tareas/alumno/${idAlumno}`)
+          axios.get(`${useHost()}/tareas/alumnoId/${idAlumno}`)
           .then((response) =>{
             setTareasAlumno(response.data); // No asumas que es un array          
             }) 
