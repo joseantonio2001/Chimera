@@ -8,6 +8,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static('./uploads'));
 
 dotenv.config({ path:'.env' }); // Revisar siempre si no va bien conexión a BD
 
@@ -266,7 +267,7 @@ app.get('/uploads/:name', (req, res) => {
       });
         res.end(content);
       }
-      
+
     });
   }else{
     res.writeHead(404, {
@@ -382,7 +383,7 @@ app.get('/pasos/:id', async (req, res) => { // GET Pasos
   try {
     const connection = await abrirConexion();
     const id = req.params.id;
-    const queryPasos = 'SELECT * FROM pasos WHERE id = ?';
+    const queryPasos = 'SELECT * FROM pasos WHERE id_tarea = ?';
     const [resultado] = await connection.promise().query(queryPasos, [id]);
     connection.end(); // Libera recursos BD
     res.json([resultado]); // Resultado servido en HTTP formato JSON
@@ -1059,42 +1060,60 @@ app.delete('/tareas/borrarTarea/:id', async (req, res) => {
   res.status(201).json({ message: ' Tarea eliminada con éxito' });
 });
 
-// Subir archivos
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Files will be stored in the 'uploads' directory
-  },
-  filename: function (req, file, cb) {
-    console.log(file.originalname);
-    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-  },
-});
+// Get de todas las imágenes una tarea
 
-// Initialize upload middleware
-const upload = multer({ storage });
-
-// POST endpoint for file upload
-app.post('/upload', upload.single('file'), async (req, res) => {
-  try{
+app.post('/obtener_imagenes', async (req, res) => {
+  try {
     const connection = await abrirConexion();
-    const { path } = req.file;
-    const query1 = 'INSERT INTO media (ruta) VALUES (?)';
-    await connection.promise().query(query1, [path], (err, result) => {
-    if (err) {
-      console.error('Error al insertar elemento: ' + err);
-      res.status(500).json({ error: 'Error al insertar elemento en la base de datos' });
-      return;
+    const { ids } = req.body;
+    const imagesNew = [];
+    for (const id of ids) {
+      const query = 'SELECT * FROM media WHERE id = ?';
+      const [resultado] = await connection.promise().query(query, [id]);
+      imagesNew.push({ id: resultado[0].id, url: resultado[0].ruta.replace('uploads/', '') });
     }
-    console.log('Elemento insertado con éxito en inventario');
-    res.status(201).json({ message: 'Elemento insertado con éxito' });
-    });
-    connection.end();
-  } catch (error){
-    console.error('Error al introducir elemento:', error);
-    res.status(500).json({ error: 'Error al introducir elemento' });
+    console.log(imagesNew);
+
+    res.json(imagesNew);
+  } catch (error) {
+    console.error('Error al obtener pasos:', error);
+    res.status(500).json({ error: 'Error al obtener pasos' });
   }
 });
 
+
+
+app.get('/uploads/:name', (req, res) => {
+  const name = req.params.name;
+  const filePath = 'uploads/'+name;
+  const extension = filePath.split('.')[1];
+  const contentType = 'image/'+extension;
+  // Comprueba exista el archivo
+  console.log(fs.existsSync(filePath));
+  if(fs.existsSync(filePath)){
+    fs.readFile(filePath,(err, content) => { // lee archivo asíncronamente
+      if(err){
+        res.writeHead(404, {
+          "Content-Type": "text/plain"
+      });
+      res.end("404 Not Found");
+      return;
+      }else{
+        res.writeHead(200, {
+          "Content-Type": contentType
+      });
+        console.log(content);
+        res.end(content);
+      }
+    });
+  }else{
+    res.writeHead(404, {
+      "Content-Type": "text/plain"
+  });
+  res.end("404 Not Found");
+  return;
+  }
+});
 
 app.listen(5050, () => { // Inicia el servidor en el puerto 5050
   console.log('Servidor en ejecución en el puerto 5050');

@@ -13,6 +13,8 @@ import Profesor from './Profesor.jsx';
 import Inicio from './Inicio.jsx';
 import TareasHoy from './TareasHoy.jsx';
 import {View} from 'react-native';
+import TareaFinalizada from "./tareasAlumno/TareaFinalizada";
+import MostrarPasos from "./tareasAlumno/MostrarPasos";
 
 
 
@@ -36,6 +38,8 @@ const Main = ()=>{
                     <Route path='confirmacioncrearusuario' exact element={<Confirmaciones/>}/>
                     <Route path='/admin/crearaula' exact element={<CrearAula/>} />
                     <Route path='confirmacioncrearaula' exact element={<Confirmaciones/>}/>
+                    <Route path='/tareafinalizada' exact element={<TareaFinalizada/>}/>
+                    <Route path='/mostrarpasos/:id' element={<MostrarPasos/>} />
 
                 </Routes>
             </View>
