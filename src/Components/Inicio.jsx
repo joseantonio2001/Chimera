@@ -6,7 +6,7 @@ import {useNavigate} from 'react-router-native'
 const Inicio = ()=>{
     const navigate = useNavigate();
     const handleButtonClick = (enlace) => {
-        navigate(enlace);
+        navigate(enlace, { state: { id: 2 }})
     };
 
     return(

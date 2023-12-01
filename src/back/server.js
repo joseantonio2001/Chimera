@@ -2,6 +2,8 @@ const express = require('express');
 const dotenv = require('dotenv'); // Uso dotenv para mantener seguro datos vulnerables
 const cors = require('cors'); // Uso CORS para poder utilizar la API desde la app (Seguridad)
 const mysql = require('mysql2');
+const fs = require('fs');
+const multer = require('multer');
 const app = express();
 
 app.use(cors());
@@ -176,6 +178,104 @@ app.get('/tareas/:id', async (req, res) => { // GET Tareas
   }
 });
 
+// Get de todas las tareas de un tipo para un estudiante
+app.get('/tareas/alumno/:id/:tipo', async (req, res) => { // GET Tareas por tipo y alumno
+  try {
+    const connection = await abrirConexion();
+    const idAlumno = req.params.id;
+    const tipoTarea = req.params.tipo;
+
+    // Realizar la consulta SQL
+    const query = `
+      SELECT t.*
+      FROM tareas t
+      INNER JOIN asignaciones_tareas at ON t.id = at.id_tarea
+      WHERE at.id_alumno = ? AND t.tipo = ?;
+    `;
+
+    const [resultado] = await connection.promise().query(query, [idAlumno, tipoTarea]);
+
+    // Cerrar conexión a la base de datos
+    connection.end();
+
+    // Devolver el resultado en formato JSON
+    res.json(resultado);
+  } catch (error) {
+    console.error('Error al obtener tareas por tipo y alumno:', error);
+    res.status(500).json({ error: 'Error al obtener tareas por tipo y alumno' });
+  }
+});
+
+
+// Get de todas las tareas según el id de un estudiante
+app.get('/tareas/alumno/:id', async (req, res) => { // GET Tareas
+  try {
+    const connection = await abrirConexion();
+    const id = req.params.id;
+    const query = `
+      SELECT t.*
+      FROM tareas t
+      INNER JOIN asignaciones_tareas at ON t.id = at.id_tarea
+      WHERE at.id_alumno = ?`;
+    const [resultado] = await connection.promise().query(query, [id]);
+    connection.end(); // Libera recursos BD
+    res.json([resultado]); // Resultado servido en HTTP formato JSON
+  } catch (error) {
+    console.error('Error al obtener tareas:', error);
+    res.status(500).json({ error: 'Error al obtener tareas' });
+  }
+});
+
+// Get datos de la imagen dado el id
+app.get('/uploads/id/:id', async (req, res) => { // GET Tareas
+  try {
+    const connection = await abrirConexion();
+    const id = req.params.id;
+    const query = `SELECT * FROM media WHERE id = ?`;
+    const [resultado] = await connection.promise().query(query, [id]);
+    connection.end(); // Libera recursos BD
+    res.json(resultado); // Resultado servido en HTTP formato JSON
+  } catch (error) {
+    console.error('Error al obtener los datos de la imagen:', error);
+    res.status(500).json({ error: 'Error al obtener los datos de la imagen' });
+  }
+});
+
+// Get imagen dada el nombre
+app.get('/uploads/:name', (req, res) => {
+  const name = req.params.name;
+  const filePath = 'uploads/'+name;
+  console.log("🚀 ~ file: server.js:321 ~ app.get ~ filePath:", filePath)
+  const extension = filePath.split('.')[1];
+  console.log("🚀 ~ file: server.js:323 ~ app.get ~ extension:", extension)
+  const contentType = 'image/'+extension;
+  // Comprueba exista el archivo
+  console.log(fs.existsSync(filePath));
+  if(fs.existsSync(filePath)){
+    fs.readFile(filePath,(err, content) => { // lee archivo asíncronamente
+      if(err){
+        console.log("🚀 ~ file: server.js:327 ~ fs.readFile ~ err:", err)
+        res.writeHead(404, {
+          "Content-Type": "text/plain"
+      });
+      res.end("404 Not Found");
+      return;
+      }else{
+        res.writeHead(200, {
+          "Content-Type": contentType
+      });
+        res.end(content);
+      }
+      
+    });
+  }else{
+    res.writeHead(404, {
+      "Content-Type": "text/plain"
+  });
+  res.end("404 Not Found");
+  return;
+  }
+});
 // Get de todas las clases
 app.get('/clases', async (req, res) => { // GET Clases
   try {
@@ -958,6 +1058,43 @@ app.delete('/tareas/borrarTarea/:id', async (req, res) => {
   console.log('Tarea eliminada con éxito en la base de datos!');
   res.status(201).json({ message: ' Tarea eliminada con éxito' });
 });
+
+// Subir archivos
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Files will be stored in the 'uploads' directory
+  },
+  filename: function (req, file, cb) {
+    console.log(file.originalname);
+    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+  },
+});
+
+// Initialize upload middleware
+const upload = multer({ storage });
+
+// POST endpoint for file upload
+app.post('/upload', upload.single('file'), async (req, res) => {
+  try{
+    const connection = await abrirConexion();
+    const { path } = req.file;
+    const query1 = 'INSERT INTO media (ruta) VALUES (?)';
+    await connection.promise().query(query1, [path], (err, result) => {
+    if (err) {
+      console.error('Error al insertar elemento: ' + err);
+      res.status(500).json({ error: 'Error al insertar elemento en la base de datos' });
+      return;
+    }
+    console.log('Elemento insertado con éxito en inventario');
+    res.status(201).json({ message: 'Elemento insertado con éxito' });
+    });
+    connection.end();
+  } catch (error){
+    console.error('Error al introducir elemento:', error);
+    res.status(500).json({ error: 'Error al introducir elemento' });
+  }
+});
+
 
 app.listen(5050, () => { // Inicia el servidor en el puerto 5050
   console.log('Servidor en ejecución en el puerto 5050');
