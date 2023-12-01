@@ -3,6 +3,7 @@ import { Platform, StyleSheet, View } from 'react-native';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-native';
+import dayjs from 'dayjs';
 
 const Cabecera = () => {
   return (
@@ -83,7 +84,7 @@ const TablaEstudiante = () => {
             <DataTable.Cell>{item.nombre}</DataTable.Cell>
             <DataTable.Cell>{item.apellido1}</DataTable.Cell>
             <DataTable.Cell>{item.apellido2}</DataTable.Cell>
-            <DataTable.Cell>{item.fecha_nac}</DataTable.Cell>
+            <DataTable.Cell>{dayjs(item.fecha_nac).format('DD/MM/YYYY')}</DataTable.Cell>
             <DataTable.Cell>{item.preferencias}</DataTable.Cell>
             {/* Botones de las filas */}
             <IconButton icon="pencil" onPress={() => handleEdit(item.id)} />

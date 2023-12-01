@@ -30,7 +30,7 @@ const TablaClase = () => {
   const navigate = useNavigate();
 
   const handleAdd = () => { // Función añadir
-    navigate('/admin/crearclase');
+    navigate('/admin/crearaula');
   };
 
   const handleDelete = (id) => { // Función borrar

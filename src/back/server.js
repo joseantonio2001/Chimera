@@ -277,6 +277,22 @@ app.get('/uploads/:name', (req, res) => {
   return;
   }
 });
+app.get('/tareas/alumno/:idAlumno', async (req, res) => {
+  try {
+    const connection = await abrirConexion();
+    const idAlumno = req.params.idAlumno;
+    const queryTareas = 'SELECT * FROM asignaciones_tareas JOIN tareas ON asignaciones_tareas.id_tarea = tareas.id WHERE asignaciones_tareas.id_alumno = ?';
+    const [resultado] = await connection.promise().query(queryTareas, [idAlumno]);
+    connection.end();
+
+    // Devuelve un array vacío si no hay resultados
+    res.json(resultado);
+  } catch (error) {
+    console.error('Error al obtener tareas del alumno:', error);
+    res.status(500).json({ error: 'Error al obtener tareas del alumno' });
+  }
+});
+
 // Get de todas las clases
 app.get('/clases', async (req, res) => { // GET Clases
   try {
@@ -677,7 +693,75 @@ app.post('/clases/quitaralumnos', async (req, res) => {
   console.log('Estudiante(s) quitado(s) con éxito');
   res.status(200).json({ message: 'Estudiantes quitados con éxito de la clase.' });
 });
-    
+
+app.post('/tareas/aniadeasignaciones', async (req, res) => {
+  try {
+    const { idAlumno, tareas } = req.body;
+    const connection = await abrirConexion();
+
+    try {
+      // Use Promise.all to wait for all queries to complete
+      await Promise.all(
+        tareas.map(async (tareaId) => {
+          const queryInsert =
+            'INSERT INTO asignaciones_tareas (id_alumno, id_tarea) VALUES (?, ?)';
+          await connection.promise().query(queryInsert, [idAlumno, tareaId]);
+        })
+      );
+
+      // All queries are successful, send a response
+      console.log('Tareas añadidas al estudiante con éxito');
+      res.status(201).json({ message: 'Tareas añadidas al estudiante con éxito.' });
+    } catch (error) {
+      console.error('Error al añadir tareas al alumno:', error);
+      res.status(500).json({ error: 'Error al añadir tareas al alumno.' });
+    } finally {
+      // Always close the connection in a finally block
+      connection.end();
+    }
+  } catch (error) {
+    console.error('Error al añadir las tareas:', error);
+    res.status(500).json({ error: 'Error al añadir las tareas.' });
+  }
+});
+
+
+
+app.post('/tareas/quitarasignaciones', async (req, res) => {
+  try {
+    const {idAlumno, tareas } = req.body;
+    const connection = await abrirConexion();
+
+    try {
+      // Iterar sobre los estudiantes seleccionados
+      for (const tareaId of tareas) {
+        // Eliminar la fila correspondiente a la asignación
+        const queryDelete = 'DELETE FROM asignaciones_tareas WHERE id_alumno = ? AND id_tarea = ?';
+        await connection.promise().query(queryDelete, [idAlumno, tareaId], (err, result) => {
+          if (err) {
+            console.error('Error al establecer conexión con la base de datos:' + err);
+            res.status(500).json({ error: 'Error al establecer conexión con la base de datos.' });
+          }
+        });
+      }
+
+    } catch (error) {
+      console.error('Error al quitar tareas a estudiante:', error);
+      res.status(500).json({ error: 'Error al quitar tareas a estudiante.' });
+    } finally {
+      connection.end();
+    }
+
+  } catch (error) {
+    console.error('Error al quitar tareas a estudiante:', error);
+    res.status(500).json({ error: 'Error al quitar tareas a estudiante.' });
+  }
+  console.log('Tarea(s) quitadas al Estudiante con éxito');
+  res.status(200).json({ message: 'Tarea(s) quitadas al Estudiante con éxito.' });
+});
+
+
+
 
 
 // Actualizaciones / PUT

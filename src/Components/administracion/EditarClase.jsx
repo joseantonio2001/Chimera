@@ -37,7 +37,7 @@ const EditarClase = () => {
     };
 
   const { state } = useLocation();
-  const claseId = state ? state.idClase : ''; 
+  const claseId = state ? state.id : ''; 
   const [clase, setClase] = useState(null);
   const [estudiantes, setEstudiantes] = useState([]);
   const [estudiantesClase, setEstudiantesClase] = useState([]);
@@ -160,7 +160,7 @@ const EditarClase = () => {
       uniqueKey="id"
       onSelectedItemsChange={selectedItems => setSelectedEstudiantes(selectedItems)}
       selectedItems={selectedEstudiantes}
-      selectText="Selecciona estudiantes"
+      selectText="Selecciona estudiantes a añadir"
       searchInputPlaceholderText="Buscar estudiantes..."
       hideSubmitButton
     />
@@ -199,6 +199,15 @@ const styles=StyleSheet.create({
       marginBottom: 10,
       fontWeight: 'bold'
   },
+  titleText:{
+    flex: 1,
+    justifyContent: 'center', // Centra horizontalmente
+    textAlign: 'center', 
+    fontSize: 20,
+    marginTop: 10,
+    marginBottom: 10,
+    fontWeight: 'bold'
+},
   mensajeError: {
       fontSize: 16,
       color: 'red', // Puedes cambiar el color a tu preferencia
@@ -211,19 +220,19 @@ const styles=StyleSheet.create({
       marginTop: 10,
   },
   pressableButton: {
-      width: 200,
-      height: 50,
-      justifyContent: 'center',
-      alignItems: 'center',
-      alignSelf: 'center',
-      backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
-      borderRadius: 10,
-      elevation: 3, // Sombra para un efecto de elevación
-      marginBottom: 15,
-      marginTop: 15,
-      paddingHorizontal: 20,
-      paddingVertical: 10,
-  },
+    width: 200,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    backgroundColor: '#049CDC',  // Un verde fresco, puedes cambiarlo según tus preferencias
+    borderRadius: 10,
+    elevation: 3, // Sombra para un efecto de elevación
+    marginBottom: 15,
+    marginTop: 15,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+},
   headerText: {
       fontSize: 24,
       fontWeight: 'bold',

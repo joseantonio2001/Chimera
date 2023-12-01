@@ -161,6 +161,15 @@ const styles=StyleSheet.create({
         marginBottom: 10,
         fontWeight: 'bold'
     },
+    titleText:{
+        flex: 1,
+        justifyContent: 'center', // Centra horizontalmente
+        textAlign: 'center', 
+        fontSize: 20,
+        marginTop: 10,
+        marginBottom: 10,
+        fontWeight: 'bold'
+    },
     mensajeError: {
         fontSize: 16,
         color: 'red', // Puedes cambiar el color a tu preferencia
@@ -178,7 +187,7 @@ const styles=StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
-        backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
+        backgroundColor: '#049CDC',  // Un verde fresco, puedes cambiarlo según tus preferencias
         borderRadius: 10,
         elevation: 3, // Sombra para un efecto de elevación
         marginBottom: 15,

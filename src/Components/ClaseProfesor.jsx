@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'; // Añade 'useEffect'
-import {Text, View, Button, StyleSheet, Image} from 'react-native'
+import {Text, View, Button, StyleSheet, Image, Platform, Pressable} from 'react-native'
 import { useNavigate, useLocation } from 'react-router-native';
 import StyledText from './StyledText';
 import axios from 'axios';
+import TablaTareasAlumno from './administracion/tablas/TablaTareasAlumno';
 
 
 const ClaseProfesor = ()=>{
@@ -17,14 +18,21 @@ const ClaseProfesor = ()=>{
     const [idClase, setIdClase]=useState();
 
     
-        const handleButtonClick = (enlace) => {
-        
+    const handleButtonClick = (enlace) => {
         navigate(enlace);
+    };
+
+    const useHost = () => {
+        if (Platform.OS === 'android') {
+        return 'http://10.0.2.2:5050';
+        } else {
+        return 'http://localhost:5050';
+        }
     };
 
     const getClaseProfe = async () => {
             try{  
-                const response = await axios.get(`http://localhost:5050/profesor/clases/${id}`);
+                const response = await axios.get(`${useHost()}/profesor/clases/${id}`);
                 const resultado = response.data;
                 setIdClase(resultado);
                 await getDatosAlumnos(resultado);
@@ -34,8 +42,10 @@ const ClaseProfesor = ()=>{
             };
     };
 
+    
+    
     const getDatosProfe = () => {
-        axios.get(`http://localhost:5050/profesores/${id}`)
+        axios.get(`${useHost()}/profesores/${id}`)
             .then((response) => {
                 const resultado = response.data[0];
                 if (resultado && resultado.length > 0 && Array.isArray(resultado)) {
@@ -54,7 +64,7 @@ const ClaseProfesor = ()=>{
     };
 
     const getDatosAlumnos = (idClase) => {
-        axios.get(`http://localhost:5050/estudiantes/clases/${idClase}`)
+        axios.get(`${useHost()}/estudiantes/clases/${idClase}`)
         .then((response) => {
             const resultado = response.data[0];
             if (resultado && resultado.length > 0 && Array.isArray(resultado)) {
@@ -77,18 +87,17 @@ const ClaseProfesor = ()=>{
         <View>
             <Image style={styles.image} source={require('../../data/img/LogoColegio.png')}/>
             <View>
-            <StyledText style={styles.text}>La clase del profesor {nombreProfe} {apellido1Profe} {apellido2Profe}  (ID: {idProfe}) es la clase {idClase}.  </StyledText>
-                <StyledText style={styles.text}>Los alumnos de esta clase son:  </StyledText>
+                <Text style={styles.text}>La clase del profesor {nombreProfe} {apellido1Profe} {apellido2Profe}  (ID: {idProfe}) es la clase {idClase}.  </Text>
             </View>
-
-            {alumnos.map((alumno) => (
-                <View style={styles.view}>
-                    <StyledText styles={styles.text} key={alumno.id}>ID {alumno.id}: {alumno.nombre} {alumno.apellido1} {alumno.apellido2}</StyledText>
-                </View>
-            ))}
-            <View style={styles.pressableButton}>
-                <Button title='Volver' onPress={() => handleButtonClick('/profesor')}/>
+            <View>    
+                <Text style={styles.text}>Los alumnos de esta clase son:  </Text>
             </View>
+            <View>
+                <TablaTareasAlumno idClase={idClase} idProfesor={id} />
+            </View>
+            <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/profesor')}>
+                <Text style={styles.pressableText}>Volver</Text>
+            </Pressable>
         </View>
         
     )
@@ -101,6 +110,12 @@ const styles=StyleSheet.create({
         alignSelf: 'center',
         paddingVertical: 10,
         marginBottom: 100
+    },
+    pressableText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold', // Texto en negrita
+        textAlign: 'center',
     },
     pressableButton: {
         width: 100,
