@@ -49,7 +49,7 @@ const TareasHoy = () => {
 
   const handleTareas = (ruta) => {
     // Lógica para redirigir a la página /tareasHoy
-    navigate();
+    navigate(ruta);
   };
 
   useEffect(() => {
@@ -98,11 +98,13 @@ const TareasHoy = () => {
       {tareasDeHoy.map((tarea, index) => (
         <View key={index} style={styles.imageContainer}>
         <Text style={styles.imageTitle}>{tarea.nombre}</Text>
+            <Pressable onPress={() => handleTareas(`/mostrarpasos/${tarea.id}`)}>
+                <Image
+                     source={{ uri: `${useHost()}${tareasPortada[index].ruta}` }}
+                    style={styles.largeImage}
+                  />
+            </Pressable>
 
-         <Image
-             source={{ uri: `${useHost()}${tareasPortada[index].ruta}` }}
-            style={styles.largeImage}
-          />
         </View>
       ))}
 

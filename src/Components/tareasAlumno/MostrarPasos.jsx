@@ -10,7 +10,7 @@ const MostrarPasos = () => {
   const [loading, setLoading] = useState(true);
   const [images, setImages] = useState();
 
-  const modoVisualizacion = 101;
+  const modoVisualizacion = 100;
   const { id } = useParams();
 
   const navigate = useNavigate();
