@@ -33,7 +33,7 @@ const TablaTareasAlumno = ({ idClase, idProfesor }) => {
 
   const getTareasAlumno = async (idAlumno) => {
     try {
-      const response = await axios.get(`${useHost()}/tareas/alumno/${idAlumno}`);
+      const response = await axios.get(`${useHost()}/tareas/alumnoId/${idAlumno}`);
       const tareas = response.data; // No asumas que es un array
 
       if (tareas && tareas.length > 0) {

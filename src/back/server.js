@@ -277,7 +277,7 @@ app.get('/uploads/:name', (req, res) => {
   return;
   }
 });
-app.get('/tareas/alumno/:idAlumno', async (req, res) => {
+app.get('/tareas/alumnoId/:idAlumno', async (req, res) => {
   try {
     const connection = await abrirConexion();
     const idAlumno = req.params.idAlumno;
