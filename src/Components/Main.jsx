@@ -19,6 +19,8 @@ import MostrarPasos from "./tareasAlumno/MostrarPasos";
 import Confirmaciones from './administracion/Confirmaciones';
 import CrearPaso from './administracion/CrearPaso';
 import CrearTarea from './administracion/CrearTarea';
+import Login from './login/login.jsx'; // Sustituir por Inicio
+import LoginEspecifico from './login/loginEspecifico.jsx';
 
 const Main = ()=>{
     return(
@@ -44,7 +46,8 @@ const Main = ()=>{
                     <Route path='confirmacioncrearaula' exact element={<Confirmaciones/>}/>
                     <Route path='/tareafinalizada' exact element={<TareaFinalizada/>}/>
                     <Route path='/mostrarpasos/:id' element={<MostrarPasos/>} />
-
+                    <Route path='/login' exact element={<Login/>}/> 
+                    <Route path='/loginespecifico' element={<LoginEspecifico/>} />
                 </Routes>
             </View>
         </NativeRouter>

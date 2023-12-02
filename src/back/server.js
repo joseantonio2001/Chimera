@@ -10,8 +10,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('./uploads'));
 
-dotenv.config({ path:'../../.env' }); // Revisar siempre si no va bien conexión a BD
-// dotenv.config(); // Revisar siempre si no va bien conexión a BD
+// dotenv.config({ path:'../../.env' }); // Revisar siempre si no va bien conexión a BD
+dotenv.config(); // Revisar siempre si no va bien conexión a BD
 
 const dbConfig = {
   host: process.env.DB_HOST,
