@@ -1,47 +1,40 @@
 import { Platform, StyleSheet, View } from 'react-native';
 import { useEffect, useState } from 'react';
-import { DataTable, FAB , IconButton} from 'react-native-paper';
+import { useLocation, useNavigate } from 'react-router-native';
+import { DataTable, FAB } from 'react-native-paper';
 import axios from 'axios';
-import { useNavigate } from 'react-router-native';
+import PropTypes from 'prop-types';
 
 const Cabecera = () => {
         return(
           <DataTable.Header>
-          <DataTable.Title>ID</DataTable.Title>
+          <DataTable.Title>Nº paso</DataTable.Title>
           <DataTable.Title>Tipo</DataTable.Title>
           <DataTable.Title>Nombre</DataTable.Title>
           <DataTable.Title>Descripción</DataTable.Title>
-          <DataTable.Title>Acciones</DataTable.Title>
         </DataTable.Header>
         );
 };
 
 const useHost = () => {
   if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:5050/tareas';
+    return 'http://10.0.2.2:5050/pasos';
   } else {
-    return 'http://localhost:5050/tareas';
+    return 'http://localhost:5050/pasos';
   }
 };
 
-const TablaTarea = () => {
+const TablaPaso = (props) => {
   const [filas, setFilas] = useState([]);
   const host = useHost();
   const navigate = useNavigate();
-  // const tarea = -1;
+  const {idTarea, paso} = props;
+
+  const [numPaso, setNumPaso] = useState(0);
 
   const handleAdd = () => {
-    navigate('/admin/creartarea'); // , { state: { nuevaTarea: tarea } }
+    navigate('/admin/crearpaso', {state : {idT : idTarea, numPaso : paso }}); // PASAR PARAMETROS ID_TAREA Y NUMERO DE PASO
   }
-
-  const handleDelete = (id) => { // Función borrar
-    axios.delete(`${useHost()}/borrarTarea/${id}`)
-    .then((response) => {             // quitar la ruta y mensajeBoton si se puede
-      navigate('/confirmaciones', { state: { mensaje: 'Tarea eliminada con éxito!', ruta : '/admin', mensajeBoton : 'Volver al menú'} });
-      })
-      .catch((error) => console.error('Error al eliminar:', error));
-  };
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,39 +58,37 @@ const TablaTarea = () => {
       <DataTable>
         {filas.map((item) => (
           <DataTable.Row key={item.id}>
-            <DataTable.Cell>{item.id}</DataTable.Cell>
-            <DataTable.Cell>{item.tipo}</DataTable.Cell>
             <DataTable.Cell>{item.nombre}</DataTable.Cell>
+            <DataTable.Cell>{item.tipo}</DataTable.Cell>
             <DataTable.Cell>{item.descripcion}</DataTable.Cell>
-            <IconButton icon="delete" onPress={() => handleDelete(item.id)} />
-          </DataTable.Row>
+            </DataTable.Row>
         ))}
-
-        
-        {/* Implementar paginación */}
-
-
       </DataTable>
+
       <FAB
         icon="plus"
         style={styles.fabStyle}
-        color='white'
         onPress={() => handleAdd()}
       />
     </View>
     );
 };
 
+TablaPaso.propTypes = {
+  idTarea: PropTypes.string.isRequired,
+  paso: PropTypes.string.isRequired
+};
+
 const styles = StyleSheet.create({
   table: {
     margin: 10,
+    height: 170,
     },
     fabStyle: {
-      width: 55,
-     backgroundColor: '#049CDC',
-     alignSelf: 'right',
-     justifyContent: 'center',
-   }
+     	bottom: -5, 
+      right: 30,
+      position: 'absolute',
+    }
 });
 
-export default TablaTarea;
+export default TablaPaso;

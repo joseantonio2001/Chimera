@@ -1,35 +1,72 @@
 import {Image, Pressable, StyleSheet,Text, View } from 'react-native'
 import {  useLocation, useNavigate } from 'react-router-native';
 import StyledText from '../StyledText';
-
+import { useEffect, useState } from 'react';
 
 const ConfirmAccion = () => {
     const navigate = useNavigate();
+    const handleButtonClick = (enlace, id) => {
+        if (id) {
+            navigate(enlace, id);
+        } else {
+            navigate(enlace);
+        }
+    };
+    const[datosGuardados, setDatosGuardados] = useState(false);
     const { state } = useLocation();
     const mensaje = state ? state.mensaje : '';
+    const ruta = state ? state.ruta : '';
+    const mensajeBoton = state ? state.mensajeBoton : '';
+    const id = state ? state.id : '';
 
-    const handleButtonClick = () => {
+    const hayDatos = () => {
+        console.log('Mensaje: ', mensaje, '\nRuta', ruta,'\nMensaje para el boton: ', mensajeBoton);
+        return (ruta && id && ruta.length>0 && id.length>0) || (ruta && mensajeBoton && ruta.length>0 && mensajeBoton.length>0);
+    }
+    useEffect(() => {
+        if (hayDatos()){
+            setDatosGuardados(true);
+            /*
+                Comprobar el mensaje boton para saber si no hay --> Volver al menú
+            */
+        }
+    }, [state, mensaje, ruta, mensajeBoton, id])
 
+/*     const handleButtonClick = () => {
         if (state && state.id && state.path) {
             navigate(state.path, { state: { id: state.id } });
           } else {
             navigate('/admin');
           }
-    
-    
-    };
-    
-    
+    }; */
 
     return(
         <View>
-            <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
+            {/* <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
             <StyledText style={styles.headerText}>{mensaje}</StyledText>
             <Pressable style={styles.pressableButton} onPress={() => handleButtonClick()}>
                 <Text style={styles.pressableText}>Volver</Text>
-            </Pressable>
+            </Pressable> */}
+
+            { datosGuardados && (
+                <View>
+                    <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
+                    <StyledText style={styles.headerText}>{mensaje}</StyledText>
+                    <Pressable style={styles.pressableButton} onPress={() => handleButtonClick(ruta, id)}>
+                        <Text style={styles.pressableText}>{mensajeBoton}</Text>
+                    </Pressable>
+                </View>
+            )}     
+            { !datosGuardados && (
+                <View>
+                    <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
+                    <StyledText style={styles.headerText}>{mensaje}</StyledText>
+                    <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/admin')}>
+                        <Text style={styles.pressableText}>Volver al menú</Text>
+                    </Pressable>
+                </View>
+            )}
         </View>
-        
     )
 }
 

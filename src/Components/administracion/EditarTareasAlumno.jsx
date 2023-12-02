@@ -62,7 +62,7 @@ const EditarTareasAlumno = ()=>{
 
     const handleQuitarTarea = () =>{
             if (selectedTareas.length === 0) {
-              navigate('/confirmaciones', { state: { mensaje: 'Selecciona estudiantes para quitar del aula.' ,  path: '/claseprofesor', id: idProfesor } });
+              navigate('/confirmaciones', { state: { mensaje: 'Selecciona estudiantes para quitar del aula.' ,  ruta: '/claseprofesor', id: idProfesor } });
               return;
             }
         
@@ -72,16 +72,16 @@ const EditarTareasAlumno = ()=>{
             })
               .then((response) => {
                 // Maneja la respuesta exitosa
-                navigate('/confirmaciones', { state: { mensaje: 'Tareas quitadas al estudiante con éxito!',  path: '/claseprofesor', id: idProfesor }} );
+                navigate('/confirmaciones', { state: { mensaje: 'Tareas quitadas al estudiante con éxito!',  ruta: '/claseprofesor', id: idProfesor }} );
               })
               .catch((error) => {
                 // Maneja los errores
-                navigate('/confirmaciones', { state: { mensaje: 'Error al quitar las tareas al estudiante', error,  path: '/claseprofesor', id: idProfesor } } );
+                navigate('/confirmaciones', { state: { mensaje: 'Error al quitar las tareas al estudiante', error,  ruta: '/claseprofesor', id: idProfesor } } );
               });
     };
     const handleAñadirTarea = () =>{
         if (selectedTareas.length === 0) {
-            navigate('/confirmaciones', { state: { mensaje: 'Selecciona tareas para añadir al estudiante.', path: '/claseprofesor', id: idProfesor } });
+            navigate('/confirmaciones', { state: { mensaje: 'Selecciona tareas para añadir al estudiante.', ruta: '/claseprofesor', id: idProfesor } });
             return;
           }
       
@@ -91,11 +91,11 @@ const EditarTareasAlumno = ()=>{
           })
             .then((response) => {
               // Maneja la respuesta exitosa
-              navigate('/confirmaciones', { state: { mensaje: 'Tareas añadidas al estudiante con éxito!'  , path: '/claseprofesor', id: idProfesor }} );
+              navigate('/confirmaciones', { state: { mensaje: 'Tareas añadidas al estudiante con éxito!'  , ruta: '/claseprofesor', id: idProfesor }} );
             })
             .catch((error) => {
               // Maneja los errores
-              navigate('/confirmaciones', { state: { mensaje: 'Error al añadir las tareas al estudiante', error,  path: '/claseprofesor', id: idProfesor } } );
+              navigate('/confirmaciones', { state: { mensaje: 'Error al añadir las tareas al estudiante', error,  ruta: '/claseprofesor', id: idProfesor } } );
             });
     }
 

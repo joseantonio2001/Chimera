@@ -11,6 +11,7 @@ app.use(express.json());
 app.use(express.static('./uploads'));
 
 dotenv.config({ path:'../../.env' }); // Revisar siempre si no va bien conexión a BD
+// dotenv.config(); // Revisar siempre si no va bien conexión a BD
 
 const dbConfig = {
   host: process.env.DB_HOST,
@@ -167,6 +168,7 @@ app.get('/tareas', async (req, res) => { // GET Tareas
 // Get de una tarea por id
 app.get('/tareas/:id', async (req, res) => { // GET Tareas
   try {
+    console.log('Obteniendo datos de tarea por id ...')
     const connection = await abrirConexion();
     const id = req.params.id;
     const queryTareas = 'SELECT * FROM tareas WHERE id = ?';
@@ -606,16 +608,11 @@ app.post('/tareas/crearTarea', async (req, res) => {
   try{
     const connection = await abrirConexion();
     const { nombre, descripcion, video, portada, tipo } = req.body;
-    const query1 = 'INSERT INTO tareas (nombre, descripcion, video, portada, tipo) VALUES (?, ?, ?, ?, ?, ?)';
-    await connection.promise().query(query1, [nombre, descripcion, video, portada, tipo ], (err, result) => {
-    if (err) {
-      console.error('Error al insertar tarea: ' + err);
-      res.status(500).json({ error: 'Error al insertar tarea en la base de datos' });
-      return;
-    }
+    const query1 = 'INSERT INTO tareas (nombre, descripcion, video, portada, tipo) VALUES (?, ?, ?, ?, ?)';
+    console.log('Insertando tarea...')
+    await connection.promise().query(query1, [nombre, descripcion, video, portada, tipo ]);
     console.log('Tarea insertada con éxito en tareas');
     res.status(201).json({ message: 'Tarea insertada con éxito' });
-    });
     connection.end();
   } catch (error){
     console.error('Error al introducir tarea:', error);
