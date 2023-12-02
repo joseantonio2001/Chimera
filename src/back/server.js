@@ -148,16 +148,13 @@ app.get('/tareas', async (req, res) => { // GET Tareas
 // Get de una tarea por id
 app.get('/tareas/:id', async (req, res) => { // GET Tareas
   try {
-    console.log('Obteniendo datos de tarea por id .....')
-    console.log(req)
+    console.log('Obteniendo datos de tarea por id ...')
     const connection = await abrirConexion();
     const id = req.params.id;
-    console.log('EL ID DE LA TAREA ', id)
     const queryTareas = 'SELECT * FROM tareas WHERE id = ?';
     const [resultado] = await connection.promise().query(queryTareas, [id]);
     connection.end(); // Libera recursos BD
     res.json([resultado]); // Resultado servido en HTTP formato JSON
-    console.log('Datos enviados')
   } catch (error) {
     console.error('Error al obtener tareas:', error);
     res.status(500).json({ error: 'Error al obtener tareas' });
@@ -478,7 +475,7 @@ app.post('/tareas/crearTarea', async (req, res) => {
     const connection = await abrirConexion();
     const { nombre, descripcion, video, portada, tipo } = req.body;
     const query1 = 'INSERT INTO tareas (nombre, descripcion, video, portada, tipo) VALUES (?, ?, ?, ?, ?)';
-    console.log('Insertando tarea.......')
+    console.log('Insertando tarea...')
     await connection.promise().query(query1, [nombre, descripcion, video, portada, tipo ]);
     console.log('Tarea insertada con éxito en tareas');
     res.status(201).json({ message: 'Tarea insertada con éxito' });

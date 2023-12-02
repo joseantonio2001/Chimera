@@ -54,20 +54,21 @@ const CrearTarea = ()=>{
     }, [])
 
     useEffect(() => { // Se guarda bien el id, lo imprime por consola al conseguirlo en getIdTarea
-        console.log('Guardado el ID en la bd (creartarea):', id)
+        console.log('ID de la tarea:', id)
     }, [id])
 
     useEffect(() => {
-        console.log('Id de la tarea que me llega de crearpaso (crearTarea): ', hayTarea);
+        console.log('Navegación desde crearPaso, ID de la tarea: ', hayTarea);
     }, [hayTarea])
 
     useEffect(() => {
-        console.log('Id de la tarea que me llega de tablatareas (crearTarea): ', nuevaTarea);
+        console.log('Navegación desde tablaTareas, ID de la tarea: ', nuevaTarea);
     }, [nuevaTarea])
 
     useEffect(() => {
-        console.log('actualizando selectedTIpo (crearTarea): ', selectedTipo);
+        console.log('Actualizando selectedTipo: ', selectedTipo);
     }, [selectedTipo])
+    
     // SELECTOR PARA TIPO DE TAREA
     const opciones = [
         { name: 'Normal', id: '0' }, 
@@ -116,7 +117,7 @@ const CrearTarea = ()=>{
         })
         .catch((error) => {
             // Maneja los errores
-            navigate('/confirmaciones', { state: { mensaje: 'Error en la creación del aula', error } });
+            navigate('/confirmaciones', { state: { mensaje: 'Error al guardar los cambios.', error } });
         });
     };
 
@@ -140,7 +141,7 @@ const CrearTarea = ()=>{
         })
         .catch((error) => {
             // Manejar los errores
-            console.error('Error en la solicitud GET:', error);
+            console.error('Error en la solicitud GET del ID', error);
         });
     };
 
@@ -163,7 +164,7 @@ const CrearTarea = ()=>{
             })
             .catch((error) => {
                 // Manejar los errores
-                console.error('Error en la solicitud GET:', error);
+                console.error('Error en la solicitud GET de los datos:', error);
                 return false;
             });
 
@@ -197,8 +198,7 @@ const CrearTarea = ()=>{
                         <StyledMultiSelect
                             style={[styles.StyledMultiSelect, {width: 700}]}
                             items={opciones}
-                            uniqueKey="id" // CAMBIAR POR name PERO permitir en la bbdd que tipo de tarea sea str o 
-                                        // o bien cambiar en server el GET de tareas
+                            uniqueKey="id" // CAMBIAR POR name PERO permitir en la bbdd que tipo de tarea sea str 
                             canAddItems={false}
                             hasSelectAll={false}                // deshabilita la opción "Seleccionar todo"
                             single={true}                       // habilita la selección única            

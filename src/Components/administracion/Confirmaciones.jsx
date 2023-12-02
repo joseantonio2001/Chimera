@@ -21,7 +21,6 @@ function confirmAccion (){
     }
     useEffect(() => {
         if (hayDatos()){
-            console.log(datosGuardados);
             setDatosGuardados(true);
         }
     }, [state, mensaje, ruta, mensajeBoton])
@@ -36,14 +35,13 @@ function confirmAccion (){
                         <Text style={styles.pressableText}>{mensajeBoton}</Text>
                     </Pressable>
                 </View>
-            )}
-
+            )}     
             { !datosGuardados && (
                 <View>
                     <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
                     <StyledText style={styles.headerText}>{mensaje}</StyledText>
-                    <Pressable style={styles.pressableButton} onPress={() => handleButtonClick(ruta)}>
-                        <Text style={styles.pressableText}>{mensajeBoton}</Text>
+                    <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/admin')}>
+                        <Text style={styles.pressableText}>Volver al menú</Text>
                     </Pressable>
                 </View>
             )}

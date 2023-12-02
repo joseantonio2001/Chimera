@@ -10,9 +10,7 @@ import StyledTextInput from '../StyledTextInput';
 
 const CrearPaso = ()=>{
     const navigate = useNavigate();
-    
         const handleButtonClick = (enlace) => {
-        
         navigate(enlace);
     };
 
@@ -22,33 +20,17 @@ const CrearPaso = ()=>{
     const nPaso = state ? state.numPaso : '';
     const mensaje = "Actualizar cambios"
 
-    // Input imagen y descripción
+    // // Input imagen y descripción
     const [imagen, setImagen] = useState('');
     const [descripcion, setDescripcion] = useState('');
 
     
     const handleCreatePaso = () => {
         navigate('/admin/creartarea', { state: { hayTarea: idTarea , mensajeTarea : mensaje} });
-        // Realiza una solicitud POST al servidor backend para crear un alumno
-        /* axios.post('http://localhost:5050/pasos/crearPaso', {
-            imagen,
-            descripcion,
-            idTarea,
-            nPaso
-        })
-        .then((response) => {
-            // Maneja la respuesta exitosa
-            navigate('/confirmacioncreartarea', { state: { mensaje: '¡Paso creado con éxito!' } });
-        })
-        .catch((error) => {
-            // Maneja los errores
-            navigate('/confirmacioncreartarea', { state: { mensaje: 'Error en la creación del paso',error } });
-        });
-         */
     };
 
     useEffect(() => {
-        console.log('Id de la tarea que me llega y que mando como "hayTarea" (crearPaso): ', idTarea);
+        console.log('Navegación hacia crearTarea mandando el ID que recibo: ', idTarea);
     }, [idTarea])
 
     return(
