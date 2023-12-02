@@ -102,6 +102,10 @@ const CrearTarea = ()=>{
             ruta : '/admin/creartarea', mensajeBoton : 'Volver a la tarea'} });
             return;
         }
+        if (id !== -1){
+            actualizarTarea();
+            return;
+        }
         // Realiza una solicitud POST al servidor backend para crear un alumno
         axios.post(`${useHost()}/crearTarea`, {
             nombre,
@@ -117,12 +121,28 @@ const CrearTarea = ()=>{
         })
         .catch((error) => {
             // Maneja los errores
-            navigate('/confirmaciones', { state: { mensaje: 'Error al guardar los cambios.', error } });
+            navigate('/confirmaciones', { state: { mensaje: 'Error al guardar los datos de la tarea.', error } });
         });
     };
 
-    const handleCreateTarea = () =>{
-        navigate('/admin');
+    // Actualizar tarea
+    const actualizarTarea = () => {
+        axios.put(`${useHost()}/actualizarTarea`, {
+            id,
+            nombre,
+            descripcion,
+            video,
+            portada,
+            tipo : parseInt(selectedTipo[0])
+        })
+        .then((response) => {
+            // Maneja la respuesta exitosa
+            console.log('Cambios actualizados')
+        })
+        .catch((error) => {
+            // Maneja los errores
+            navigate('/confirmaciones', { state: { mensaje: 'Error al guardar los cambios de la tarea.', error } });
+        });
     }
 
     // ID de la tarea una vez guardada

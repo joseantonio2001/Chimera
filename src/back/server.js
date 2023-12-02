@@ -173,6 +173,7 @@ app.get('/tareas/:id', async (req, res) => { // GET Tareas
     const id = req.params.id;
     const queryTareas = 'SELECT * FROM tareas WHERE id = ?';
     const [resultado] = await connection.promise().query(queryTareas, [id]);
+    console.log('Datos obtenidos')
     connection.end(); // Libera recursos BD
     res.json([resultado]); // Resultado servido en HTTP formato JSON
   } catch (error) {
