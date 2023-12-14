@@ -4,10 +4,13 @@ import Alumno from './Alumno.jsx'
 import Confirmaciones from './administracion/Confirmaciones';
 import CrearAlumno from './administracion/CrearAlumno';
 import CrearAula from './administracion/CrearAula.jsx'
+import CrearPaso from './administracion/CrearPaso.jsx';
 import CrearProfe from './administracion/CrearProfesor';
 import EditarAlumno from './administracion/EditarAlumno.jsx'
 import EditarClase from './administracion/EditarClase.jsx'
+import EditarPaso from './administracion/EditarPaso.jsx'
 import EditarProfe from './administracion/EditarProfe.jsx'
+import EditarTarea from './administracion/EditarTarea.jsx'
 import Inicio from './Inicio.jsx'
 import Profesor from './Profesor.jsx'
 import {View} from 'react-native'
@@ -27,8 +30,10 @@ const Main = ()=>{
                     <Route path='/admin/editarprofe' exact element={<EditarProfe/>} />
                     <Route path='/admin/crearclase' exact element={<CrearAula/>} />
                     <Route path='/admin/editarclase' exact element={<EditarClase/>}/> 
+                    <Route path='/admin/editartarea' exact element={<EditarTarea/>}/>
                     <Route path='/confirmaciones' exact element={<Confirmaciones/>}/>
-                    
+                    <Route path='/admin/tareas/crearpaso' exact element={<CrearPaso/>}/>
+                    <Route path='/admin/tareas/editarpaso' exact element={<EditarPaso/>}/>
                 </Routes>
             </View>
         </NativeRouter>

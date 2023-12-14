@@ -20,7 +20,7 @@ const EditarAlumno = ()=>{
         const handleButtonClick = (enlace) => {
         
         navigate(enlace);
-    };
+    };  
 
     const { state } = useLocation();
     const id = state ? state.id : '';
