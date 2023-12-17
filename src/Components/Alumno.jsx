@@ -41,6 +41,12 @@ const Alumno = ()=>{
       // Lógica para redirigir a la página /tareasHoy
       navigate(ruta, { state: { id: alumnoId }});
     };
+
+    const handleEnlace = (enlace, id) => {
+        
+      navigate(enlace, { state: { id:id }});
+  };
+
   
 
     useEffect(() => {
@@ -53,8 +59,6 @@ const Alumno = ()=>{
             console.error('Error al obtener información del estudiante:', error);
           }
         };
-
-        
 
         const obtenerTareas = async () => {
           try {
@@ -127,9 +131,7 @@ const Alumno = ()=>{
 
         {tienePedidoMaterial && (
           <Pressable
-            onPress={() => {
-              /* Acción cuando se selecciona la imagen de Pedido del Material */
-            }}
+            onPress={() => handleEnlace(`/tareainventario`, alumnoId)}
             accessibilityLabel="Pedido del Material. Haz clic para ver más detalles."
           >
             <View style={styles.imageContainer}>

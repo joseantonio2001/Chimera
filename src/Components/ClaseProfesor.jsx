@@ -22,6 +22,10 @@ const ClaseProfesor = ()=>{
         navigate(enlace);
     };
 
+    const handleButtonPedir = () => {
+        navigate('/pedirmaterial', { state: { id: idClase }});
+    };
+
     const useHost = () => {
         if (Platform.OS === 'android') {
         return 'http://10.0.2.2:5050';
@@ -95,6 +99,11 @@ const ClaseProfesor = ()=>{
             <View>
                 <TablaTareasAlumno idClase={idClase} idProfesor={id} />
             </View>
+
+            <Pressable style={styles.pressableButton} onPress={() => handleButtonPedir()}>
+                <Text style={styles.pressableText}>Pedir material</Text>
+            </Pressable>
+            
             <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/profesor')}>
                 <Text style={styles.pressableText}>Volver</Text>
             </Pressable>

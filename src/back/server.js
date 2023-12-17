@@ -151,6 +151,44 @@ app.get('/profesor/clases/:id', async (req, res) => {
   }
 });
 
+// Get del profesor segun el id de la clase
+
+app.get('/clase/profesor/:id', async (req, res) => {
+  const idClase = req.params.id;
+  try {
+    const connection = await abrirConexion();
+
+    // Obtener el id_profesor desde la tabla asignaciones
+    const queryIdProfesor = 'SELECT id_profesor FROM asignaciones WHERE id_clase=?';
+    const [rowsIdProfesor] = await connection.promise().query(queryIdProfesor, [idClase]);
+    
+    if (rowsIdProfesor.length === 0) {
+      connection.end();
+      return res.status(404).json({ error: 'No se encontró el ID del profesor para la clase', idClase });
+    }
+
+    const idProfesor = rowsIdProfesor[0].id_profesor;
+
+    // Obtener todos los datos del profesor desde la tabla usuarios
+    const queryDatosProfesor = 'SELECT * FROM usuarios WHERE id=?';
+    const [rowsDatosProfesor] = await connection.promise().query(queryDatosProfesor, [idProfesor]);
+
+    connection.end(); // Liberar recursos BD
+
+    if (rowsDatosProfesor.length === 0) {
+      return res.status(404).json({ error: 'No se encontraron datos para el profesor con ID', idProfesor });
+    }
+
+    const datosProfesor = rowsDatosProfesor[0];
+
+    res.json(datosProfesor); // Resultado servido en HTTP formato JSON
+  } catch (error) {
+    console.error('Error al obtener los datos del profesor de la clase ', idClase, ':', error);
+    res.status(500).json({ error: 'Error al obtener los datos del profesor de la clase', idClase });
+  }
+});
+
+
 // Get de todas las tareas
 app.get('/tareas', async (req, res) => { // GET Tareas
   try {
@@ -427,6 +465,21 @@ app.get('/pasosTarea/:id', async (req, res) => { // GET Pasos
   }
 });
 
+// Get de los pedidos asociados a un alumno 
+app.get('/pedido/:id', async (req, res) => { // GET Pasos
+  try {
+    const connection = await abrirConexion();
+    const idEstudiante = req.params.id;
+    const queryPasos = 'SELECT * FROM pedido_material WHERE id_estudiante = ?';
+    const [resultado] = await connection.promise().query(queryPasos, [idEstudiante]);
+    connection.end(); // Libera recursos BD
+    res.json([resultado]); // Resultado servido en HTTP formato JSON
+  } catch (error) {
+    console.error('Error al obtener pasos:', error);
+    res.status(500).json({ error: 'Error al obtener pasos' });
+  }
+});
+
 // Insercioones / POST
 // Ruta para insertar un estudiante en la base de datos
 app.post('/estudiantes/crearAlumno', async (req, res) => {
@@ -657,6 +710,49 @@ app.post('/clases/aniadealumnos', async (req, res) => {
 
 });
 
+// Insertar el pedido de material
+
+
+app.post('/guardarPedido', async (req, res) => {
+  try {
+    const { claseId, alumnoId, pedidos } = req.body;
+    const connection = await abrirConexion();
+    console.log('Valores a insertar:', { claseId, alumnoId, pedidos });
+    try {
+      // Iterar sobre los pedidos
+      for (const pedido of pedidos) {
+        const inventarioId = pedido.inventarioId;
+        const cantidad = pedido.cantidad;
+        
+        // Insertar una nueva fila en la tabla pedido_material
+        const queryInsert = 'INSERT INTO pedido_material (id_clase, id_estudiante, id_inventario, cantidad) VALUES (?, ?, ?, ?)';
+        await connection.promise().query(queryInsert, [claseId, alumnoId, inventarioId, cantidad], (err, result) => {
+          if (err) {
+            console.error('Error al establecer conexión con la base de datos:' + err);
+            res.status(500).json({ error: 'Error al establecer conexión con la base de datos.' });
+          }
+          // Puedes manejar el resultado si es necesario
+        });
+      }
+
+    } catch (error) {
+      console.error('Error al guardar pedidos:', error);
+      res.status(500).json({ error: 'Error al guardar pedidos.' });
+    } finally {
+      // Asegúrate de cerrar la conexión después de completar todas las inserciones
+      connection.end();
+    }
+  } catch (error) {
+    console.error('Error al procesar la solicitud:', error);
+    res.status(500).json({ error: 'Error al procesar la solicitud.' });
+  }
+
+  console.log('Pedidos guardados con éxito');
+  res.status(201).json({ message: 'Pedidos guardados con éxito.' });
+});
+
+
+
 // eliminar asignaciones
 
 app.post('/clases/quitaralumnos', async (req, res) => {
@@ -698,18 +794,29 @@ app.post('/tareas/aniadeasignaciones', async (req, res) => {
     const connection = await abrirConexion();
 
     try {
-      // Use Promise.all to wait for all queries to complete
-      await Promise.all(
-        tareas.map(async (tareaId) => {
-          const queryInsert =
-            'INSERT INTO asignaciones_tareas (id_alumno, id_tarea) VALUES (?, ?)';
-          await connection.promise().query(queryInsert, [idAlumno, tareaId]);
-        })
-      );
+      if (Array.isArray(tareas)) {
+        // Use Promise.all to wait for all queries to complete
+        await Promise.all(
+          tareas.map(async (tareaId) => {
+            const queryInsert =
+              'INSERT INTO asignaciones_tareas (id_alumno, id_tarea) VALUES (?, ?)';
+            await connection.promise().query(queryInsert, [idAlumno, tareaId]);
+          })
+        );
 
-      // All queries are successful, send a response
-      console.log('Tareas añadidas al estudiante con éxito');
-      res.status(201).json({ message: 'Tareas añadidas al estudiante con éxito.' });
+        // All queries are successful, send a response
+        console.log('Tareas añadidas al estudiante con éxito');
+        res.status(201).json({ message: 'Tareas añadidas al estudiante con éxito.' });
+      } else {
+        // Si tareas no es un array, realizar una única inserción
+        const queryInsert =
+          'INSERT INTO asignaciones_tareas (id_alumno, id_tarea) VALUES (?, ?)';
+        await connection.promise().query(queryInsert, [idAlumno, tareas]);
+
+        // Query is successful, send a response
+        console.log('Tarea añadida al estudiante con éxito');
+        res.status(201).json({ message: 'Tarea añadida al estudiante con éxito.' });
+      }
     } catch (error) {
       console.error('Error al añadir tareas al alumno:', error);
       res.status(500).json({ error: 'Error al añadir tareas al alumno.' });
@@ -722,6 +829,7 @@ app.post('/tareas/aniadeasignaciones', async (req, res) => {
     res.status(500).json({ error: 'Error al añadir las tareas.' });
   }
 });
+
 
 
 
@@ -1140,6 +1248,32 @@ app.delete('/tareas/borrarTarea/:id', async (req, res) => {
   }
   console.log('Tarea eliminada con éxito en la base de datos!');
   res.status(201).json({ message: ' Tarea eliminada con éxito' });
+});
+
+
+// Borrar un pedido
+app.delete('/pedido/:id', async (req, res) => {
+  try{
+    const connection = await abrirConexion();
+    const idClase = parseInt(req.params.id, 10);
+
+    const query1 = 'DELETE FROM pedido_material WHERE id_clase = ?';
+    await connection.promise().query(query1, [idClase], (err, result) => {
+    if (err) {
+      console.error('Error al borrar el pedido: ' + err);
+      res.status(500).json({ error: 'Error al borrar el pedido en la base de datos' });
+      return;
+    }
+    console.log('Peido borrado con éxito');
+    res.status(201).json({ message: 'Pedido borrado con éxito' });
+    });
+    connection.end();
+  } catch (error){
+    console.error('Error al borrar el pedido:', error);
+    res.status(500).json({ error: 'Error al borrar el pedido' });
+  }
+  console.log('Pedido eliminado con éxito en la base de datos!');
+  res.status(201).json({ message: ' Pedido eliminado con éxito' });
 });
 
 // Get de todas las imágenes una tarea
