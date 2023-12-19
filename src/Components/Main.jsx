@@ -43,7 +43,7 @@ const Main = ()=>{
                     <Route path='/admin/editartareasalumno' exact element ={<EditarTareasAlumno/>}/>
                     <Route path='confirmacioncrearaula' exact element={<Confirmaciones/>}/>
                     <Route path='/tareafinalizada' exact element={<TareaFinalizada/>}/>
-                    <Route path='/mostrarpasos/:id' element={<MostrarPasos/>} />
+                    <Route path='/mostrarpasos/:id/:alumnoId' element={<MostrarPasos/>} />
 
                 </Routes>
             </View>

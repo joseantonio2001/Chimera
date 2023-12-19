@@ -46,10 +46,6 @@ const CrearTarea = ()=>{
     ]);
 
     useEffect(() => {
-        getIdTarea();
-    }, [])
-
-    useEffect(() => {
         getDatosTarea();
     }, [])
 
@@ -71,9 +67,9 @@ const CrearTarea = ()=>{
     
     // SELECTOR PARA TIPO DE TAREA
     const opciones = [
-        { name: 'Normal', id: '0' }, 
-        { name: 'Comanda', id: '1' }, 
-        { name: 'Pedido de material', id: '2' }, 
+        { name: 'Normal', id: '1' }, 
+        { name: 'Comanda', id: '2' }, 
+        { name: 'Pedido de material', id: '3' }, 
     ];
 
     // PROPIEDADES PARA TABLA
@@ -146,24 +142,31 @@ const CrearTarea = ()=>{
     }
 
     // ID de la tarea una vez guardada
-    const getIdTarea = () => {
-        console.log('getIdTarea')
-        axios.get(`${useHost()}/`)
-        .then((response) => {
-            const resultado = response.data[0];
-            if (resultado && resultado.length > 0 && Array.isArray(resultado)) {
-                resultado.forEach((tarea) => {
-                    if (tarea.nombre === nombre && tarea.descripcion === descripcion && tarea.tipo === parseInt(selectedTipo[0])){
-                        setId(tarea.id)
-                    }
-                });
+    const getIdTarea = async () => {
+        console.log('getIdTarea');
+    
+        try {
+            const response = await axios.get(`${useHost()}/tareaMayorId`);
+            const resultado = response.data;
+    
+            // Verificar si el resultado contiene el campo 'id'
+            if (resultado && resultado.id) {
+                console.log('Id Tarea:', resultado.id);
+    
+                // Actualizar el estado y esperar a que se complete antes de continuar
+                await setId(resultado.id);
+    
+                // Log después de la actualización del estado
+                console.log('El valor actualizado del id es ', id);
+            } else {
+                console.error('La respuesta de la API no contiene un campo "id" válido:', resultado);
             }
-        })
-        .catch((error) => {
+        } catch (error) {
             // Manejar los errores
             console.error('Error en la solicitud GET del ID', error);
-        });
+        }
     };
+    
 
     // Datos de la tarea traidos por ID
     const getDatosTarea = () => {

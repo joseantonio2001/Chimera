@@ -14,7 +14,7 @@ const TareaFinalizada = () => {
         <View>
             <StyledText style={styles.headerText}>¡Bien hecho!</StyledText>
             <Image source={require('../../../assets/celebrar.png')} style={styles.image}></Image>
-            <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/')}>
+            <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/estudiante')}>
                 <Text style={styles.pressableText}>Volver a inicio</Text>
             </Pressable>
         </View>
@@ -43,7 +43,7 @@ const styles = {
         justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
-        backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
+        backgroundColor: '#049CDC',  // Un verde fresco, puedes cambiarlo según tus preferencias
         borderRadius: 10,
         elevation: 3, // Sombra para un efecto de elevación
         marginBottom: 15,
