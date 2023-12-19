@@ -8,19 +8,19 @@ import PropTypes from 'prop-types';
 const Cabecera = () => {
         return(
           <DataTable.Header>
-          <DataTable.Title>Nº paso</DataTable.Title>
-          <DataTable.Title>Tipo</DataTable.Title>
-          <DataTable.Title>Nombre</DataTable.Title>
-          <DataTable.Title>Descripción</DataTable.Title>
+          <DataTable.Title>ID de tarea</DataTable.Title>
+          <DataTable.Title>Nombre de tarea</DataTable.Title>
+          <DataTable.Title>Número de paso</DataTable.Title>
+          <DataTable.Title>Descripción del paso</DataTable.Title>
         </DataTable.Header>
         );
 };
 
 const useHost = () => {
   if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:5050/pasos';
+    return 'http://10.0.2.2:5050/pasosTarea';
   } else {
-    return 'http://localhost:5050/pasos';
+    return 'http://localhost:5050/pasosTarea';
   }
 };
 
@@ -28,18 +28,18 @@ const TablaPaso = (props) => {
   const [filas, setFilas] = useState([]);
   const host = useHost();
   const navigate = useNavigate();
-  const {idTarea, paso} = props;
+  const {idTarea, paso, nombreTarea} = props;
 
   const [numPaso, setNumPaso] = useState(0);
 
   const handleAdd = () => {
-    navigate('/admin/crearpaso', {state : {idT : idTarea, numPaso : paso }}); // PASAR PARAMETROS ID_TAREA Y NUMERO DE PASO
+    navigate('/admin/tareas/crearpaso', {state : {idT : idTarea, numPaso : paso }}); // PASAR PARAMETROS ID_TAREA Y NUMERO DE PASO
   }
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(host);
+        const response = await axios.get(`${useHost()}/${idTarea}`);
         const resultado = response.data[0];
         setFilas(resultado);
       } catch (error) {
@@ -48,7 +48,7 @@ const TablaPaso = (props) => {
     };
 
     fetchData();
-  }, [host]); // Agregar `host` como dependencia para que useEffect se ejecute cuando cambie
+  }, [idTarea]); // Agregar `host` como dependencia para que useEffect se ejecute cuando cambie
 
     return (
       <View style={styles.table}>
@@ -58,9 +58,11 @@ const TablaPaso = (props) => {
       <DataTable>
         {filas.map((item) => (
           <DataTable.Row key={item.id}>
-            <DataTable.Cell>{item.nombre}</DataTable.Cell>
-            <DataTable.Cell>{item.tipo}</DataTable.Cell>
-            <DataTable.Cell>{item.descripcion}</DataTable.Cell>
+            <DataTable.Cell style={{ flex: 1 }}>{item.id_tarea}</DataTable.Cell>
+            <DataTable.Cell style={{ flex: 1 }}>{nombreTarea}</DataTable.Cell>
+            <DataTable.Cell style={{ flex: 1 }}>Paso {item.n_paso}</DataTable.Cell>
+            <DataTable.Cell style={{ flex: 1 }}>{item.descripcion}</DataTable.Cell>
+           
             </DataTable.Row>
         ))}
       </DataTable>

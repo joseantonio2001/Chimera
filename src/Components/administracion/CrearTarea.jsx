@@ -87,7 +87,7 @@ const CrearTarea = ()=>{
     // TABLA PASOS
     const tabPasos = () => (
         <View>
-          <TablaPaso idTarea={id.toString()} paso={numPaso.toString()}/>
+          <TablaPaso idTarea={id.toString()} paso={numPaso.toString()} nombreTarea={nombre.toString()}/>
         </View>
     );
     
@@ -168,6 +168,7 @@ const CrearTarea = ()=>{
     // Datos de la tarea traidos por ID
     const getDatosTarea = () => {
         if (hayTarea !== 0){
+        setId(hayTarea);
         axios.get(`${useHost()}/${hayTarea}`)
             .then((response) => {
                 const resultado = response.data[0];
@@ -270,7 +271,8 @@ const styles=StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 20,
         marginBottom: 30,
-        width: 700,
+        width: 1100,
+        flex: 1,
         justifyContent: 'center',
         alignSelf: 'center',  
         borderColor: '#999',
