@@ -20,6 +20,8 @@ const CrearPaso = () => {
     const [img, setImg] = useState(null);
     // const [selectedTarea, setSelectedTarea] = useState(0);
     // const [tareas, setTareas] = useState([]);
+    const [ruta, setRuta] = useState("");
+    const [idImagen, setIdImagen] = useState('');
     const [descripcion, setDescripcion] = useState("");
     const [pasoCreado, setPasoCreado] = useState(false);
     const navigate = useNavigate();
@@ -37,26 +39,55 @@ const CrearPaso = () => {
         const formData = new FormData(); // Formatear datos para enviar peticion
         const filename = img.assets[0].uri.split('/').pop();
         formData.append('file', theBlob, filename);
-        formData.append('n_paso',parseInt(nPaso));
-        formData.append('id_tarea',idTarea);
-        formData.append('descripcion',descripcion);
-        // Petición POST (SOLO SOPORTADO EN FORMATO WEB, ANDROID hay problemas con los formatos y las peticiones a HTTP)
-        axios.post(`${useHost('pasos/crearPaso')}`, formData, {
+                
+        // Petición POST MEDIA (SOLO SOPORTADO EN FORMATO WEB, ANDROID hay problemas con los formatos y las peticiones a HTTP)
+        axios.post(`${useHost('media/imagen')}`, formData, {
         headers: {
             Accept: 'application/json',
             'Content-Type': 'multipart/form-data'
         }
         }).then((response) => {
-            // Maneja la respuesta exitosa
-            setPasoCreado(true);
+            if (getIdImagen()){
+                // Maneja la respuesta exitosa + Petición POST PASO
+                axios.post(`${useHost()}/pasos/crearPaso`, {
+                    idTarea,
+                    nPaso,
+                    idImagen,
+                    descripcion,
+                })
+                .then((response) => {
+                    // Maneja la respuesta exitosa
+                    setPasoCreado(true);
+                })
+                .catch((error) => {
+                    // Maneja los errores
+                    navigate('/confirmaciones', { state: { mensaje: 'Error al guardar los datos de la tarea.', error } });
+                });
+            }
         })
         .catch((error) => {
             // Maneja los errores
             console.error("Error al crear estudiante: ",error);
             navigate('/confirmaciones', { state: { mensaje: 'Error en la creación del paso',error } });
         }); 
-        
     };
+
+    const getIdImagen = () => {
+        if (img){
+            axios.get(`${useHost()}/media/imagen`)
+            .then((response) => {
+                const resultado = response.data[0];
+                console.log("ID DE LA IMAGEN", resultado);
+                setIdImagen(resultado);
+                return true;
+            })
+            .catch((error) => {
+                // Manejar los errores
+                console.error('Error en la solicitud GET de los datos:', error);
+                return false;
+            });  
+        }
+    }
 
     const handleVolverTarea = () => {
         navigate('/admin/creartarea', { state: { hayTarea: idTarea , mensajeTarea : mensaje} });
@@ -69,12 +100,15 @@ const CrearPaso = () => {
         const response = await ImagePicker.launchImageLibraryAsync(options);
         if(!response.canceled){
                 setImg(response);
+                setRuta(response.assets[0].uri.split('/').pop());
+                console.log(ruta);
+
         }
     };
 
     useEffect(() => {
-        console.log('Navegación hacia crearTarea mandando el ID que recibo: ', idTarea);
-    }, [idTarea])
+        console.log('Navegación hacia crearPaso mandando el ID y en num de paso: ', idTarea, nPaso);
+    }, [idTarea, nPaso])
 
     return(
         <View>
@@ -96,7 +130,7 @@ const CrearPaso = () => {
             )}
             
             <Pressable style={styles.pressableButton} onPress={pickImage}>
-                    <Text style={styles.pressableText}>{img ? 'Cambiar imagen' : 'Subir imagen'}</Text>
+                    <Text style={styles.pressableText}>Subir imagen</Text>
             </Pressable>
             
             <StyledTextInput
@@ -127,7 +161,7 @@ const styles=StyleSheet.create({
         borderRadius: 4,
         alignSelf: 'center',
         justifyContent: 'center',
-        //paddingVertical: 10
+        // paddingVertical: 10
     },
     button: {
         width:200, 

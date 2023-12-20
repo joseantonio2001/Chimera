@@ -261,6 +261,7 @@ app.get('/uploads/id/:id', async (req, res) => { // GET Tareas
     const query = `SELECT * FROM media WHERE id = ?`;
     const [resultado] = await connection.promise().query(query, [id]);
     connection.end(); // Libera recursos BD
+
     res.json(resultado); // Resultado servido en HTTP formato JSON
   } catch (error) {
     console.error('Error al obtener los datos de la imagen:', error);
@@ -638,21 +639,50 @@ app.post('/menus/crearMenu', async (req, res) => {
     res.status(500).json({ error: 'Error al introducir menu' });
   }
 });
+app.post('/tareas/crearTarea', async (req, res) => {
+  try{
+    const connection = await abrirConexion();
+    const { nombre, descripcion, video, portada, tipo } = req.body;
+    const query1 = 'INSERT INTO tareas (nombre, descripcion, video, portada, tipo) VALUES (?, ?, ?, ?, ?)';
+    console.log('Insertando tarea...')
+    await connection.promise().query(query1, [nombre, descripcion, video, portada, tipo ]);
+    console.log('Tarea insertada con éxito en tareas');
+    res.status(201).json({ message: 'Tarea insertada con éxito' });
+    connection.end();
+  } catch (error){
+    console.error('Error al introducir tarea:', error);
+    res.status(500).json({ error: 'Error al introducir tarea' });
+  }
+});
 
 // Insertar paso
-app.post('/pasos/crearPaso', upload.single('file'), async (req, res) => {
+app.post('/pasos/crearPaso', async (req, res) => {
   try {
     const connection = await abrirConexion();
-    const imagen = req.file.path;
-    const { nPaso, idTarea, descripcion } = req.body;
-    const query1 = 'INSERT INTO pasos (id_tarea, n_paso, imagen, descripcion) VALUES (?, ?, ?, ?)';
-    await connection.promise().query(query1, [idTarea, nPaso, imagen, descripcion]);
-    console.log('Paso insertado con éxito en pasos');
+    const { idTarea, nPaso, id_imagen, descripcion } = req.body;
+    const query1 = 'INSERT INTO pasos (id_tarea, n_paso, id_imagen, descripcion) VALUES (?, ?, ?, ?)';
+    await connection.promise().query(query1, [idTarea, nPaso, id_imagen, descripcion]);
     res.status(201).json({ message: 'Paso insertado con éxito' });
     connection.end();
   } catch (error) {
     console.error('Error al introducir paso:', error);
     res.status(500).json({ error: 'Error al introducir paso' });
+  }
+ });
+
+ // Insertar multimedia (imagenes) en la tabla media
+app.post('/media/imagen', upload.single('file'), async (req, res) => {
+  try {
+    const connection = await abrirConexion();
+    const imagen = req.file.path;
+    console.log(imagen);
+    const query1 = 'INSERT INTO media (ruta) VALUES (?)';
+    await connection.promise().query(query1, [imagen]);
+    res.status(201).json({ message: 'Imagen insertada con éxito' });
+    connection.end();
+  } catch (error) {
+    console.error('Error al introducir la imagen:', error);
+    res.status(500).json({ error: 'Error al introducir la imagen' });
   }
  });
 

@@ -36,8 +36,8 @@ const CrearTarea = ()=>{
     const [datosGuardados, setDatosGuardados] = useState(false); // tarea medio guardada
 
     const [numPaso, setNumPaso] = useState(1);
-    const [portada, setPortada] = useState('');
-    const [video, setVideo] = useState('');
+    const [portada, setPortada] = useState(1);
+    const [video, setVideo] = useState(2);
 
 
     const [index, setIndex] = useState(0);
@@ -87,7 +87,7 @@ const CrearTarea = ()=>{
     // TABLA PASOS
     const tabPasos = () => (
         <View>
-          <TablaPaso idTarea={id.toString()} paso={numPaso.toString()} nombreTarea={nombre.toString()}/>
+          <TablaPaso idTarea={id.toString()} paso={numPaso.toString()} nombreTarea={nombre}/>
         </View>
     );
     
