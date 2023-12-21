@@ -56,8 +56,6 @@ const Profesor = ()=>{
             ))}
 
             
-
-            
             <Pressable style={styles.pressableButton} onPress={() => handleButtonClick('/')}>
                 <Text style={styles.pressableText}>Volver a inicio</Text>
             </Pressable>

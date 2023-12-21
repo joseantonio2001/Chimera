@@ -2,6 +2,8 @@ import { Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-native';
 import axios from 'axios';
+import { Buffer } from 'buffer';
+
 
 const useHost = () =>{
   if (Platform.OS === 'android') {
