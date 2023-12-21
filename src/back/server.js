@@ -243,6 +243,46 @@ app.get('/tareas/alumno/:id', async (req, res) => { // GET Tareas
   }
 });
 
+// Get de todas las tareas según el id de un estudiante
+app.get('/tareasFinalizadas/alumno/:id', async (req, res) => { // GET Tareas
+  try {
+    console.log('Entra');
+    const connection = await abrirConexion();
+    const id = req.params.id;
+    const query = `
+      SELECT t.*
+      FROM tareas t
+      INNER JOIN asignaciones_tareas at ON t.id = at.id_tarea AND at.finalizada=1
+      WHERE at.id_alumno = ?`;
+    const [resultado] = await connection.promise().query(query, [id]);
+    connection.end(); // Libera recursos BD
+    res.json([resultado]); // Resultado servido en HTTP formato JSON
+  } catch (error) {
+    console.error('Error al obtener tareas:', error);
+    res.status(500).json({ error: 'Error al obtener tareas' });
+  }
+});
+
+// Get de todas las tareas según el id de un estudiante
+app.get('/tareasTodas/alumno/:id', async (req, res) => { // GET Tareas
+  try {
+    console.log('Entra');
+    const connection = await abrirConexion();
+    const id = req.params.id;
+    const query = `
+      SELECT t.*
+      FROM tareas t
+      INNER JOIN asignaciones_tareas at ON t.id = at.id_tarea
+      WHERE at.id_alumno = ?`;
+    const [resultado] = await connection.promise().query(query, [id]);
+    connection.end(); // Libera recursos BD
+    res.json([resultado]); // Resultado servido en HTTP formato JSON
+  } catch (error) {
+    console.error('Error al obtener tareas:', error);
+    res.status(500).json({ error: 'Error al obtener tareas' });
+  }
+});
+
 // Get datos de la imagen dado el id
 app.get('/uploads/id/:id', async (req, res) => { // GET Tareas
   try {
@@ -764,7 +804,7 @@ app.post('/tareas/quitarasignaciones', async (req, res) => {
       // Iterar sobre los estudiantes seleccionados
       for (const tareaId of tareas) {
         // Eliminar la fila correspondiente a la asignación
-        const queryDelete = 'DELETE FROM asignaciones_tareas WHERE id_alumno = ? AND id_tarea = ?';
+        const queryDelete = 'DELETE FROM asignaciones_tareas WHERE id_alumno = ? AND id_tarea = ? AND finalizada=0';
         await connection.promise().query(queryDelete, [idAlumno, tareaId], (err, result) => {
           if (err) {
             console.error('Error al establecer conexión con la base de datos:' + err);

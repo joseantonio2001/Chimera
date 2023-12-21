@@ -49,12 +49,18 @@ const TablaTareasAlumno = ({ idClase, idProfesor }) => {
       // Manejar errores de la solicitud
       throw error;
     }
-  }
+  };
   
 
 	const handleEdit = (idAlumno, nombreAlumno, apellido1Alumno, apellido2Alumno, idClase, idProfesor) => {
 		navigate('/admin/editartareasalumno', { state: { idAlumno, nombreAlumno, apellido1Alumno, apellido2Alumno, idClase, idProfesor}})
 	};
+
+  const handleSee = (alumno, idClase, idProfesor) => {
+		navigate('/statsalumno', { state: {alumno, idClase, idProfesor}})
+	};
+
+
 
   const handlePageChange = (page) => {  
     setPagina(page);
@@ -104,6 +110,7 @@ const TablaTareasAlumno = ({ idClase, idProfesor }) => {
             {/* Botones de las filas */}
             <View style={styles.accionesColumnTitle}>
                 <IconButton icon="pencil" onPress={() => handleEdit(item.id, item.nombre, item.apellido1, item.apellido2, idClase, idProfesor)} style={styles.accionesColumnTitle}/>
+                <IconButton icon="eye" onPress={() => handleSee(item, idClase, idProfesor)} style={styles.accionesColumnTitle}/>
             </View>
           </DataTable.Row>
         ))}

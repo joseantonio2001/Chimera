@@ -19,6 +19,7 @@ import MostrarPasos from "./tareasAlumno/MostrarPasos";
 import Confirmaciones from './administracion/Confirmaciones';
 import CrearPaso from './administracion/CrearPaso';
 import CrearTarea from './administracion/CrearTarea';
+import StatsAlumno from './StatsAlumno.jsx';
 
 const Main = ()=>{
     return(
@@ -44,6 +45,7 @@ const Main = ()=>{
                     <Route path='confirmacioncrearaula' exact element={<Confirmaciones/>}/>
                     <Route path='/tareafinalizada' exact element={<TareaFinalizada/>}/>
                     <Route path='/mostrarpasos/:id/:alumnoId' element={<MostrarPasos/>} />
+                    <Route path='/statsalumno' element={<StatsAlumno/>} />
 
                 </Routes>
             </View>
