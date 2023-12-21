@@ -867,7 +867,22 @@ app.post('/tareas/quitarasignaciones', async (req, res) => {
 });
 
 
-
+// Get datos de la imagen dado el id
+app.post('/tareas/finalizar', async (req, res) => { // GET Tareas
+  try {
+    const connection = await abrirConexion();
+    const alumnoId=req.body.alumnoId;
+    const id = req.body.id;
+    console.log('Alumno ', alumnoId, 'Tarea ', id);
+    const query = 'UPDATE asignaciones_tareas SET finalizada = 1 WHERE id_alumno = ? AND id_tarea = ?';
+    const [resultado] = await connection.promise().query(query, [alumnoId, id]);
+    connection.end(); // Libera recursos BD
+    res.json(resultado); // Resultado servido en HTTP formato JSON
+  } catch (error) {
+    console.error('Error al finalizar la tarea:', error);
+    res.status(500).json({ error: 'Error al finalizar la tarea' });
+  }
+});
 
 
 // Actualizaciones / PUT

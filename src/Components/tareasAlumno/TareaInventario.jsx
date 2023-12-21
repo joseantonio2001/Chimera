@@ -107,8 +107,12 @@ const MostrarPasos = () => {
       const tareas = responseTareas.data;
       console.log(tareas);
       console.log(tareas[0].id);
-      // Borrar la tarea
-      await axios.delete(`${useHost()}/tareas/borrarTarea/${tareas[0].id}`);
+
+      // Marcar la tarea como finalizada
+      await axios.post(`${useHost()}/tareas/finalizar`, {
+        alumnoId: idEstudiante,
+        id: tareas[0].id
+      });
   
     
   };
