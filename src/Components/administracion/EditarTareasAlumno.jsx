@@ -1,4 +1,3 @@
-
 import {  Image, Platform, Pressable , StyleSheet, Text, View} from 'react-native'
 import { useEffect, useState} from 'react'
 import { useLocation, useNavigate } from 'react-router-native';

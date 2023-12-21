@@ -6,6 +6,7 @@ import CrearAula from './administracion/CrearAula.jsx';
 import CrearProfe from './administracion/CrearProfesor.jsx';
 import EditarAlumno from './administracion/EditarAlumno.jsx';
 import EditarClase from './administracion/EditarClase.jsx';
+import EditarItem from './administracion/EditarItem.jsx';
 import EditarProfe from './administracion/EditarProfe.jsx';
 import Profesor from './Profesor.jsx';
 import Inicio from './Inicio.jsx';
@@ -16,12 +17,12 @@ import ConfirmAccion from './administracion/Confirmaciones.jsx';
 import EditarTareasAlumno from './administracion/EditarTareasAlumno.jsx';
 import TareaFinalizada from "./tareasAlumno/TareaFinalizada";
 import MostrarPasos from "./tareasAlumno/MostrarPasos";
+import CrearItem from './administracion/CrearItem.jsx';
 import Inventario from "./tareasAlumno/TareaInventario.jsx";
 import Confirmaciones from './administracion/Confirmaciones';
 import CrearPaso from './administracion/CrearPaso';
 import CrearTarea from './administracion/CrearTarea';
 import PedirMaterial from './PedirMaterial.jsx';
-
 
 const Main = ()=>{
     return(
@@ -39,7 +40,9 @@ const Main = ()=>{
                     <Route path='/admin/crearprofe' exact element={<CrearProfe/>} />
                     <Route path='/admin/creartarea' exact element={<CrearTarea/>} />
                     <Route path='/admin/crearpaso' exact element={<CrearPaso/>} />
+                    <Route path='/admin/crearitem' exact element={<CrearItem/>} />
                     <Route path='/admin/editarprofe' exact element={<EditarProfe/>} />
+                    <Route path='/admin/editaritem' exact element={<EditarItem/>} />
                     <Route path='/admin/editarclase' exact element={<EditarClase/>}/>
                     <Route path='/admin/crearaula' exact element={<CrearAula/>} />
                     <Route path='/confirmaciones' exact element={<ConfirmAccion/>}/>

@@ -4,6 +4,7 @@ import TablaClase from './tablas/TablaClase';
 import TablaEstudiante from './tablas/TablaEstudiante';
 import TablaProfesores from './tablas/TablaProfesor';
 import TablaTarea from './tablas/TablaTarea';
+import TablaInventario from './tablas/TablaInventario';
 import {useState}from 'react';
 
 
@@ -31,11 +32,18 @@ const tabClases = () => (
   </View>
 );
 
+const tabInventario = () => (
+  <View>
+    <TablaInventario />
+  </View>
+);
+
 const renderScene = SceneMap({
   first: tabEstudiantes,
   second: tabProfesores,
   third: tabTareas,
-  fourth: tabClases
+  fourth: tabClases,
+  fifth: tabInventario
 });
 
 const initialLayout = { width: Dimensions.get('window').width };
@@ -47,6 +55,7 @@ const PanelAdmin = () => {
     { key: 'second', title: 'Profesores' },
     { key: 'third', title: 'Tareas' },
     { key: 'fourth', title: 'Clases' },
+    { key: 'fifth', title: 'Inventario' },
   ]);
 
   return (

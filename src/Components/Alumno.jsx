@@ -46,7 +46,6 @@ const Alumno = ()=>{
         
       navigate(enlace, { state: { id:id }});
   };
-
   
 
     useEffect(() => {
@@ -59,6 +58,7 @@ const Alumno = ()=>{
             console.error('Error al obtener información del estudiante:', error);
           }
         };
+
 
         const obtenerTareas = async () => {
           try {
