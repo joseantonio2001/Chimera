@@ -10,7 +10,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-dotenv.config({ path: '../../.env' }); // Revisar siempre si no va bien conexión a BD
+app.use(express.static('./uploads'));
+
+dotenv.config({ path:'../../.env' }); // Revisar siempre si no va bien conexión a BD
+// dotenv.config(); // Revisar siempre si no va bien conexión a BD
 
 const dbConfig = {
   host: process.env.DB_HOST,
@@ -111,7 +114,8 @@ app.get('/estudiantes/:id', async (req, res) => { // GET Estudiantes
 
 // Get de todos los estudiantes de una clase por el id de la clase
 app.get('/estudiantes/clases/:idClase', async (req, res) => {
-  try {
+
+  try{
     const connection = await abrirConexion();
     const idClase = req.params.idClase;
     const queryEstudiantes = 'SELECT usuarios.*, estudiantes.* FROM usuarios INNER JOIN estudiantes ON usuarios.id = estudiantes.id INNER JOIN asignaciones ON estudiantes.id = asignaciones.id_estudiante WHERE asignaciones.id_clase = ?';
@@ -119,6 +123,7 @@ app.get('/estudiantes/clases/:idClase', async (req, res) => {
     connection.end(); // Libera recursos BD
     res.json([resultado]); // Resultado servido en HTTP formato JSON
   } catch (error) {
+
     console.error('Error al obtener estudiantes:', error);
     res.status(500).json({ error: 'Error al obtener estudiantes' });
   }
@@ -156,18 +161,57 @@ app.get('/profesores/:id', async (req, res) => { // GET Profesores
 // Get delid de clase de un profesor
 app.get('/profesor/clases/:id', async (req, res) => {
   const id = req.params.id;
-  try {
+
+  try{
     const connection = await abrirConexion();
-    const queryIdClase = 'SELECT id_clase FROM asignaciones WHERE id_profesor=?';
-    const idClase = await connection.promise().query(queryIdClase, [id]);
+    const queryIdClase='SELECT id_clase FROM asignaciones WHERE id_profesor=?';
+    const idClase=await connection.promise().query(queryIdClase, [id]);
     const idClaseValor = idClase[0][0].id_clase;
     connection.end(); // Libera recursos BD
     res.json(idClaseValor); // Resultado servido en HTTP formato JSON
-  } catch (error) {
+  }catch (error) {
     console.error('Error al obtener el id de la clase del profesor ', id, ':', error);
-    res.status(500).json({ error: 'Error al obtener el id de la clase del profesor ', id });
+    res.status(500).json({ error: 'Error al obtener el id de la clase del profesor ',id });
   }
 });
+
+// Get del profesor segun el id de la clase
+
+app.get('/clase/profesor/:id', async (req, res) => {
+  const idClase = req.params.id;
+  try {
+    const connection = await abrirConexion();
+
+    // Obtener el id_profesor desde la tabla asignaciones
+    const queryIdProfesor = 'SELECT id_profesor FROM asignaciones WHERE id_clase=?';
+    const [rowsIdProfesor] = await connection.promise().query(queryIdProfesor, [idClase]);
+    
+    if (rowsIdProfesor.length === 0) {
+      connection.end();
+      return res.status(404).json({ error: 'No se encontró el ID del profesor para la clase', idClase });
+    }
+
+    const idProfesor = rowsIdProfesor[0].id_profesor;
+
+    // Obtener todos los datos del profesor desde la tabla usuarios
+    const queryDatosProfesor = 'SELECT * FROM usuarios WHERE id=?';
+    const [rowsDatosProfesor] = await connection.promise().query(queryDatosProfesor, [idProfesor]);
+
+    connection.end(); // Liberar recursos BD
+
+    if (rowsDatosProfesor.length === 0) {
+      return res.status(404).json({ error: 'No se encontraron datos para el profesor con ID', idProfesor });
+    }
+
+    const datosProfesor = rowsDatosProfesor[0];
+
+    res.json(datosProfesor); // Resultado servido en HTTP formato JSON
+  } catch (error) {
+    console.error('Error al obtener los datos del profesor de la clase ', idClase, ':', error);
+    res.status(500).json({ error: 'Error al obtener los datos del profesor de la clase', idClase });
+  }
+});
+
 
 // Get de todas las tareas
 app.get('/tareas', async (req, res) => { // GET Tareas
@@ -266,26 +310,26 @@ app.get('/uploads/id/:id', async (req, res) => { // GET Tareas
 // Get imagen dada el nombre
 app.get('/uploads/:name', (req, res) => {
   const name = req.params.name;
-  const filePath = 'uploads/' + name;
+  const filePath = 'uploads/'+name;
   console.log("🚀 ~ file: server.js:321 ~ app.get ~ filePath:", filePath)
   const extension = filePath.split('.')[1];
   console.log("🚀 ~ file: server.js:323 ~ app.get ~ extension:", extension)
-  const contentType = 'image/' + extension;
+  const contentType = 'image/'+extension;
   // Comprueba exista el archivo
   console.log(fs.existsSync(filePath));
-  if (fs.existsSync(filePath)) {
-    fs.readFile(filePath, (err, content) => { // lee archivo asíncronamente
-      if (err) {
+  if(fs.existsSync(filePath)){
+    fs.readFile(filePath,(err, content) => { // lee archivo asíncronamente
+      if(err){
         console.log("🚀 ~ file: server.js:327 ~ fs.readFile ~ err:", err)
         res.writeHead(404, {
           "Content-Type": "text/plain"
-        });
-        res.end("404 Not Found");
-        return;
-      } else {
+      });
+      res.end("404 Not Found");
+      return;
+      }else{
         res.writeHead(200, {
           "Content-Type": contentType
-        });
+      });
         res.end(content);
       }
 
@@ -445,15 +489,31 @@ app.get('/pasosTarea/:id', async (req, res) => { // GET Pasos
   }
 });
 
+// Get de los pedidos asociados a un alumno 
+app.get('/pedido/:id', async (req, res) => { // GET Pasos
+  try {
+    const connection = await abrirConexion();
+    const idEstudiante = req.params.id;
+    const queryPasos = 'SELECT * FROM pedido_material WHERE id_estudiante = ?';
+    const [resultado] = await connection.promise().query(queryPasos, [idEstudiante]);
+    connection.end(); // Libera recursos BD
+    res.json([resultado]); // Resultado servido en HTTP formato JSON
+  } catch (error) {
+    console.error('Error al obtener pasos:', error);
+    res.status(500).json({ error: 'Error al obtener pasos' });
+  }
+});
+
 // Insercioones / POST
 // Ruta para insertar un estudiante en la base de datos
 app.post('/estudiantes/crearAlumno', async (req, res) => {
-  try {
+  try{
     let nuevoElementoId = '-1';
     const connection = await abrirConexion();
-    const { nombre, apellido1, apellido2, contraseña, preferencias, fechaNac } = req.body;
+    const { nombre, apellido1, apellido2, contraseña,  preferencias, fechaNac} = req.body;
     const query1 = 'INSERT INTO usuarios (nombre, apellido1, apellido2, fecha_nac, PASSWORD,img_perfil) VALUES (?, ?, ?, ?, MD5(?),?)';
-    const result = await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, contraseña, null]);
+    const result = await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, contraseña, null ]);
+
     if (result[0].err) {
       console.error('Error al insertar estudiante: ' + err);
       return;
@@ -475,6 +535,7 @@ app.post('/estudiantes/crearAlumno', async (req, res) => {
     console.log('Estudiante insertado con éxito');
     connection.end();
   } catch (error) {
+
     console.error('Error al introducir estudiante:', error);
     res.status(500).json({ error: 'Error al introducir estudiante' });
   }
@@ -491,6 +552,7 @@ app.post('/profesores/crearProfe', async (req, res) => {
     const query1 = 'INSERT INTO usuarios (nombre, apellido1, apellido2, fecha_nac, PASSWORD,img_perfil) VALUES (?, ?, ?, ?, MD5(?),?)';
 
     const result = await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, contraseña, null]);
+
     if (result[0].err) {
       console.error('Error al insertar profesor: ' + result[0].err);
       return;
@@ -509,6 +571,7 @@ app.post('/profesores/crearProfe', async (req, res) => {
     res.status(201).json({ message: 'Profesor insertado con éxito' });
     connection.end();
   } catch (error) {
+
     console.error('Error al introducir profesor:', error);
     res.status(500).json({ error: 'Error al introducir profesor' });
   }
@@ -610,21 +673,21 @@ app.post('/menus/crearMenu', async (req, res) => {
 
 // Insertar paso
 app.post('/pasos/crearPaso', async (req, res) => {
-  try {
+  try{
     const connection = await abrirConexion();
-    const { id_tarea, n_paso, imagen } = req.body;
+    const {id_tarea, n_paso, imagen } = req.body;
     const query1 = 'INSERT INTO pasos (id_tarea, n_paso, imagen) VALUES (?, ?, ?, ?)';
     await connection.promise().query(query1, [id_tarea, n_paso, imagen], (err, result) => {
-      if (err) {
-        console.error('Error al insertar paso: ' + err);
-        res.status(500).json({ error: 'Error al insertar paso en la base de datos' });
-        return;
-      }
-      console.log('Paso insertado con éxito en pasos');
-      res.status(201).json({ message: 'Paso insertado con éxito' });
+    if (err) {
+      console.error('Error al insertar paso: ' + err);
+      res.status(500).json({ error: 'Error al insertar paso en la base de datos' });
+      return;
+    }
+    console.log('Paso insertado con éxito en pasos');
+    res.status(201).json({ message: 'Paso insertado con éxito' });
     });
     connection.end();
-  } catch (error) {
+  } catch (error){
     console.error('Error al introducir paso:', error);
     res.status(500).json({ error: 'Error al introducir paso' });
   }
@@ -632,16 +695,16 @@ app.post('/pasos/crearPaso', async (req, res) => {
 
 // Insertar tarea
 app.post('/tareas/crearTarea', async (req, res) => {
-  try {
+  try{
     const connection = await abrirConexion();
     const { nombre, descripcion, video, portada, tipo } = req.body;
     const query1 = 'INSERT INTO tareas (nombre, descripcion, video, portada, tipo) VALUES (?, ?, ?, ?, ?)';
     console.log('Insertando tarea...')
-    await connection.promise().query(query1, [nombre, descripcion, video, portada, tipo]);
+    await connection.promise().query(query1, [nombre, descripcion, video, portada, tipo ]);
     console.log('Tarea insertada con éxito en tareas');
     res.status(201).json({ message: 'Tarea insertada con éxito' });
     connection.end();
-  } catch (error) {
+  } catch (error){
     console.error('Error al introducir tarea:', error);
     res.status(500).json({ error: 'Error al introducir tarea' });
   }
@@ -659,21 +722,21 @@ app.post('/clases/aniadealumnos', async (req, res) => {
       for (const estudianteId of estudiantes) {
         // Insertar una nueva fila en la tabla de asignaciones
         const queryInsert = 'INSERT INTO asignaciones (id_clase, id_estudiante) VALUES (?, ?)';
-        await connection.promise().query(queryInsert, [claseId, estudianteId], (err, result) => {
-          if (err) {
-            console.error('Error al establecer conexión con la base de datos:' + err);
-            res.status(500).json({ error: 'Error al establecer conexión con la base de datos.' });
-          }
-          // Enviar respuesta exitosa
+        await connection.promise().query(queryInsert, [claseId, estudianteId], (err, result) =>{
+        if (err){
+          console.error('Error al establecer conexión con la base de datos:' + err);
+          res.status(500).json({ error: 'Error al establecer conexión con la base de datos.' });
+        }
+        // Enviar respuesta exitosa
         });
         connection.end();
 
       }
 
-    } catch (error) {
+       } catch (error) {
       console.error('Error al añadir alumnos a la clase:', error);
       res.status(500).json({ error: 'Error al añadir alumnos a la clase.' });
-    }
+    } 
   } catch (error) {
     console.error('Error al añadir los estudiantes:', error);
     res.status(500).json({ error: 'Error al añadir los estudiantes.' });
@@ -682,6 +745,50 @@ app.post('/clases/aniadealumnos', async (req, res) => {
   res.status(201).json({ message: 'Alumnos añadidos con éxito a la clase.' });
 
 });
+
+
+// Insertar el pedido de material
+
+
+app.post('/guardarPedido', async (req, res) => {
+  try {
+    const { claseId, alumnoId, pedidos } = req.body;
+    const connection = await abrirConexion();
+    console.log('Valores a insertar:', { claseId, alumnoId, pedidos });
+    try {
+      // Iterar sobre los pedidos
+      for (const pedido of pedidos) {
+        const inventarioId = pedido.inventarioId;
+        const cantidad = pedido.cantidad;
+        
+        // Insertar una nueva fila en la tabla pedido_material
+        const queryInsert = 'INSERT INTO pedido_material (id_clase, id_estudiante, id_inventario, cantidad) VALUES (?, ?, ?, ?)';
+        await connection.promise().query(queryInsert, [claseId, alumnoId, inventarioId, cantidad], (err, result) => {
+          if (err) {
+            console.error('Error al establecer conexión con la base de datos:' + err);
+            res.status(500).json({ error: 'Error al establecer conexión con la base de datos.' });
+          }
+          // Puedes manejar el resultado si es necesario
+        });
+      }
+
+    } catch (error) {
+      console.error('Error al guardar pedidos:', error);
+      res.status(500).json({ error: 'Error al guardar pedidos.' });
+    } finally {
+      // Asegúrate de cerrar la conexión después de completar todas las inserciones
+      connection.end();
+    }
+  } catch (error) {
+    console.error('Error al procesar la solicitud:', error);
+    res.status(500).json({ error: 'Error al procesar la solicitud.' });
+  }
+
+  console.log('Pedidos guardados con éxito');
+  res.status(201).json({ message: 'Pedidos guardados con éxito.' });
+});
+
+
 
 // eliminar asignaciones
 
@@ -724,18 +831,29 @@ app.post('/tareas/aniadeasignaciones', async (req, res) => {
     const connection = await abrirConexion();
 
     try {
-      // Use Promise.all to wait for all queries to complete
-      await Promise.all(
-        tareas.map(async (tareaId) => {
-          const queryInsert =
-            'INSERT INTO asignaciones_tareas (id_alumno, id_tarea) VALUES (?, ?)';
-          await connection.promise().query(queryInsert, [idAlumno, tareaId]);
-        })
-      );
+      if (Array.isArray(tareas)) {
+        // Use Promise.all to wait for all queries to complete
+        await Promise.all(
+          tareas.map(async (tareaId) => {
+            const queryInsert =
+              'INSERT INTO asignaciones_tareas (id_alumno, id_tarea) VALUES (?, ?)';
+            await connection.promise().query(queryInsert, [idAlumno, tareaId]);
+          })
+        );
 
-      // All queries are successful, send a response
-      console.log('Tareas añadidas al estudiante con éxito');
-      res.status(201).json({ message: 'Tareas añadidas al estudiante con éxito.' });
+        // All queries are successful, send a response
+        console.log('Tareas añadidas al estudiante con éxito');
+        res.status(201).json({ message: 'Tareas añadidas al estudiante con éxito.' });
+      } else {
+        // Si tareas no es un array, realizar una única inserción
+        const queryInsert =
+          'INSERT INTO asignaciones_tareas (id_alumno, id_tarea) VALUES (?, ?)';
+        await connection.promise().query(queryInsert, [idAlumno, tareas]);
+
+        // Query is successful, send a response
+        console.log('Tarea añadida al estudiante con éxito');
+        res.status(201).json({ message: 'Tarea añadida al estudiante con éxito.' });
+      }
     } catch (error) {
       console.error('Error al añadir tareas al alumno:', error);
       res.status(500).json({ error: 'Error al añadir tareas al alumno.' });
@@ -753,7 +871,7 @@ app.post('/tareas/aniadeasignaciones', async (req, res) => {
 
 app.post('/tareas/quitarasignaciones', async (req, res) => {
   try {
-    const { idAlumno, tareas } = req.body;
+    const {idAlumno, tareas } = req.body;
     const connection = await abrirConexion();
 
     try {
@@ -792,30 +910,30 @@ app.post('/tareas/quitarasignaciones', async (req, res) => {
 // Ruta para actualizar un estudiante en la base de datos
 
 app.put('/estudiantes/actualizarAlumno', async (req, res) => {
-  try {
+  try{
     const connection = await abrirConexion();
-    const { id, nombre, apellido1, apellido2, preferencias, fechaNac } = req.body;
+    const { id, nombre, apellido1, apellido2,  preferencias, fechaNac} = req.body;
     const query1 = 'UPDATE usuarios SET nombre = ?, apellido1 = ?, apellido2 = ?, fecha_nac = ? WHERE id = ?';
-    await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, id], (err, result) => {
-      if (err) {
-        console.error('Error al actualizar estudiante: ' + err);
-        return;
-      }
-      console.log('Estudiante actualizado con éxito en usuarios');
+    await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, id ], (err, result) => {
+    if (err) {
+      console.error('Error al actualizar estudiante: ' + err);
+      return;
+    }
+    console.log('Estudiante actualizado con éxito en usuarios');
     });
 
     const query2 = 'UPDATE estudiantes SET preferencias = ? WHERE id = ?';
-    await connection.promise().query(query2, [preferencias, id], (err, result) => {
-      if (err) {
-        console.error('Error al actualizar estudiante: ' + err);
-        res.status(500).json({ error: 'Error al actualizar estudiante en la base de datos' });
-        return;
-      }
-      console.log('Estudiante actualizado con éxito en Estudiantes');
-      res.status(201).json({ message: 'Estudiante actualizado con éxito' });
+    await connection.promise().query(query2, [preferencias,id], (err, result) => {
+    if (err) {
+      console.error('Error al actualizar estudiante: ' + err);
+      res.status(500).json({ error: 'Error al actualizar estudiante en la base de datos' });
+      return;
+    }
+    console.log('Estudiante actualizado con éxito en Estudiantes');
+    res.status(201).json({ message: 'Estudiante actualizado con éxito' });
     });
     connection.end();
-  } catch (error) {
+  } catch (error){
     console.error('Error al actualizar estudiante:', error);
     res.status(500).json({ error: 'Error al actualizar estudiante' });
   }
@@ -825,30 +943,30 @@ app.put('/estudiantes/actualizarAlumno', async (req, res) => {
 
 // Actualizar profesor
 app.put('/profesores/actualizarProfe', async (req, res) => {
-  try {
+  try{
     const connection = await abrirConexion();
-    const { id, nombre, apellido1, apellido2, admin, fechaNac } = req.body;
+    const { id, nombre, apellido1, apellido2, admin, fechaNac} = req.body;
     const query1 = 'UPDATE usuarios SET nombre = ?, apellido1 = ?, apellido2 = ?, fecha_nac = ? WHERE id = ?';
-    await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, id], (err, result) => {
-      if (err) {
-        console.error('Error al actualizar profesor: ' + err);
-        return;
-      }
-      console.log('Profesor actualizado con éxito en usuarios');
+    await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac,  id ], (err, result) => {
+    if (err) {
+      console.error('Error al actualizar profesor: ' + err);
+      return;
+    }
+    console.log('Profesor actualizado con éxito en usuarios');
     });
 
     const query2 = 'UPDATE profesores SET admin = ? WHERE id = ?';
-    await connection.promise().query(query2, [admin, id], (err, result) => {
-      if (err) {
-        console.error('Error al actualizar profesor: ' + err);
-        res.status(500).json({ error: 'Error al actualizar profesor en la base de datos' });
-        return;
-      }
-      console.log('Profesor actualizado con éxito en Profesores');
-      res.status(201).json({ message: 'Profesor actualizado con éxito' });
+    await connection.promise().query(query2, [admin,id], (err, result) => {
+    if (err) {
+      console.error('Error al actualizar profesor: ' + err);
+      res.status(500).json({ error: 'Error al actualizar profesor en la base de datos' });
+      return;
+    }
+    console.log('Profesor actualizado con éxito en Profesores');
+    res.status(201).json({ message: 'Profesor actualizado con éxito' });
     });
     connection.end();
-  } catch (error) {
+  } catch (error){
     console.error('Error al actualizar profesor:', error);
     res.status(500).json({ error: 'Error al actualizar profesor' });
   }
@@ -858,21 +976,21 @@ app.put('/profesores/actualizarProfe', async (req, res) => {
 
 // Actualizar clase
 app.put('/clases/actualizarClase', async (req, res) => {
-  try {
+  try{
     const connection = await abrirConexion();
     const { id, capacidad, id_profesor, id_estudiante } = req.body;
     const query1 = 'UPDATE clases SET capacidad = ?, id_profesor = ?, id_estudiante = ? WHERE id = ?';
-    await connection.promise().query(query1, [capacidad, id_profesor, id_estudiante, id], (err, result) => {
-      if (err) {
-        console.error('Error al actualizar clase: ' + err);
-        res.status(500).json({ error: 'Error al actualizar clase en la base de datos' });
-        return;
-      }
-      console.log('Clase actualizada con éxito en clases');
-      res.status(201).json({ message: 'Clase actualizada con éxito' });
+    await connection.promise().query(query1, [capacidad, id_profesor, id_estudiante, id ], (err, result) => {
+    if (err) {
+      console.error('Error al actualizar clase: ' + err);
+      res.status(500).json({ error: 'Error al actualizar clase en la base de datos' });
+      return;
+    }
+    console.log('Clase actualizada con éxito en clases');
+    res.status(201).json({ message: 'Clase actualizada con éxito' });
     });
     connection.end();
-  } catch (error) {
+  } catch (error){
     console.error('Error al actualizar clase:', error);
     res.status(500).json({ error: 'Error al actualizar clase' });
   }
@@ -942,21 +1060,21 @@ app.put('/menus/actualizarMenu', async (req, res) => {
 
 // Actualizar paso
 app.put('/pasos/actualizarPaso', async (req, res) => {
-  try {
+  try{
     const connection = await abrirConexion();
     const { id, id_tarea, n_paso, imagen } = req.body;
     const query1 = 'UPDATE pasos SET id_tarea = ?, n_paso = ?, imagen = ? WHERE id = ?';
-    await connection.promise().query(query1, [id_tarea, n_paso, imagen, id], (err, result) => {
-      if (err) {
-        console.error('Error al actualizar paso: ' + err);
-        res.status(500).json({ error: 'Error al actualizar paso en la base de datos' });
-        return;
-      }
-      console.log('Paso actualizado con éxito en pasos');
-      res.status(201).json({ message: 'Paso actualizado con éxito' });
+    await connection.promise().query(query1, [id_tarea, n_paso, imagen, id ], (err, result) => {
+    if (err) {
+      console.error('Error al actualizar paso: ' + err);
+      res.status(500).json({ error: 'Error al actualizar paso en la base de datos' });
+      return;
+    }
+    console.log('Paso actualizado con éxito en pasos');
+    res.status(201).json({ message: 'Paso actualizado con éxito' });
     });
     connection.end();
-  } catch (error) {
+  } catch (error){
     console.error('Error al actualizar paso:', error);
     res.status(500).json({ error: 'Error al actualizar paso' });
   }
@@ -964,21 +1082,21 @@ app.put('/pasos/actualizarPaso', async (req, res) => {
 
 // Actualizar tarea
 app.put('/tareas/actualizarTarea', async (req, res) => {
-  try {
+  try{
     const connection = await abrirConexion();
     const { id, nombre, descripcion, video, portada, tipo } = req.body;
     const query1 = 'UPDATE tareas SET nombre = ?, descripcion = ?, video = ?, portada = ?, tipo = ? WHERE id = ?';
-    await connection.promise().query(query1, [nombre, descripcion, video, portada, tipo, id], (err, result) => {
-      if (err) {
-        console.error('Error al actualizar tarea: ' + err);
-        res.status(500).json({ error: 'Error al actualizar tarea en la base de datos' });
-        return;
-      }
-      console.log('Tarea actualizada con éxito en tareas');
-      res.status(201).json({ message: 'Tarea actualizada con éxito' });
+    await connection.promise().query(query1, [nombre, descripcion, video, portada, tipo, id ], (err, result) => {
+    if (err) {
+      console.error('Error al actualizar tarea: ' + err);
+      res.status(500).json({ error: 'Error al actualizar tarea en la base de datos' });
+      return;
+    }
+    console.log('Tarea actualizada con éxito en tareas');
+    res.status(201).json({ message: 'Tarea actualizada con éxito' });
     });
     connection.end();
-  } catch (error) {
+  } catch (error){
     console.error('Error al actualizar tarea:', error);
     res.status(500).json({ error: 'Error al actualizar tarea' });
   }
@@ -988,32 +1106,32 @@ app.put('/tareas/actualizarTarea', async (req, res) => {
 // Ruta para borrar un estudiante en la base de datos
 
 app.delete('/estudiantes/borrarAlumno/:id', async (req, res) => {
-  try {
+  try{
     const connection = await abrirConexion();
     const id = parseInt(req.params.id, 10);
-    console.log('Queremos borrar alumno. ID: ', id)
+    console.log('Queremos borrar alumno. ID: ',id)
 
     const query1 = 'DELETE FROM estudiantes WHERE id = ?';
     await connection.promise().query(query1, id, (err, result) => {
-      if (err) {
-        console.error('Error al borrar estudiante: ' + err);
-        res.status(500).json({ error: 'Error al borrar estudiante en la base de datos' });
-        return;
-      }
-      console.log('Estudiante borrado con éxito en Estudiantes');
-      res.status(201).json({ message: 'Estudiante borrado con éxito' });
+    if (err) {
+      console.error('Error al borrar estudiante: ' + err);
+      res.status(500).json({ error: 'Error al borrar estudiante en la base de datos' });
+      return;
+    }
+    console.log('Estudiante borrado con éxito en Estudiantes');
+    res.status(201).json({ message: 'Estudiante borrado con éxito' });
     });
 
     const query2 = 'DELETE FROM usuarios WHERE id = ?';
     await connection.promise().query(query2, id, (err, result) => {
-      if (err) {
-        console.error('Error al borrar estudiante: ' + err);
-        return;
-      }
-      console.log('Estudiante borrado con éxito en usuarios');
+    if (err) {
+      console.error('Error al borrar estudiante: ' + err);
+      return;
+    }
+    console.log('Estudiante borrado con éxito en usuarios');
     });
     connection.end();
-  } catch (error) {
+  } catch (error){
     console.error('Error al borrar estudiante:', error);
     res.status(500).json({ error: 'Error al borrar estudiante' });
   }
@@ -1023,32 +1141,33 @@ app.delete('/estudiantes/borrarAlumno/:id', async (req, res) => {
 
 // Borrar profesor
 app.delete('/profesores/borrarProfe/:id', async (req, res) => {
-  try {
+  try{
     const connection = await abrirConexion();
     const id = parseInt(req.params.id, 10);
-    console.log('Queremos borrar profesor. ID: ', id)
+    console.log('Queremos borrar profesor. ID: ',id)
 
     const query1 = 'DELETE FROM profesores WHERE id = ?';
     await connection.promise().query(query1, [id], (err, result) => {
-      if (err) {
-        console.error('Error al borrar profesor: ' + err);
-        res.status(500).json({ error: 'Error al borrar profesor en la base de datos' });
-        return;
-      }
-      console.log('Profesor borrado con éxito en Profesores');
-      res.status(201).json({ message: 'Profesor borrado con éxito' });
+    if (err) {
+      console.error('Error al borrar profesor: ' + err);
+      res.status(500).json({ error: 'Error al borrar profesor en la base de datos' });
+      return;
+    }
+    console.log('Profesor borrado con éxito en Profesores');
+    res.status(201).json({ message: 'Profesor borrado con éxito' });
     });
 
     const query2 = 'DELETE FROM usuarios WHERE id = ?';
     await connection.promise().query(query2, [id], (err, result) => {
-      if (err) {
-        console.error('Error al borrar profesor: ' + err);
-        return;
-      }
-      console.log('Profesor borrado con éxito en usuarios');
+
+    if (err) {
+      console.error('Error al borrar profesor: ' + err);
+      return;
+    }
+    console.log('Profesor borrado con éxito en usuarios');
     });
     connection.end();
-  } catch (error) {
+  } catch (error){
     console.error('Error al borrar profesor:', error);
     res.status(500).json({ error: 'Error al borrar profesor' });
   }
@@ -1058,23 +1177,23 @@ app.delete('/profesores/borrarProfe/:id', async (req, res) => {
 
 // Borrar clase
 app.delete('/clases/borrarClase/:id', async (req, res) => {
-  try {
+  try{
     const connection = await abrirConexion();
     const id = parseInt(req.params.id, 10);
-    console.log('Queremos borrar clase. ID: ', id)
+    console.log('Queremos borrar clase. ID: ',id)
 
     const query1 = 'DELETE FROM clases WHERE id = ?';
     await connection.promise().query(query1, [id], (err, result) => {
-      if (err) {
-        console.error('Error al borrar clase: ' + err);
-        res.status(500).json({ error: 'Error al borrar clase en la base de datos' });
-        return;
-      }
-      console.log('Clase borrada con éxito en clases');
-      res.status(201).json({ message: 'Clase borrada con éxito' });
+    if (err) {
+      console.error('Error al borrar clase: ' + err);
+      res.status(500).json({ error: 'Error al borrar clase en la base de datos' });
+      return;
+    }
+    console.log('Clase borrada con éxito en clases');
+    res.status(201).json({ message: 'Clase borrada con éxito' });
     });
     connection.end();
-  } catch (error) {
+  } catch (error){
     console.error('Error al borrar clase:', error);
     res.status(500).json({ error: 'Error al borrar clase' });
   }
@@ -1110,23 +1229,23 @@ app.delete('/inventario/borrarElemento/:id', async (req, res) => {
 
 // Borrar menú
 app.delete('/menus/borrarMenu/:id', async (req, res) => {
-  try {
+  try{
     const connection = await abrirConexion();
     const id = parseInt(req.params.id, 10);
-    console.log('Queremos borrar manú. ID: ', id)
+    console.log('Queremos borrar manú. ID: ',id)
 
     const query1 = 'DELETE FROM menus WHERE id = ?';
     await connection.promise().query(query1, [id], (err, result) => {
-      if (err) {
-        console.error('Error al borrar menu: ' + err);
-        res.status(500).json({ error: 'Error al borrar menu en la base de datos' });
-        return;
-      }
-      console.log('Menu borrado con éxito en menus');
-      res.status(201).json({ message: 'Menu borrado con éxito' });
+    if (err) {
+      console.error('Error al borrar menu: ' + err);
+      res.status(500).json({ error: 'Error al borrar menu en la base de datos' });
+      return;
+    }
+    console.log('Menu borrado con éxito en menus');
+    res.status(201).json({ message: 'Menu borrado con éxito' });
     });
     connection.end();
-  } catch (error) {
+  } catch (error){
     console.error('Error al borrar menu:', error);
     res.status(500).json({ error: 'Error al borrar menu' });
   }
@@ -1136,23 +1255,23 @@ app.delete('/menus/borrarMenu/:id', async (req, res) => {
 
 // Borrar paso
 app.delete('/pasos/borrarPaso/:id', async (req, res) => {
-  try {
+  try{
     const connection = await abrirConexion();
     const id = parseInt(req.params.id, 10);
-    console.log('Queremos borrar un paso de una tarea. ID: ', id)
+    console.log('Queremos borrar un paso de una tarea. ID: ',id)
 
     const query1 = 'DELETE FROM pasos WHERE id = ?';
     await connection.promise().query(query1, [id], (err, result) => {
-      if (err) {
-        console.error('Error al borrar paso: ' + err);
-        res.status(500).json({ error: 'Error al borrar paso en la base de datos' });
-        return;
-      }
-      console.log('Paso borrado con éxito en pasos');
-      res.status(201).json({ message: 'Paso borrado con éxito' });
+    if (err) {
+      console.error('Error al borrar paso: ' + err);
+      res.status(500).json({ error: 'Error al borrar paso en la base de datos' });
+      return;
+    }
+    console.log('Paso borrado con éxito en pasos');
+    res.status(201).json({ message: 'Paso borrado con éxito' });
     });
     connection.end();
-  } catch (error) {
+  } catch (error){
     console.error('Error al borrar paso:', error);
     res.status(500).json({ error: 'Error al borrar paso' });
   }
@@ -1162,28 +1281,54 @@ app.delete('/pasos/borrarPaso/:id', async (req, res) => {
 
 // Borrar tarea
 app.delete('/tareas/borrarTarea/:id', async (req, res) => {
-  try {
+  try{
     const connection = await abrirConexion();
     const id = parseInt(req.params.id, 10);
-    console.log('Queremos borrar tarea. ID: ', id)
+    console.log('Queremos borrar tarea. ID: ',id)
 
     const query1 = 'DELETE FROM tareas WHERE id = ?';
     await connection.promise().query(query1, [id], (err, result) => {
-      if (err) {
-        console.error('Error al borrar tarea: ' + err);
-        res.status(500).json({ error: 'Error al borrar tarea en la base de datos' });
-        return;
-      }
-      console.log('Tarea borrada con éxito en tareas');
-      res.status(201).json({ message: 'Tarea borrada con éxito' });
+    if (err) {
+      console.error('Error al borrar tarea: ' + err);
+      res.status(500).json({ error: 'Error al borrar tarea en la base de datos' });
+      return;
+    }
+    console.log('Tarea borrada con éxito en tareas');
+    res.status(201).json({ message: 'Tarea borrada con éxito' });
     });
     connection.end();
-  } catch (error) {
+  } catch (error){
     console.error('Error al borrar tarea:', error);
     res.status(500).json({ error: 'Error al borrar tarea' });
   }
   console.log('Tarea eliminada con éxito en la base de datos!');
   res.status(201).json({ message: ' Tarea eliminada con éxito' });
+});
+
+
+// Borrar un pedido
+app.delete('/pedido/:id', async (req, res) => {
+  try{
+    const connection = await abrirConexion();
+    const idClase = parseInt(req.params.id, 10);
+
+    const query1 = 'DELETE FROM pedido_material WHERE id_clase = ?';
+    await connection.promise().query(query1, [idClase], (err, result) => {
+    if (err) {
+      console.error('Error al borrar el pedido: ' + err);
+      res.status(500).json({ error: 'Error al borrar el pedido en la base de datos' });
+      return;
+    }
+    console.log('Peido borrado con éxito');
+    res.status(201).json({ message: 'Pedido borrado con éxito' });
+    });
+    connection.end();
+  } catch (error){
+    console.error('Error al borrar el pedido:', error);
+    res.status(500).json({ error: 'Error al borrar el pedido' });
+  }
+  console.log('Pedido eliminado con éxito en la base de datos!');
+  res.status(201).json({ message: ' Pedido eliminado con éxito' });
 });
 
 // Get de todas las imágenes una tarea

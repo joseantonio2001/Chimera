@@ -17,10 +17,12 @@ import ConfirmAccion from './administracion/Confirmaciones.jsx';
 import EditarTareasAlumno from './administracion/EditarTareasAlumno.jsx';
 import TareaFinalizada from "./tareasAlumno/TareaFinalizada";
 import MostrarPasos from "./tareasAlumno/MostrarPasos";
+import CrearItem from './administracion/CrearItem.jsx';
+import Inventario from "./tareasAlumno/TareaInventario.jsx";
 import Confirmaciones from './administracion/Confirmaciones';
 import CrearPaso from './administracion/CrearPaso';
 import CrearTarea from './administracion/CrearTarea';
-import CrearItem from './administracion/CrearItem.jsx';
+import PedirMaterial from './PedirMaterial.jsx';
 
 const Main = ()=>{
     return(
@@ -48,6 +50,8 @@ const Main = ()=>{
                     <Route path='confirmacioncrearaula' exact element={<Confirmaciones/>}/>
                     <Route path='/tareafinalizada' exact element={<TareaFinalizada/>}/>
                     <Route path='/mostrarpasos/:id' element={<MostrarPasos/>} />
+                    <Route path='/tareainventario' element={<Inventario/>} />
+                    <Route path='/pedirmaterial' exact element={<PedirMaterial/>} />
 
                 </Routes>
             </View>
