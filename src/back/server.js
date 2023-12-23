@@ -1197,6 +1197,69 @@ app.get('/uploads/:name', (req, res) => {
   }
 });
 
+
+app.get('/videos/:name', (req, res) => {
+  const name = req.params.name;
+  const filePath = `uploads/${name}`;
+  const stat = fs.statSync(filePath);
+  const fileSize = stat.size;
+  const range = req.headers.range;
+
+  if (range) {
+    const parts = range.replace(/bytes=/, "").split("-");
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : fileSize-1;
+
+    if(start >= fileSize) {
+      res.status(416).send('Requested range not satisfiable\n'+start+' >= '+fileSize);
+      return;
+    }
+
+    const chunksize = (end-start)+1;
+    const file = fs.createReadStream(filePath, {start, end});
+    const head = {
+      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunksize,
+      'Content-Type': 'video/mp4',
+    };
+
+    res.writeHead(206, head);
+    file.pipe(res);
+  } else {
+    const head = {
+      'Content-Length': fileSize,
+      'Content-Type': 'video/mp4',
+    };
+    res.writeHead(200, head);
+    fs.createReadStream(filePath).pipe(res);
+  }
+});
+
+app.get('/obtener_video/:id', async (req, res) => {
+  try {
+    console.log("HOLAAAAAAAAAAAA");
+    const id = req.params.id;
+    const connection = await abrirConexion();
+    console.log(id);
+
+
+
+    const query = 'SELECT * FROM media WHERE id = ?';
+    const resultado = await connection.promise().query(query, id);
+    console.log(resultado[0][0].ruta);
+    const videoNew = { id: resultado[0].id, url: resultado[0][0].ruta.replace('uploads/', '') };
+
+    console.log("nombre");
+    console.log(videoNew);
+
+    res.json(videoNew);
+  } catch (error) {
+    console.error('Error al obtener pasos:', error);
+    res.status(500).json({ error: 'Error al obtener pasos' });
+  }
+});
+
 app.listen(5050, () => { // Inicia el servidor en el puerto 5050
   console.log('Servidor en ejecución en el puerto 5050');
 });

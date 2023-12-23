@@ -21,6 +21,7 @@ import CrearPaso from './administracion/CrearPaso';
 import CrearTarea from './administracion/CrearTarea';
 
 const Main = ()=>{
+
     return(
         <NativeRouter>
             <View style={{ flex: 1 }}>
@@ -53,3 +54,4 @@ const Main = ()=>{
 }
 
 export default Main
+export const modoVisualizacion = '101';
