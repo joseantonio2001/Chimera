@@ -1238,7 +1238,6 @@ app.get('/videos/:name', (req, res) => {
 
 app.get('/obtener_video/:id', async (req, res) => {
   try {
-    console.log("HOLAAAAAAAAAAAA");
     const id = req.params.id;
     const connection = await abrirConexion();
     console.log(id);
@@ -1249,9 +1248,6 @@ app.get('/obtener_video/:id', async (req, res) => {
     const resultado = await connection.promise().query(query, id);
     console.log(resultado[0][0].ruta);
     const videoNew = { id: resultado[0].id, url: resultado[0][0].ruta.replace('uploads/', '') };
-
-    console.log("nombre");
-    console.log(videoNew);
 
     res.json(videoNew);
   } catch (error) {
