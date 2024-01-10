@@ -19,6 +19,9 @@ import MostrarPasos from "./tareasAlumno/MostrarPasos";
 import Confirmaciones from './administracion/Confirmaciones';
 import CrearPaso from './administracion/CrearPaso';
 import CrearTarea from './administracion/CrearTarea';
+import SeleccionMenu from './tareas/SeleccionMenu.jsx';
+import AulasComanda from './tareas/AulasComanda.jsx';
+import MenuComanda from './tareas/MenuComanda.jsx';
 
 const Main = ()=>{
     return(
@@ -44,7 +47,9 @@ const Main = ()=>{
                     <Route path='confirmacioncrearaula' exact element={<Confirmaciones/>}/>
                     <Route path='/tareafinalizada' exact element={<TareaFinalizada/>}/>
                     <Route path='/mostrarpasos/:id' element={<MostrarPasos/>} />
-
+                    <Route path='/tareaComanda' exact element={<AulasComanda/>}/>
+                    <Route path='/tareaComanda/menu' exact element={<MenuComanda/>}/>
+                    <Route path='/tareaComanda/menu/seleccion' exact element={<SeleccionMenu/>}/>
                 </Routes>
             </View>
         </NativeRouter>

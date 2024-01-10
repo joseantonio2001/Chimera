@@ -111,7 +111,7 @@ const Alumno = ()=>{
         {tieneComandas && (
           <Pressable
             onPress={() => {
-              /* Acción cuando se selecciona la imagen de Comandas */
+              navigate('/tareaComanda');
             }}
             accessibilityLabel="Tareas de las comandas. Haz clic para ver más detalles."
           >

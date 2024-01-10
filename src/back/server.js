@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('./uploads'));
 
-dotenv.config({ path:'../../.env' }); // Revisar siempre si no va bien conexión a BD
+dotenv.config({ path:'.env' }); // Revisar siempre si no va bien conexión a BD
 // dotenv.config(); // Revisar siempre si no va bien conexión a BD
 
 const dbConfig = {
@@ -135,11 +135,11 @@ app.get('/profesores/:id', async (req, res) => { // GET Profesores
   }
 });
 
-// Get delid de clase de un profesor
+// Get del id de clase de un profesor
 app.get('/profesor/clases/:id', async (req, res) => {
-  const id = req.params.id;
   try{
     const connection = await abrirConexion();
+    const id = req.params.id;
     const queryIdClase='SELECT id_clase FROM asignaciones WHERE id_profesor=?';
     const idClase=await connection.promise().query(queryIdClase, [id]);
     const idClaseValor = idClase[0][0].id_clase;
@@ -150,6 +150,21 @@ app.get('/profesor/clases/:id', async (req, res) => {
     res.status(500).json({ error: 'Error al obtener el id de la clase del profesor ',id });
   }
 });
+
+// Get profesores id de una clase por su id
+app.get('/clases/profesores/:id', async (req, res) => {
+  try{
+    const connection = await abrirConexion();
+    const id = req.params.id;
+    const queryProfesores = 'SELECT id_profesor FROM asignaciones WHERE id_clase=?';
+    const [profesores] = await connection.promise().query(queryProfesores, [id]);
+    connection.end(); // Libera recursos BD
+    res.json(profesores); // Resultado servido en HTTP formato JSON
+  }catch (error) {
+    console.error('Error al obtener los profesores de la clase ', id, ':', error);
+    res.status(500).json({ error: 'Error al obtener los profesores de la clase ',id });
+  }
+})
 
 // Get de todas las tareas
 app.get('/tareas', async (req, res) => { // GET Tareas
@@ -564,9 +579,11 @@ app.post('/inventario/crearElemento', async (req, res) => {
 app.post('/menus/crearMenu', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const { nombre, descripcion } = req.body;
-    const query1 = 'INSERT INTO menus (nombre, descripcion) VALUES (?, ?)';
-    await connection.promise().query(query1, [nombre, descripcion ], (err, result) => {
+    const { usuario, selectedComida } = req.body;
+    const id_usuario = usuario.id;
+    const selectedComidaString = selectedComida.join(','); 
+    const query1 = 'INSERT INTO menus (id_usuario, menu_seleccionado) VALUES (?, ?)';
+    await connection.promise().query(query1, [id_usuario, selectedComidaString], (err, result) => {
     if (err) {
       console.error('Error al insertar menu: ' + err);
       res.status(500).json({ error: 'Error al insertar menu en la base de datos' });
