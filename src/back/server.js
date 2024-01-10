@@ -1280,6 +1280,118 @@ app.get('/uploads/:name', (req, res) => {
       "Content-Type": "text/plain"
   });
   res.end("404 Not Found");
+  return;
+  }
+});
+
+
+app.get('/videos/:name', (req, res) => {
+  const name = req.params.name;
+  const filePath = `uploads/${name}`;
+  const stat = fs.statSync(filePath);
+  const fileSize = stat.size;
+  const range = req.headers.range;
+
+  if (range) {
+    const parts = range.replace(/bytes=/, "").split("-");
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : fileSize-1;
+
+    if(start >= fileSize) {
+      res.status(416).send('Requested range not satisfiable\n'+start+' >= '+fileSize);
+      return;
+    }
+
+    const chunksize = (end-start)+1;
+    const file = fs.createReadStream(filePath, {start, end});
+    const head = {
+      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunksize,
+      'Content-Type': 'video/mp4',
+    };
+
+    res.writeHead(206, head);
+    file.pipe(res);
+  } else {
+    const head = {
+      'Content-Length': fileSize,
+      'Content-Type': 'video/mp4',
+    };
+    res.writeHead(200, head);
+    fs.createReadStream(filePath).pipe(res);
+  }
+});
+
+// Get de todas las imágenes una tarea
+
+app.post('/obtener_imagenes', async (req, res) => {
+  try {
+    const connection = await abrirConexion();
+    const { ids } = req.body;
+    const imagesNew = [];
+    for (const id of ids) {
+      const query = 'SELECT * FROM media WHERE id = ?';
+      const [resultado] = await connection.promise().query(query, [id]);
+      imagesNew.push({ id: resultado[0].id, url: resultado[0].ruta.replace('uploads/', '') });
+    }
+    console.log(imagesNew);
+
+    res.json(imagesNew);
+  } catch (error) {
+    console.error('Error al obtener pasos:', error);
+    res.status(500).json({ error: 'Error al obtener pasos' });
+  }
+});
+
+app.get('/obtener_video/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const connection = await abrirConexion();
+    console.log(id);
+
+
+
+    const query = 'SELECT * FROM media WHERE id = ?';
+    const resultado = await connection.promise().query(query, id);
+    console.log(resultado[0][0].ruta);
+    const videoNew = { id: resultado[0].id, url: resultado[0][0].ruta.replace('uploads/', '') };
+
+    res.json(videoNew);
+  } catch (error) {
+    console.error('Error al obtener pasos:', error);
+    res.status(500).json({ error: 'Error al obtener pasos' });
+  }
+});
+
+
+app.get('/uploads/:name', (req, res) => {
+  const name = req.params.name;
+  const filePath = 'uploads/'+name;
+  const extension = filePath.split('.')[1];
+  const contentType = 'image/'+extension;
+  // Comprueba exista el archivo
+  console.log(fs.existsSync(filePath));
+  if(fs.existsSync(filePath)){
+    fs.readFile(filePath,(err, content) => { // lee archivo asíncronamente
+      if(err){
+        res.writeHead(404, {
+          "Content-Type": "text/plain"
+      });
+      res.end("404 Not Found");
+      }else{
+        res.writeHead(200, {
+          "Content-Type": contentType
+      });
+        console.log(content);
+        res.end(content);
+      }
+    });
+  }else{
+    res.writeHead(404, {
+      "Content-Type": "text/plain"
+  });
+  res.end("404 Not Found");
   }
 });
 
