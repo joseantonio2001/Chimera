@@ -62,7 +62,7 @@ const MostrarPasos = () => {
           return paso.id_imagen
         });
         const imagenesResponse = await obtenerNombresImagenes(idImagenes);
-        const videoResponse = await obtenerVideo(tareaResponse.data[0][0].id_video);
+        const videoResponse = await obtenerVideo(tareaResponse.data[0][0].video);
 
         setImages(imagenesResponse);
         setVideoUrl(videoResponse);

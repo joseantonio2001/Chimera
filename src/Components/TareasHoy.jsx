@@ -59,7 +59,7 @@ const TareasHoy = () => {
         const tareasConPortadas = await Promise.all(
           response.data.map(async (tarea) => {
             try {
-              const tareaPortadaResponse = await axios.get(`${useHostParam('uploads')}/id/${tarea.id_portada}`);
+              const tareaPortadaResponse = await axios.get(`${useHostParam('uploads')}/id/${tarea.portada}`);
               return tareaPortadaResponse.data[0];
             } catch (error) {
               console.error(`Error al obtener la portada para la tarea ${tarea.id}:`, error.message);
