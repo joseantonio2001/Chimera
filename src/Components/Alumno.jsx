@@ -2,6 +2,7 @@ import {Image, Platform, Pressable, StyleSheet, Text, View} from 'react-native'
 import { useEffect, useState} from 'react'
 import { useLocation, useNavigate } from 'react-router-native';
 import axios from 'axios';
+import {modoVisualizacion} from "./Main";
 
 
 const useHost = (campo) => {
@@ -85,15 +86,39 @@ const Alumno = ()=>{
       return (
         <View>
           <Image style={styles.image} source={require('../../data/img/LogoColegio.png')} />
-          <Text style={styles.headerText}>Lista De Tareas</Text>
-          {estudiante.nombre && (
+          {estudiante.nombre && modoVisualizacion === '100' && (
             <Text style={styles.welcomeText}>
               Bienvenido de nuevo, {estudiante.nombre}
             </Text>
           )}
+            {estudiante.nombre && (modoVisualizacion === '101' || modoVisualizacion === '010') && (
+                <View>
+                    <Text style={styles.welcomeText}>
+                      Bienvenido de nuevo, {estudiante.nombre}
+                    </Text>
+                    <Image resizeMode="contain" style={styles.titleImage} source={require('../../data/img/hola.png')} />
+                </View>
+
+          )}
+            {estudiante.nombre && modoVisualizacion === '001' && (
+            <Image resizeMode="contain" style={styles.titleImage} source={require('../../data/img/hola.png')} />
+          )}
+            {modoVisualizacion === '100' && (
+             <Text style={styles.headerText}>Lista De Tareas</Text>
+            )}
+            {(modoVisualizacion === '101' || modoVisualizacion === '010') && (
+                <View>
+                    <Text style={styles.headerText}>Lista De Tareas</Text>
+                    <Image resizeMode="contain" style={styles.image} source={require('../../data/img/lista.png')} />
+                </View>
+
+            )}
+            {modoVisualizacion === '001' && (
+             <Image resizeMode="contain" style={styles.image} source={require('../../data/img/lista.png')} />
+            )}
 
       <View style={styles.imagesContainer}>
-        {tieneTareasDeHoy && (
+        {tieneTareasDeHoy &&  (modoVisualizacion === '101' || modoVisualizacion === '010') &&(
           <Pressable
             onPress={() => handleTareas('/tareasHoy')}
             accessibilityLabel="Tareas de Hoy. Haz clic para ver más detalles."
@@ -107,8 +132,31 @@ const Alumno = ()=>{
             </View>
           </Pressable>
         )}
+          {tieneTareasDeHoy &&  modoVisualizacion === '100' &&(
+          <Pressable
+            onPress={() => handleTareas('/tareasHoy')}
+            accessibilityLabel="Tareas de Hoy. Haz clic para ver más detalles."
+          >
+            <View style={styles.imageContainer}>
+              <Text style={styles.imageTitle}>Tareas de Hoy</Text>
+            </View>
+          </Pressable>
+        )}
+          {tieneTareasDeHoy &&  modoVisualizacion === '001' &&(
+          <Pressable
+            onPress={() => handleTareas('/tareasHoy')}
+            accessibilityLabel="Tareas de Hoy. Haz clic para ver más detalles."
+          >
+            <View style={styles.imageContainer}>
+                <Image
+                style={styles.largeImage}
+                source={require('../../data/img/PortadaTareasHoy.png')}
+              />
+            </View>
+          </Pressable>
+        )}
 
-        {tieneComandas && (
+        {tieneComandas && modoVisualizacion === '101' && (
           <Pressable
             onPress={() => {
               navigate('/tareaComanda');
@@ -124,8 +172,35 @@ const Alumno = ()=>{
             </View>
           </Pressable>         
         )}
+          {tieneComandas && modoVisualizacion === '100' && (
+          <Pressable
+            onPress={() => {
+              /* Acción cuando se selecciona la imagen de Comandas */
+            }}
+            accessibilityLabel="Tareas de las comandas. Haz clic para ver más detalles."
+          >
+            <View style={styles.imageContainer}>
+              <Text style={styles.imageTitle}>Comandas</Text>
+            </View>
+          </Pressable>
+        )}
+          {tieneComandas && modoVisualizacion === '001' && (
+          <Pressable
+            onPress={() => {
+              /* Acción cuando se selecciona la imagen de Comandas */
+            }}
+            accessibilityLabel="Tareas de las comandas. Haz clic para ver más detalles."
+          >
+            <View style={styles.imageContainer}>
+              <Image
+                style={styles.largeImage}
+                source={require('../../data/img/PortadaComandas.png')}
+              />
+            </View>
+          </Pressable>
+        )}
 
-        {tienePedidoMaterial && (
+        {tienePedidoMaterial && modoVisualizacion === '101' && (
           <Pressable
             onPress={() => {
               /* Acción cuando se selecciona la imagen de Pedido del Material */
@@ -141,12 +216,49 @@ const Alumno = ()=>{
             </View>
           </Pressable>
         )}
+          {tienePedidoMaterial && modoVisualizacion === '100' && (
+          <Pressable
+            onPress={() => {
+              /* Acción cuando se selecciona la imagen de Pedido del Material */
+            }}
+            accessibilityLabel="Pedido del Material. Haz clic para ver más detalles."
+          >
+            <View style={styles.imageContainer}>
+              <Text style={styles.imageTitle}>Pedido del Material</Text>
+            </View>
+          </Pressable>
+        )}
+          {tienePedidoMaterial && modoVisualizacion === '001' && (
+          <Pressable
+            onPress={() => {
+              /* Acción cuando se selecciona la imagen de Pedido del Material */
+            }}
+            accessibilityLabel="Pedido del Material. Haz clic para ver más detalles."
+          >
+            <View style={styles.imageContainer}>
+              <Image
+                style={styles.largeImage}
+                source={require('../../data/img/PortadaMaterial.png')}
+              />
+            </View>
+          </Pressable>
+        )}
       </View>
 
       {/* Mostrar la imagen de Libre.png si no hay tareas disponibles */}
-      {!tieneTareasDeHoy && !tieneComandas && !tienePedidoMaterial && (
+      {!tieneTareasDeHoy && !tieneComandas && !tienePedidoMaterial && modoVisualizacion === '101' && (
         <View style={styles.imageContainer}>
           <Text style={styles.imageTitle}>No hay tareas disponibles</Text>
+          <Image style={styles.largeImage} source={require('../../data/img/Libre.png')} />
+        </View>
+      )}
+            {!tieneTareasDeHoy && !tieneComandas && !tienePedidoMaterial && modoVisualizacion === '100' && (
+        <View style={styles.imageContainer}>
+          <Text style={styles.imageTitle}>No hay tareas disponibles</Text>
+        </View>
+      )}
+            {!tieneTareasDeHoy && !tieneComandas && !tienePedidoMaterial && modoVisualizacion === '001' && (
+        <View style={styles.imageContainer}>
           <Image style={styles.largeImage} source={require('../../data/img/Libre.png')} />
         </View>
       )}
@@ -174,6 +286,13 @@ const styles=StyleSheet.create({
         height: 200,
         borderRadius: 4,
         alignSelf: 'center',
+        paddingVertical: 10
+    },
+    titleImage:{
+        width: 600,
+        height: 200,
+        borderRadius: 4,
+        alignSelf: 'flex-start',
         paddingVertical: 10
     },
     pressableButton: {

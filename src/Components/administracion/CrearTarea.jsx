@@ -28,6 +28,7 @@ const CrearTarea = ()=>{
     const mensajeTarea = state ? state.mensajeTarea : '';
     const hayTarea = state ? state.hayTarea : 0; // tarea q viene de CrearPasos
     const nuevaTarea = state ? state.nuevaTarea : 0; // tarea q viene de TablaTarea
+    const numPaso = state ? state.numPaso : 0;
 
     const [id, setId] = useState(-1);
     const [nombre, setNombre] = useState('');
@@ -35,9 +36,8 @@ const CrearTarea = ()=>{
     const [selectedTipo, setSelectedTipo] = useState([]);
     const [datosGuardados, setDatosGuardados] = useState(false); // tarea medio guardada
 
-    const [numPaso, setNumPaso] = useState(1);
-    const [portada, setPortada] = useState('');
-    const [video, setVideo] = useState('');
+    const [portada, setPortada] = useState(null);
+    const [video, setVideo] = useState(null);
 
 
     const [index, setIndex] = useState(0);
@@ -58,11 +58,11 @@ const CrearTarea = ()=>{
     }, [id])
 
     useEffect(() => {
-        console.log('Navegación desde crearPaso, ID de la tarea: ', hayTarea);
+        console.log('ID de la tarea: ', hayTarea);
     }, [hayTarea])
 
     useEffect(() => {
-        console.log('Navegación desde tablaTareas, ID de la tarea: ', nuevaTarea);
+        console.log('ID de la tarea: ', nuevaTarea);
     }, [nuevaTarea])
 
     useEffect(() => {
@@ -87,7 +87,7 @@ const CrearTarea = ()=>{
     // TABLA PASOS
     const tabPasos = () => (
         <View>
-          <TablaPaso idTarea={id.toString()} paso={numPaso.toString()}/>
+          <TablaPaso idTarea={id.toString()} paso={numPaso.toString()} nombreTarea={nombre.toString()}/>
         </View>
     );
     
@@ -168,6 +168,7 @@ const CrearTarea = ()=>{
     // Datos de la tarea traidos por ID
     const getDatosTarea = () => {
         if (hayTarea !== 0){
+        setId(hayTarea);
         axios.get(`${useHost()}/${hayTarea}`)
             .then((response) => {
                 const resultado = response.data[0];
@@ -270,7 +271,8 @@ const styles=StyleSheet.create({
         paddingHorizontal: 20,
         paddingVertical: 20,
         marginBottom: 30,
-        width: 700,
+        width: 1100,
+        flex: 1,
         justifyContent: 'center',
         alignSelf: 'center',  
         borderColor: '#999',

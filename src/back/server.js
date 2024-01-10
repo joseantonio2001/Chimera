@@ -2,16 +2,22 @@ const express = require('express');
 const dotenv = require('dotenv'); // Uso dotenv para mantener seguro datos vulnerables
 const cors = require('cors'); // Uso CORS para poder utilizar la API desde la app (Seguridad)
 const mysql = require('mysql2');
+
 const fs = require('fs');
 const multer = require('multer');
+const path = require('path');
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static('./uploads'));
 
+
 dotenv.config({ path:'.env' }); // Revisar siempre si no va bien conexión a BD
+// dotenv.config({ path:'../../.env' }); // Revisar siempre si no va bien conexión a BD
 // dotenv.config(); // Revisar siempre si no va bien conexión a BD
+
 
 const dbConfig = {
   host: process.env.DB_HOST,
@@ -25,6 +31,26 @@ async function abrirConexion(){
   const connection = await mysql.createConnection(dbConfig);
   return connection;
 } 
+
+// Carga de archivos
+// Multer manejar la carga de archivos
+// Configuración de Multer para manejar la carga de archivos
+const almacen = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = 'uploads'; // Directorio de carga de archivos
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir);
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname) + `.${file.mimetype.split('/')[1]}`);
+  },
+});
+
+// Inicializar middleware
+const upload = multer({ storage: almacen });
+
 
 // Rutas API
 // Consultas / GETS
@@ -248,11 +274,13 @@ app.get('/tareas/alumno/:id', async (req, res) => { // GET Tareas
 // Get datos de la imagen dado el id
 app.get('/uploads/id/:id', async (req, res) => { // GET Tareas
   try {
+    console.log(req);
     const connection = await abrirConexion();
     const id = req.params.id;
     const query = `SELECT * FROM media WHERE id = ?`;
     const [resultado] = await connection.promise().query(query, [id]);
     connection.end(); // Libera recursos BD
+
     res.json(resultado); // Resultado servido en HTTP formato JSON
   } catch (error) {
     console.error('Error al obtener los datos de la imagen:', error);
@@ -278,7 +306,6 @@ app.get('/uploads/:name', (req, res) => {
           "Content-Type": "text/plain"
       });
       res.end("404 Not Found");
-      return;
       }else{
         res.writeHead(200, {
           "Content-Type": contentType
@@ -292,7 +319,6 @@ app.get('/uploads/:name', (req, res) => {
       "Content-Type": "text/plain"
   });
   res.end("404 Not Found");
-  return;
   }
 });
 app.get('/tareas/alumnoId/:idAlumno', async (req, res) => {
@@ -415,10 +441,12 @@ app.get('/pasos', async (req, res) => { // GET Pasos
 // Get de un paso por id
 app.get('/pasos/:id', async (req, res) => { // GET Pasos
   try {
+    console.log("pasos");
     const connection = await abrirConexion();
     const id = req.params.id;
     const queryPasos = 'SELECT * FROM pasos WHERE id_tarea = ?';
     const [resultado] = await connection.promise().query(queryPasos, [id]);
+    console.log(resultado);
     connection.end(); // Libera recursos BD
     res.json([resultado]); // Resultado servido en HTTP formato JSON
   } catch (error) {
@@ -430,15 +458,51 @@ app.get('/pasos/:id', async (req, res) => { // GET Pasos
 // Get de todos los pasos de una tarea por id ordenados por n_paso
 app.get('/pasosTarea/:id', async (req, res) => { // GET Pasos
   try {
+    console.log('Get pasos por id de tarea')
     const connection = await abrirConexion();
     const id = req.params.id;
     const queryPasos = 'SELECT * FROM pasos WHERE id_tarea = ? ORDER BY n_paso';
     const [resultado] = await connection.promise().query(queryPasos, [id]);
+    console.log('Pasos de una tarea conseguidos con exito')
     connection.end(); // Libera recursos BD
     res.json([resultado]); // Resultado servido en HTTP formato JSON
   } catch (error) {
     console.error('Error al obtener pasos:', error);
     res.status(500).json({ error: 'Error al obtener pasos' });
+  }
+});
+
+// Get imagen dada el nombre
+app.get('/uploads/:name', (req, res) => {
+  const name = req.params.name;
+  const filePath = 'uploads/'+name;
+  console.log("🚀 ~ file: server.js:321 ~ app.get ~ filePath:", filePath)
+  const extension = filePath.split('.')[1];
+  console.log("🚀 ~ file: server.js:323 ~ app.get ~ extension:", extension)
+  const contentType = 'image/'+extension;
+  // Comprueba exista el archivo
+  console.log(fs.existsSync(filePath));
+  if(fs.existsSync(filePath)){
+    fs.readFile(filePath,(err, content) => { // lee archivo asíncronamente
+      if(err){
+        console.log("🚀 ~ file: server.js:327 ~ fs.readFile ~ err:", err)
+        res.writeHead(404, {
+          "Content-Type": "text/plain"
+      });
+      res.end("404 Not Found");
+      }else{
+        res.writeHead(200, {
+          "Content-Type": contentType
+      });
+        res.end(content);
+      }
+      
+    });
+  }else{
+    res.writeHead(404, {
+      "Content-Type": "text/plain"
+  });
+  res.end("404 Not Found");
   }
 });
 
@@ -517,7 +581,7 @@ app.post('/clases/crearAula', async (req, res) => {
   try{
     let nuevoElementoId = '-1';
     const connection = await abrirConexion();
-    const { capacidad, id_profesor, estudiantes } = req.body;
+    const { capacidad, selectedProfesor, estudiantes } = req.body;
 
     // Validar capacidad antes de realizar las inserciones
     if (estudiantes.length > capacidad) {
@@ -539,7 +603,7 @@ app.post('/clases/crearAula', async (req, res) => {
     const query2 = 'INSERT INTO asignaciones (id_estudiante, id_profesor, id_clase) VALUES (?, ?, ?)';
     await Promise.all(estudiantes.map(async estudianteId => {
       if (limite > 0) {
-        await connection.promise().query(query2, [estudianteId, id_profesor, nuevoElementoId]);
+        await connection.promise().query(query2, [estudianteId, selectedProfesor, nuevoElementoId]);
         limite--;
       }
     }));
@@ -598,28 +662,53 @@ app.post('/menus/crearMenu', async (req, res) => {
     res.status(500).json({ error: 'Error al introducir menu' });
   }
 });
+app.post('/tareas/crearTarea', async (req, res) => {
+  try{
+    const connection = await abrirConexion();
+    const { nombre, descripcion, video, portada, tipo } = req.body;
+    const query1 = 'INSERT INTO tareas (nombre, descripcion, video, portada, tipo) VALUES (?, ?, ?, ?, ?)';
+    console.log('Insertando tarea...')
+    await connection.promise().query(query1, [nombre, descripcion, video, portada, tipo ]);
+    console.log('Tarea insertada con éxito en tareas');
+    res.status(201).json({ message: 'Tarea insertada con éxito' });
+    connection.end();
+  } catch (error){
+    console.error('Error al introducir tarea:', error);
+    res.status(500).json({ error: 'Error al introducir tarea' });
+  }
+});
 
 // Insertar paso
 app.post('/pasos/crearPaso', async (req, res) => {
-  try{
+  try {
     const connection = await abrirConexion();
-    const {id_tarea, n_paso, imagen } = req.body;
-    const query1 = 'INSERT INTO pasos (id_tarea, n_paso, imagen) VALUES (?, ?, ?, ?)';
-    await connection.promise().query(query1, [id_tarea, n_paso, imagen], (err, result) => {
-    if (err) {
-      console.error('Error al insertar paso: ' + err);
-      res.status(500).json({ error: 'Error al insertar paso en la base de datos' });
-      return;
-    }
-    console.log('Paso insertado con éxito en pasos');
+    const { idTarea, nPaso, id_imagen, descripcion } = req.body;
+    const query1 = 'INSERT INTO pasos (id_tarea, n_paso, id_imagen, descripcion) VALUES (?, ?, ?, ?)';
+    await connection.promise().query(query1, [idTarea, nPaso, id_imagen, descripcion]);
     res.status(201).json({ message: 'Paso insertado con éxito' });
-    });
     connection.end();
-  } catch (error){
+  } catch (error) {
     console.error('Error al introducir paso:', error);
     res.status(500).json({ error: 'Error al introducir paso' });
   }
-});
+ });
+
+ // Insertar multimedia (imagenes) en la tabla media
+app.post('/media/imagen', upload.single('file'), async (req, res) => {
+  try {
+    const connection = await abrirConexion();
+    const imagen = req.file.path;
+    const query1 = 'INSERT INTO media (ruta) VALUES (?)';
+    await connection.promise().query(query1, [imagen]);
+    const query2 = 'SELECT * FROM media WHERE ruta = ?';
+    const [resultado] = await connection.promise().query(query2, imagen);
+    connection.end();
+    res.json([resultado]);
+  } catch (error) {
+    console.error('Error al introducir la imagen:', error);
+    res.status(500).json({ error: 'Error al introducir la imagen' });
+  }
+ });
 
 // Insertar tarea
 app.post('/tareas/crearTarea', async (req, res) => {
@@ -914,21 +1003,24 @@ app.put('/menus/actualizarMenu', async (req, res) => {
 });
 
 // Actualizar paso
-app.put('/pasos/actualizarPaso', async (req, res) => {
+app.put('/pasos/actualizarPaso', upload.single('file'), async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const { id, id_tarea, n_paso, imagen } = req.body;
-    const query1 = 'UPDATE pasos SET id_tarea = ?, n_paso = ?, imagen = ? WHERE id = ?';
-    await connection.promise().query(query1, [id_tarea, n_paso, imagen, id ], (err, result) => {
-    if (err) {
-      console.error('Error al actualizar paso: ' + err);
-      res.status(500).json({ error: 'Error al actualizar paso en la base de datos' });
-      return;
-    }
+    const imagen = req.file.path;
+    const { id, nPaso, descripcion } = req.body;
+    const queryImgAnterior = 'SELECT imagen FROM pasos WHERE id = ?';
+    const resultado = await connection.promise().query(queryImgAnterior, [id]);
+    const query1 = 'UPDATE pasos SET descripcion = ?, n_paso = ?, imagen = ? WHERE id = ?';
+    await connection.promise().query(query1, [descripcion, nPaso, imagen, id ]);
     console.log('Paso actualizado con éxito en pasos');
     res.status(201).json({ message: 'Paso actualizado con éxito' });
-    });
+    // Tras finalizar borrar la imagen anterior
+    const imagenAnterior = resultado[0][0].imagen;
+    if(fs.existsSync(imagenAnterior)){ 
+      fs.unlinkSync(imagenAnterior); // Desvincula el archivo (Borra enlaces = borra archivo)
+    }
     connection.end();
+
   } catch (error){
     console.error('Error al actualizar paso:', error);
     res.status(500).json({ error: 'Error al actualizar paso' });
@@ -1181,7 +1273,6 @@ app.post('/obtener_imagenes', async (req, res) => {
 });
 
 
-
 app.get('/uploads/:name', (req, res) => {
   const name = req.params.name;
   const filePath = 'uploads/'+name;
@@ -1196,7 +1287,6 @@ app.get('/uploads/:name', (req, res) => {
           "Content-Type": "text/plain"
       });
       res.end("404 Not Found");
-      return;
       }else{
         res.writeHead(200, {
           "Content-Type": contentType
@@ -1214,8 +1304,118 @@ app.get('/uploads/:name', (req, res) => {
   }
 });
 
+
+app.get('/videos/:name', (req, res) => {
+  const name = req.params.name;
+  const filePath = `uploads/${name}`;
+  const stat = fs.statSync(filePath);
+  const fileSize = stat.size;
+  const range = req.headers.range;
+
+  if (range) {
+    const parts = range.replace(/bytes=/, "").split("-");
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : fileSize-1;
+
+    if(start >= fileSize) {
+      res.status(416).send('Requested range not satisfiable\n'+start+' >= '+fileSize);
+      return;
+    }
+
+    const chunksize = (end-start)+1;
+    const file = fs.createReadStream(filePath, {start, end});
+    const head = {
+      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunksize,
+      'Content-Type': 'video/mp4',
+    };
+
+    res.writeHead(206, head);
+    file.pipe(res);
+  } else {
+    const head = {
+      'Content-Length': fileSize,
+      'Content-Type': 'video/mp4',
+    };
+    res.writeHead(200, head);
+    fs.createReadStream(filePath).pipe(res);
+  }
+});
+
+// Get de todas las imágenes una tarea
+
+app.post('/obtener_imagenes', async (req, res) => {
+  try {
+    const connection = await abrirConexion();
+    const { ids } = req.body;
+    const imagesNew = [];
+    for (const id of ids) {
+      const query = 'SELECT * FROM media WHERE id = ?';
+      const [resultado] = await connection.promise().query(query, [id]);
+      imagesNew.push({ id: resultado[0].id, url: resultado[0].ruta.replace('uploads/', '') });
+    }
+    console.log(imagesNew);
+
+    res.json(imagesNew);
+  } catch (error) {
+    console.error('Error al obtener pasos:', error);
+    res.status(500).json({ error: 'Error al obtener pasos' });
+  }
+});
+
+app.get('/obtener_video/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const connection = await abrirConexion();
+    console.log(id);
+
+
+
+    const query = 'SELECT * FROM media WHERE id = ?';
+    const resultado = await connection.promise().query(query, id);
+    console.log(resultado[0][0].ruta);
+    const videoNew = { id: resultado[0].id, url: resultado[0][0].ruta.replace('uploads/', '') };
+
+    res.json(videoNew);
+  } catch (error) {
+    console.error('Error al obtener pasos:', error);
+    res.status(500).json({ error: 'Error al obtener pasos' });
+  }
+});
+
+
+app.get('/uploads/:name', (req, res) => {
+  const name = req.params.name;
+  const filePath = 'uploads/'+name;
+  const extension = filePath.split('.')[1];
+  const contentType = 'image/'+extension;
+  // Comprueba exista el archivo
+  console.log(fs.existsSync(filePath));
+  if(fs.existsSync(filePath)){
+    fs.readFile(filePath,(err, content) => { // lee archivo asíncronamente
+      if(err){
+        res.writeHead(404, {
+          "Content-Type": "text/plain"
+      });
+      res.end("404 Not Found");
+      }else{
+        res.writeHead(200, {
+          "Content-Type": contentType
+      });
+        console.log(content);
+        res.end(content);
+      }
+    });
+  }else{
+    res.writeHead(404, {
+      "Content-Type": "text/plain"
+  });
+  res.end("404 Not Found");
+  }
+});
+
 app.listen(5050, () => { // Inicia el servidor en el puerto 5050
   console.log('Servidor en ejecución en el puerto 5050');
 });
-
 

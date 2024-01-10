@@ -2,7 +2,7 @@ import { Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-native';
 import axios from 'axios';
-import { Buffer } from 'buffer';
+import {modoVisualizacion} from "./Main";
 
 const useHost = () =>{
   if (Platform.OS === 'android') {
@@ -59,7 +59,7 @@ const TareasHoy = () => {
         const tareasConPortadas = await Promise.all(
           response.data.map(async (tarea) => {
             try {
-              const tareaPortadaResponse = await axios.get(`${useHostParam('uploads')}/id/${tarea.id_portada}`);
+              const tareaPortadaResponse = await axios.get(`${useHostParam('uploads')}/id/${tarea.portada}`);
               return tareaPortadaResponse.data[0];
             } catch (error) {
               console.error(`Error al obtener la portada para la tarea ${tarea.id}:`, error.message);
@@ -91,19 +91,61 @@ const TareasHoy = () => {
   return (
     <View>
     <Image style={styles.image} source={require('../../data/img/LogoColegio.png')} />
-    <Text style={styles.headerText}>Tareas de Hoy</Text>
+        {(modoVisualizacion === '101' || modoVisualizacion === '010') && (
+            <View>
+                <Text style={styles.headerText}>Tareas de Hoy</Text>
+                <Image
+                style={styles.largeImage}
+                source={require('../../data/img/PortadaTareasHoy.png')}
+              />
+            </View>
+        )}
+        {modoVisualizacion === '100' && (
+            <View>
+                <Text style={styles.headerText}>Tareas de Hoy</Text>
+            </View>
+        )}
+        {modoVisualizacion === '001' && (
+            <View>
+                <Image
+                style={styles.largeImage}
+                source={require('../../data/img/PortadaTareasHoy.png')}
+              />
+            </View>
+        )}
 
     <View style={styles.imagesContainer}>
       
       {tareasDeHoy.map((tarea, index) => (
         <View key={index} style={styles.imageContainer}>
-        <Text style={styles.imageTitle}>{tarea.nombre}</Text>
+            {(modoVisualizacion === '101' || modoVisualizacion === '010') && (
+                <View>
+                    <Text style={styles.imageTitle}>{tarea.nombre}</Text>
             <Pressable onPress={() => handleTareas(`/mostrarpasos/${tarea.id}`)}>
                 <Image
                      source={{ uri: `${useHost()}${tareasPortada[index].ruta}` }}
                     style={styles.largeImage}
                   />
             </Pressable>
+                </View>
+            )}
+            {modoVisualizacion === '100' && (
+                <View>
+                    <Pressable onPress={() => handleTareas(`/mostrarpasos/${tarea.id}`)}>
+                    <Text style={styles.imageTitle}>{tarea.nombre}</Text>
+            </Pressable>
+                </View>
+            )}
+            {modoVisualizacion === '001' && (
+                <View>
+            <Pressable onPress={() => handleTareas(`/mostrarpasos/${tarea.id}`)}>
+                <Image
+                     source={{ uri: `${useHost()}${tareasPortada[index].ruta}` }}
+                    style={styles.largeImage}
+                  />
+            </Pressable>
+                </View>
+            )}
 
         </View>
       ))}
@@ -182,6 +224,7 @@ const styles=StyleSheet.create({
       largeImage: {
         width: 150, // Ajustar según tus necesidades
         height: 150, // Ajustar según tus necesidades
+          alignSelf: 'center',
         borderRadius: 4,
         marginBottom: 10,
       },
