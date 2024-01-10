@@ -5,12 +5,15 @@ import { useEffect, useState } from 'react';
 
 const ConfirmAccion = () => {
     const navigate = useNavigate();
-    const handleButtonClick = (enlace, id) => {
-        if (id) {
-            navigate(enlace, id);
-        } else {
-            navigate(enlace);
-        }
+    const handleButtonClick = () => {
+
+        if (state && state.id && state.ruta) {
+            navigate(state.ruta, { state: { id: state.id } });
+          } else {
+            navigate('/admin');
+          }
+    
+    
     };
     const[datosGuardados, setDatosGuardados] = useState(false);
     const { state } = useLocation();

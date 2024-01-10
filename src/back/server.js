@@ -206,6 +206,19 @@ app.get('/tareas', async (req, res) => { // GET Tareas
   }
 });
 
+app.get('/tareas/tareaMayorId', async (req, res) => {
+  try {
+    const connection = await abrirConexion();
+    const queryTareaMayorId = 'SELECT id FROM tareas ORDER BY id DESC LIMIT 1';
+    const [resultado] = await connection.promise().query(queryTareaMayorId);
+    connection.end(); // Libera recursos BD
+    res.json(resultado[0]); // Resultado servido en HTTP formato JSON
+  } catch (error) {
+    console.error('Error al obtener la tarea con mayor ID:', error);
+    res.status(500).json({ error: 'Error al obtener la tarea con mayor ID' });
+  }
+});
+
 // Get de una tarea por id
 app.get('/tareas/:id', async (req, res) => { // GET Tareas
   try {
@@ -234,7 +247,7 @@ app.get('/tareas/alumno/:id/:tipo', async (req, res) => { // GET Tareas por tipo
     const query = `
       SELECT t.*
       FROM tareas t
-      INNER JOIN asignaciones_tareas at ON t.id = at.id_tarea
+      INNER JOIN asignaciones_tareas at ON t.id = at.id_tarea AND at.finalizada=0
       WHERE at.id_alumno = ? AND t.tipo = ?;
     `;
 
@@ -255,6 +268,46 @@ app.get('/tareas/alumno/:id/:tipo', async (req, res) => { // GET Tareas por tipo
 // Get de todas las tareas según el id de un estudiante
 app.get('/tareas/alumno/:id', async (req, res) => { // GET Tareas
   try {
+    const connection = await abrirConexion();
+    const id = req.params.id;
+    const query = `
+      SELECT t.*
+      FROM tareas t
+      INNER JOIN asignaciones_tareas at ON t.id = at.id_tarea AND at.finalizada=0
+      WHERE at.id_alumno = ?`;
+    const [resultado] = await connection.promise().query(query, [id]);
+    connection.end(); // Libera recursos BD
+    res.json([resultado]); // Resultado servido en HTTP formato JSON
+  } catch (error) {
+    console.error('Error al obtener tareas:', error);
+    res.status(500).json({ error: 'Error al obtener tareas' });
+  }
+});
+
+// Get de todas las tareas según el id de un estudiante
+app.get('/tareasFinalizadas/alumno/:id', async (req, res) => { // GET Tareas
+  try {
+    console.log('Entra');
+    const connection = await abrirConexion();
+    const id = req.params.id;
+    const query = `
+      SELECT t.*
+      FROM tareas t
+      INNER JOIN asignaciones_tareas at ON t.id = at.id_tarea AND at.finalizada=1
+      WHERE at.id_alumno = ?`;
+    const [resultado] = await connection.promise().query(query, [id]);
+    connection.end(); // Libera recursos BD
+    res.json([resultado]); // Resultado servido en HTTP formato JSON
+  } catch (error) {
+    console.error('Error al obtener tareas:', error);
+    res.status(500).json({ error: 'Error al obtener tareas' });
+  }
+});
+
+// Get de todas las tareas según el id de un estudiante
+app.get('/tareasTodas/alumno/:id', async (req, res) => { // GET Tareas
+  try {
+    console.log('Entra');
     const connection = await abrirConexion();
     const id = req.params.id;
     const query = `
@@ -285,6 +338,23 @@ app.get('/uploads/id/:id', async (req, res) => { // GET Tareas
   } catch (error) {
     console.error('Error al obtener los datos de la imagen:', error);
     res.status(500).json({ error: 'Error al obtener los datos de la imagen' });
+  }
+});
+
+// Get datos de la imagen dado el id
+app.post('/tareas/finalizar', async (req, res) => { // GET Tareas
+  try {
+    const connection = await abrirConexion();
+    const alumnoId=req.body.alumnoId;
+    const id = req.body.id;
+    console.log('Alumno ', alumnoId, 'Tarea ', id);
+    const query = 'UPDATE asignaciones_tareas SET finalizada = 1 WHERE id_alumno = ? AND id_tarea = ?';
+    const [resultado] = await connection.promise().query(query, [alumnoId, id]);
+    connection.end(); // Libera recursos BD
+    res.json(resultado); // Resultado servido en HTTP formato JSON
+  } catch (error) {
+    console.error('Error al finalizar la tarea:', error);
+    res.status(500).json({ error: 'Error al finalizar la tarea' });
   }
 });
 
@@ -325,7 +395,7 @@ app.get('/tareas/alumnoId/:idAlumno', async (req, res) => {
   try {
     const connection = await abrirConexion();
     const idAlumno = req.params.idAlumno;
-    const queryTareas = 'SELECT * FROM asignaciones_tareas JOIN tareas ON asignaciones_tareas.id_tarea = tareas.id WHERE asignaciones_tareas.id_alumno = ?';
+    const queryTareas = 'SELECT * FROM asignaciones_tareas JOIN tareas ON asignaciones_tareas.id_tarea = tareas.id AND asignaciones_tareas.finalizada=0 WHERE asignaciones_tareas.id_alumno = ?';
     const [resultado] = await connection.promise().query(queryTareas, [idAlumno]);
     connection.end();
 
@@ -714,10 +784,10 @@ app.post('/media/imagen', upload.single('file'), async (req, res) => {
 app.post('/tareas/crearTarea', async (req, res) => {
   try{
     const connection = await abrirConexion();
-    const { nombre, descripcion, video, portada, tipo } = req.body;
-    const query1 = 'INSERT INTO tareas (nombre, descripcion, video, portada, tipo) VALUES (?, ?, ?, ?, ?)';
+    const { nombre, descripcion, tipo } = req.body;
+    const query1 = 'INSERT INTO tareas (nombre, descripcion, tipo) VALUES (?, ?, ?)';
     console.log('Insertando tarea...')
-    await connection.promise().query(query1, [nombre, descripcion, video, portada, tipo ]);
+    await connection.promise().query(query1, [nombre, descripcion,  tipo ]);
     console.log('Tarea insertada con éxito en tareas');
     res.status(201).json({ message: 'Tarea insertada con éxito' });
     connection.end();
@@ -840,7 +910,7 @@ app.post('/tareas/quitarasignaciones', async (req, res) => {
       // Iterar sobre los estudiantes seleccionados
       for (const tareaId of tareas) {
         // Eliminar la fila correspondiente a la asignación
-        const queryDelete = 'DELETE FROM asignaciones_tareas WHERE id_alumno = ? AND id_tarea = ?';
+        const queryDelete = 'DELETE FROM asignaciones_tareas WHERE id_alumno = ? AND id_tarea = ? AND finalizada=0';
         await connection.promise().query(queryDelete, [idAlumno, tareaId], (err, result) => {
           if (err) {
             console.error('Error al establecer conexión con la base de datos:' + err);

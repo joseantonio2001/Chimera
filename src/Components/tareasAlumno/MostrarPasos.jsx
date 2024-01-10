@@ -4,9 +4,13 @@ import axios from 'axios';
 import {useNavigate, useParams} from "react-router-native";
 import { modoVisualizacion } from '../Main';
 import { Video, ResizeMode } from 'expo-av';
+
+
+
 const MostrarPasos = () => {
   const [tarea, setTarea] = useState();
   const [pasos, setPasos] = useState([]);
+  const { state } = useLocation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [images, setImages] = useState();
@@ -16,13 +20,29 @@ const MostrarPasos = () => {
   const [status, setStatus] = React.useState({});
 
   const { id } = useParams();
-
+  const {alumnoId} = useParams();
   const navigate = useNavigate();
 
         const handleButtonClick = (enlace) => {
 
         navigate(enlace);
     };
+
+    const finalizarTarea=(enlace)=>{
+      axios.post(`http://localhost:5050/tareas/finalizar`, {
+          alumnoId,
+          id
+      })
+      .then((response) => {
+          // Maneja la respuesta exitosa
+          navigate(enlace);
+      })
+      .catch((error) => {
+          // Maneja los errores
+          console.error("Error al crear estudiante: ",error);
+          navigate(enlace);
+      });
+      };
 
   useEffect(() => {
     const obtenerNombresImagenes = async (ids) => {
@@ -160,7 +180,7 @@ const MostrarPasos = () => {
             />
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity onPress={() => handleButtonClick('/tareafinalizada')} style={styles.boton}>
+          <TouchableOpacity onPress={() => finalizarTarea('/tareafinalizada')} style={styles.boton}>
             <Image
               source={require('../../../assets/finalizar.png')}
               style={{ width: 100, height: 100 }}

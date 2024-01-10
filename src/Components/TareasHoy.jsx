@@ -37,14 +37,14 @@ const TareasHoy = () => {
   const navigate = useNavigate();
 
   const { state } = useLocation();
-  const alumnoId = state ? state.id : '';
+  const alumnoId = state ? state.alumnoId : '';
   const tipoTarea = 1;
   const [tareasDeHoy, setTareasDeHoy] = useState([]);
   const [tareasPortada, setTareasPortada] = useState([]);
   const [portadas, setPortadas] = useState([]);
 
   const handleButtonClick = (enlace) => {
-    navigate(enlace, { state: { id: 2 }});
+    navigate(enlace, { state: { alumnoId }});
   };
 
   const handleTareas = (ruta) => {
@@ -169,19 +169,19 @@ const styles=StyleSheet.create({
         paddingVertical: 10
     },
     pressableButton: {
-        width: 200,
-        height: 50,
-        justifyContent: 'center',
-        alignItems: 'center',
-        alignSelf: 'center',
-        backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
-        borderRadius: 10,
-        elevation: 3, // Sombra para un efecto de elevación
-        marginBottom: 15,
-        marginTop: 15,
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-    },
+      width: 200,
+      height: 50,
+      justifyContent: 'center',
+      alignItems: 'center',
+      alignSelf: 'center',
+      backgroundColor: '#049CDC',  // Un verde fresco, puedes cambiarlo según tus preferencias
+      borderRadius: 10,
+      elevation: 3, // Sombra para un efecto de elevación
+      marginBottom: 15,
+      marginTop: 15,
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+  },
     headerText: {
         fontSize: 24,
         fontWeight: 'bold',

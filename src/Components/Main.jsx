@@ -24,6 +24,7 @@ import AulasComanda from './tareas/AulasComanda.jsx';
 import MenuComanda from './tareas/MenuComanda.jsx';
 import EditarTarea from './administracion/EditarTarea.jsx';
 // import EditarPaso from "./administracion/EditarPaso.jsx";
+import StatsAlumno from './StatsAlumno.jsx';
 
 
 const Main = ()=>{
@@ -62,7 +63,8 @@ const Main = ()=>{
                 <Route path='/admin/editartareasalumno' exact element ={<EditarTareasAlumno/>}/>
                 <Route path='confirmacioncrearaula' exact element={<ConfirmAccion/>}/>
                 <Route path='/tareafinalizada' exact element={<TareaFinalizada/>}/>
-
+          { /* <Route path='/mostrarpasos/:id/:alumnoId' element={<MostrarPasos/>} /> */ }
+                    <Route path='/statsalumno' element={<StatsAlumno/>} />
                 </Routes>
             </View>
         </NativeRouter>

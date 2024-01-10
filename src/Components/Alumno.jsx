@@ -40,7 +40,8 @@ const Alumno = ()=>{
 
     const handleTareas = (ruta) => {
       // Lógica para redirigir a la página /tareasHoy
-      navigate(ruta, { state: { id: alumnoId }});
+      console.log('Alumno ', alumnoId);
+      navigate(ruta, { state: { alumnoId }});
     };
   
 
