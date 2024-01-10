@@ -25,7 +25,7 @@ const CrearTarea = ()=>{
         navigate(enlace);
     };
     const { state } = useLocation();
-    const mensajeTarea = state ? state.mensajeTarea : '';
+    const mensajeTarea = state ? state.mensajeTarea : 'NUEVA TAREA';
     const hayTarea = state ? state.hayTarea : 0; // tarea q viene de CrearPasos
     const nuevaTarea = state ? state.nuevaTarea : 0; // tarea q viene de TablaTarea
     const numPaso = state ? state.numPaso : 0;
@@ -53,21 +53,21 @@ const CrearTarea = ()=>{
         getDatosTarea();
     }, [])
 
+    useEffect(() => {
+        console.log("Numero de paso: ", numPaso)
+    }, [numPaso, hayTarea])
+
     useEffect(() => { // Se guarda bien el id, lo imprime por consola al conseguirlo en getIdTarea
         console.log('ID de la tarea:', id)
     }, [id])
 
     useEffect(() => {
-        console.log('ID de la tarea: ', hayTarea);
+        console.log('Desde (*) - haTarea: ', hayTarea);
     }, [hayTarea])
 
     useEffect(() => {
         console.log('ID de la tarea: ', nuevaTarea);
-    }, [nuevaTarea])
-
-    useEffect(() => {
-        console.log('Actualizando selectedTipo: ', selectedTipo);
-    }, [selectedTipo])
+    }, [nuevaTarea, selectedTipo])
     
     // SELECTOR PARA TIPO DE TAREA
     const opciones = [
@@ -205,7 +205,7 @@ const CrearTarea = ()=>{
             <View>
                 <Image style={styles.image} source={require('../../../data/img/LogoColegio.png')}/>
                 <View>       
-                        <StyledText style={styles.headerText}>NUEVA TAREA</StyledText>
+                        <StyledText style={styles.headerText}>{mensajeTarea}</StyledText>
 
                         {/* Nombre */}
                         <StyledTextInput
@@ -327,7 +327,7 @@ const styles=StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
-        backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
+        backgroundColor: '#049CDC',  // Un verde fresco, puedes cambiarlo según tus preferencias
         borderRadius: 10,
         elevation: 3, // Sombra para un efecto de elevación
         marginBottom: 0,

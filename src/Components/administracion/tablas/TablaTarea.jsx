@@ -30,7 +30,7 @@ const TablaTarea = () => {
   const [itemsPorPagina] = useState(10); // Ajustar preferencia
   const host = useHost();
   const navigate = useNavigate();
-  const mensaje = "Actualizar cambios";
+  const mensaje = "TAREA";
 
   // const tarea = -1;
 
@@ -41,6 +41,7 @@ const TablaTarea = () => {
   const handleDelete = (id) => { // Función borrar
     axios.delete(`${useHost()}/borrarTarea/${id}`)
     .then((response) => {             // quitar la ruta y mensajeBoton si se puede
+      console.log("Desde (TablaTareas) a (Confirmaciones) - [mensaje : 'Tarea eliminada con éxito!', ruta : '/admin', mensajeBoton : 'Volver al menú']");
       navigate('/confirmaciones', { state: { mensaje: 'Tarea eliminada con éxito!', ruta : '/admin', mensajeBoton : 'Volver al menú'} });
       })
       .catch((error) => console.error('Error al eliminar:', error));
@@ -48,7 +49,7 @@ const TablaTarea = () => {
 
   // EDITAR TAREA
   const handleEdit = (ide) => {
-    console.log("Tarea a editar : ", ide);
+    console.log("Desde (TablaTarea) a (EditarTarea=CrearTarea) - [hayTarea : ", ide, ", mensajeTarea : ", mensaje, ", numPaso : '']")
     navigate('/admin/creartarea', {state : { hayTarea : ide , mensajeTarea : mensaje, numPaso : ''}})
 		// navigate('/admin/editartarea', { state: { id: ide }})
 	};

@@ -19,7 +19,7 @@ import TareasHoy from './TareasHoy.jsx';
 import EditarTareasAlumno from './administracion/EditarTareasAlumno.jsx';
 import TareaFinalizada from "./tareasAlumno/TareaFinalizada";
 import EditarTarea from './administracion/EditarTarea.jsx';
-// import EditarPaso from "./administracion/EditarPaso.jsx";
+import EditarPaso from "./administracion/EditarPaso.jsx";
 
 const Main = ()=>{
 
@@ -40,7 +40,7 @@ const Main = ()=>{
                 <Route path='/claseprofesor' exact element={<ClaseProfesor/>} />
                 <Route path='/admin/creartarea' exact element={<CrearTarea/>} />
                 <Route path='/admin/tareas/crearpaso' exact element={<CrearPaso/>}/>
-                { /*<Route path='/admin/tareas/editarpaso' exact element={<EditarPaso/>}/> */ }
+                <Route path='/admin/tareas/editarpaso' exact element={<EditarPaso/>}/>
                 { /* <Route path='/admin/editartarea' exact element={<EditarTarea/>}/> */ }
                 <Route path='/mostrarpasos/:id' element={<MostrarPasos/>} />
                 <Route path='/confirmaciones' exact element={<ConfirmAccion/>}/>                
