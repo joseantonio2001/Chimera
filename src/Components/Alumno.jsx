@@ -43,6 +43,11 @@ const Alumno = ()=>{
       console.log('Alumno ', alumnoId);
       navigate(ruta, { state: { alumnoId }});
     };
+
+    const handleEnlace = (enlace, id) => {
+        
+      navigate(enlace, { state: { id:id }});
+  };
   
 
     useEffect(() => {
@@ -56,7 +61,6 @@ const Alumno = ()=>{
           }
         };
 
-        
 
         const obtenerTareas = async () => {
           try {
@@ -203,9 +207,7 @@ const Alumno = ()=>{
 
         {tienePedidoMaterial && modoVisualizacion === '101' && (
           <Pressable
-            onPress={() => {
-              /* Acción cuando se selecciona la imagen de Pedido del Material */
-            }}
+            onPress={() => handleEnlace(`/tareainventario`, alumnoId)}
             accessibilityLabel="Pedido del Material. Haz clic para ver más detalles."
           >
             <View style={styles.imageContainer}>

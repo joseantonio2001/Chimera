@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-native';
 import axios from 'axios';
 import {modoVisualizacion} from "./Main";
 
+
 const useHost = () =>{
   if (Platform.OS === 'android') {
     return 'http://10.0.2.2:5050/';

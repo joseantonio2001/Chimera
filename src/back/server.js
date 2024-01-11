@@ -2,15 +2,14 @@ const express = require('express');
 const dotenv = require('dotenv'); // Uso dotenv para mantener seguro datos vulnerables
 const cors = require('cors'); // Uso CORS para poder utilizar la API desde la app (Seguridad)
 const mysql = require('mysql2');
-
-const fs = require('fs');
 const multer = require('multer');
 const path = require('path');
-
+const fs = require('fs');
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
 app.use(express.static('./uploads'));
 
 
@@ -27,10 +26,10 @@ const dbConfig = {
   port: process.env.DB_PORT
 };
 
-async function abrirConexion(){
+async function abrirConexion() {
   const connection = await mysql.createConnection(dbConfig);
   return connection;
-} 
+}
 
 // Carga de archivos
 // Multer manejar la carga de archivos
@@ -50,7 +49,6 @@ const almacen = multer.diskStorage({
 
 // Inicializar middleware
 const upload = multer({ storage: almacen });
-
 
 // Rutas API
 // Consultas / GETS
@@ -119,6 +117,7 @@ app.get('/estudiantes/:id', async (req, res) => { // GET Estudiantes
 
 // Get de todos los estudiantes de una clase por el id de la clase
 app.get('/estudiantes/clases/:idClase', async (req, res) => {
+
   try{
     const connection = await abrirConexion();
     const idClase = req.params.idClase;
@@ -126,7 +125,8 @@ app.get('/estudiantes/clases/:idClase', async (req, res) => {
     const [resultado] = await connection.promise().query(queryEstudiantes, [idClase]);
     connection.end(); // Libera recursos BD
     res.json([resultado]); // Resultado servido en HTTP formato JSON
-  }catch (error) {
+  } catch (error) {
+
     console.error('Error al obtener estudiantes:', error);
     res.status(500).json({ error: 'Error al obtener estudiantes' });
   }
@@ -177,20 +177,44 @@ app.get('/profesor/clases/:id', async (req, res) => {
   }
 });
 
-// Get profesores id de una clase por su id
-app.get('/clases/profesores/:id', async (req, res) => {
-  try{
+// Get del profesor segun el id de la clase
+
+app.get('/clase/profesor/:id', async (req, res) => {
+  const idClase = req.params.id;
+  try {
     const connection = await abrirConexion();
-    const id = req.params.id;
-    const queryProfesores = 'SELECT id_profesor FROM asignaciones WHERE id_clase=?';
-    const [profesores] = await connection.promise().query(queryProfesores, [id]);
-    connection.end(); // Libera recursos BD
-    res.json(profesores); // Resultado servido en HTTP formato JSON
-  }catch (error) {
-    console.error('Error al obtener los profesores de la clase ', id, ':', error);
-    res.status(500).json({ error: 'Error al obtener los profesores de la clase ',id });
+
+    // Obtener el id_profesor desde la tabla asignaciones
+    const queryIdProfesor = 'SELECT id_profesor FROM asignaciones WHERE id_clase=?';
+    const [rowsIdProfesor] = await connection.promise().query(queryIdProfesor, [idClase]);
+    
+    if (rowsIdProfesor.length === 0) {
+      connection.end();
+      return res.status(404).json({ error: 'No se encontró el ID del profesor para la clase', idClase });
+    }
+
+    const idProfesor = rowsIdProfesor[0].id_profesor;
+
+    // Obtener todos los datos del profesor desde la tabla usuarios
+    const queryDatosProfesor = 'SELECT * FROM usuarios WHERE id=?';
+    const [rowsDatosProfesor] = await connection.promise().query(queryDatosProfesor, [idProfesor]);
+
+    connection.end(); // Liberar recursos BD
+
+    if (rowsDatosProfesor.length === 0) {
+      return res.status(404).json({ error: 'No se encontraron datos para el profesor con ID', idProfesor });
+    }
+
+    const datosProfesor = rowsDatosProfesor[0];
+
+    res.json(datosProfesor); // Resultado servido en HTTP formato JSON
+  } catch (error) {
+    console.error('Error al obtener los datos del profesor de la clase ', idClase, ':', error);
+    res.status(500).json({ error: 'Error al obtener los datos del profesor de la clase', idClase });
   }
-})
+});
+
+
 
 // Get de todas las tareas
 app.get('/tareas', async (req, res) => { // GET Tareas
@@ -384,13 +408,14 @@ app.get('/uploads/:name', (req, res) => {
       }
 
     });
-  }else{
+  } else {
     res.writeHead(404, {
       "Content-Type": "text/plain"
   });
   res.end("404 Not Found");
   }
 });
+
 app.get('/tareas/alumnoId/:idAlumno', async (req, res) => {
   try {
     const connection = await abrirConexion();
@@ -542,6 +567,7 @@ app.get('/pasosTarea/:id', async (req, res) => { // GET Pasos
   }
 });
 
+
 // Get imagen dada el nombre
 app.get('/uploads/:name', (req, res) => {
   const name = req.params.name;
@@ -576,6 +602,21 @@ app.get('/uploads/:name', (req, res) => {
   }
 });
 
+// Get de los pedidos asociados a un alumno 
+app.get('/pedido/:id', async (req, res) => { // GET Pasos
+  try {
+    const connection = await abrirConexion();
+    const idEstudiante = req.params.id;
+    const queryPasos = 'SELECT * FROM pedido_material WHERE id_estudiante = ?';
+    const [resultado] = await connection.promise().query(queryPasos, [idEstudiante]);
+    connection.end(); // Libera recursos BD
+    res.json([resultado]); // Resultado servido en HTTP formato JSON
+  } catch (error) {
+    console.error('Error al obtener pasos:', error);
+    res.status(500).json({ error: 'Error al obtener pasos' });
+  }
+});
+
 // Insercioones / POST
 // Ruta para insertar un estudiante en la base de datos
 app.post('/estudiantes/crearAlumno', async (req, res) => {
@@ -585,6 +626,7 @@ app.post('/estudiantes/crearAlumno', async (req, res) => {
     const { nombre, apellido1, apellido2, contraseña,  preferencias, fechaNac} = req.body;
     const query1 = 'INSERT INTO usuarios (nombre, apellido1, apellido2, fecha_nac, PASSWORD,img_perfil) VALUES (?, ?, ?, ?, MD5(?),?)';
     const result = await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, contraseña, null ]);
+
     if (result[0].err) {
       console.error('Error al insertar estudiante: ' + err);
       return;
@@ -605,7 +647,8 @@ app.post('/estudiantes/crearAlumno', async (req, res) => {
 
     console.log('Estudiante insertado con éxito');
     connection.end();
-  } catch (error){
+  } catch (error) {
+
     console.error('Error al introducir estudiante:', error);
     res.status(500).json({ error: 'Error al introducir estudiante' });
   }
@@ -614,14 +657,15 @@ app.post('/estudiantes/crearAlumno', async (req, res) => {
 
 
 // Ruta para insertar un profesor en la base de datos
-app.post('/profesores/crearProfe',  async (req, res) => {
-  try{
+app.post('/profesores/crearProfe', async (req, res) => {
+  try {
     let nuevoElementoId = '-1';
     const connection = await abrirConexion();
-    const {nombre, apellido1, apellido2, contraseña,  admin, fechaNac} = req.body;
+    const { nombre, apellido1, apellido2, contraseña, admin, fechaNac } = req.body;
     const query1 = 'INSERT INTO usuarios (nombre, apellido1, apellido2, fecha_nac, PASSWORD,img_perfil) VALUES (?, ?, ?, ?, MD5(?),?)';
-    
-    const result = await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, contraseña, null ]);
+
+    const result = await connection.promise().query(query1, [nombre, apellido1, apellido2, fechaNac, contraseña, null]);
+
     if (result[0].err) {
       console.error('Error al insertar profesor: ' + result[0].err);
       return;
@@ -639,7 +683,8 @@ app.post('/profesores/crearProfe',  async (req, res) => {
     console.log('Profesor insertado con éxito en Profesores');
     res.status(201).json({ message: 'Profesor insertado con éxito' });
     connection.end();
-  } catch (error){
+  } catch (error) {
+
     console.error('Error al introducir profesor:', error);
     res.status(500).json({ error: 'Error al introducir profesor' });
   }
@@ -648,7 +693,7 @@ app.post('/profesores/crearProfe',  async (req, res) => {
 
 // Insertar clase
 app.post('/clases/crearAula', async (req, res) => {
-  try{
+  try {
     let nuevoElementoId = '-1';
     const connection = await abrirConexion();
     const { capacidad, selectedProfesor, estudiantes } = req.body;
@@ -688,30 +733,38 @@ app.post('/clases/crearAula', async (req, res) => {
 
 
 // Insertar elemento inventario
-app.post('/inventario/crearElemento', async (req, res) => {
-  try{
-    const connection = await abrirConexion();
+app.post('/inventario/crearElemento', upload.single('file'), async (req, res) => {
+  try {
     const { nombre, cantidad } = req.body;
-    const query1 = 'INSERT INTO inventario (nombre, cantidad) VALUES (?, ?)';
-    await connection.promise().query(query1, [nombre, cantidad ], (err, result) => {
-    if (err) {
-      console.error('Error al insertar elemento: ' + err);
-      res.status(500).json({ error: 'Error al insertar elemento en la base de datos' });
-      return;
-    }
-    console.log('Elemento insertado con éxito en inventario');
-    res.status(201).json({ message: 'Elemento insertado con éxito' });
-    });
+    const filePath = req.file.path;
+
+    const connection = await abrirConexion();
+
+    // Insertar la imagen en la tabla media
+    const insertMediaQuery = 'INSERT INTO media (ruta) VALUES (?)';
+    const [mediaResult] = await connection.promise().execute(insertMediaQuery, [filePath]);
+
+    // Obtener el ID de la imagen recién insertada
+    const mediaId = mediaResult.insertId;
+
+    // Insertar el elemento en la tabla inventario con el ID de la imagen
+    const insertElementoQuery = 'INSERT INTO inventario (nombre, cantidad, id_pictograma) VALUES (?, ?, ?)';
+    await connection.promise().execute(insertElementoQuery, [nombre, cantidad, mediaId]);
+
+    // Cerrar la conexión
     connection.end();
-  } catch (error){
-    console.error('Error al introducir elemento:', error);
-    res.status(500).json({ error: 'Error al introducir elemento' });
+    res.status(201).json({ message: 'Elemento insertado con éxito' });
+
+  } catch (error) {
+    console.error("Error al crear elemento en el inventario: ", error);
+    res.status(500).json({ error: 'Error en la creación del elemento' });
   }
 });
 
+
 // Insertar menú
 app.post('/menus/crearMenu', async (req, res) => {
-  try{
+  try {
     const connection = await abrirConexion();
     const { usuario, selectedComida } = req.body;
     const id_usuario = usuario.id;
@@ -725,9 +778,9 @@ app.post('/menus/crearMenu', async (req, res) => {
     }
     console.log('Menu insertado con éxito en menus');
     res.status(201).json({ message: 'Menu insertado con éxito' });
-    });
+   });
     connection.end();
-  } catch (error){
+  } catch (error) {
     console.error('Error al introducir menu:', error);
     res.status(500).json({ error: 'Error al introducir menu' });
   }
@@ -833,6 +886,50 @@ app.post('/clases/aniadealumnos', async (req, res) => {
 
 });
 
+
+// Insertar el pedido de material
+
+
+app.post('/guardarPedido', async (req, res) => {
+  try {
+    const { claseId, alumnoId, pedidos } = req.body;
+    const connection = await abrirConexion();
+    console.log('Valores a insertar:', { claseId, alumnoId, pedidos });
+    try {
+      // Iterar sobre los pedidos
+      for (const pedido of pedidos) {
+        const inventarioId = pedido.inventarioId;
+        const cantidad = pedido.cantidad;
+        
+        // Insertar una nueva fila en la tabla pedido_material
+        const queryInsert = 'INSERT INTO pedido_material (id_clase, id_estudiante, id_inventario, cantidad) VALUES (?, ?, ?, ?)';
+        await connection.promise().query(queryInsert, [claseId, alumnoId, inventarioId, cantidad], (err, result) => {
+          if (err) {
+            console.error('Error al establecer conexión con la base de datos:' + err);
+            res.status(500).json({ error: 'Error al establecer conexión con la base de datos.' });
+          }
+          // Puedes manejar el resultado si es necesario
+        });
+      }
+
+    } catch (error) {
+      console.error('Error al guardar pedidos:', error);
+      res.status(500).json({ error: 'Error al guardar pedidos.' });
+    } finally {
+      // Asegúrate de cerrar la conexión después de completar todas las inserciones
+      connection.end();
+    }
+  } catch (error) {
+    console.error('Error al procesar la solicitud:', error);
+    res.status(500).json({ error: 'Error al procesar la solicitud.' });
+  }
+
+  console.log('Pedidos guardados con éxito');
+  res.status(201).json({ message: 'Pedidos guardados con éxito.' });
+});
+
+
+
 // eliminar asignaciones
 
 app.post('/clases/quitaralumnos', async (req, res) => {
@@ -874,18 +971,29 @@ app.post('/tareas/aniadeasignaciones', async (req, res) => {
     const connection = await abrirConexion();
 
     try {
-      // Use Promise.all to wait for all queries to complete
-      await Promise.all(
-        tareas.map(async (tareaId) => {
-          const queryInsert =
-            'INSERT INTO asignaciones_tareas (id_alumno, id_tarea) VALUES (?, ?)';
-          await connection.promise().query(queryInsert, [idAlumno, tareaId]);
-        })
-      );
+      if (Array.isArray(tareas)) {
+        // Use Promise.all to wait for all queries to complete
+        await Promise.all(
+          tareas.map(async (tareaId) => {
+            const queryInsert =
+              'INSERT INTO asignaciones_tareas (id_alumno, id_tarea) VALUES (?, ?)';
+            await connection.promise().query(queryInsert, [idAlumno, tareaId]);
+          })
+        );
 
-      // All queries are successful, send a response
-      console.log('Tareas añadidas al estudiante con éxito');
-      res.status(201).json({ message: 'Tareas añadidas al estudiante con éxito.' });
+        // All queries are successful, send a response
+        console.log('Tareas añadidas al estudiante con éxito');
+        res.status(201).json({ message: 'Tareas añadidas al estudiante con éxito.' });
+      } else {
+        // Si tareas no es un array, realizar una única inserción
+        const queryInsert =
+          'INSERT INTO asignaciones_tareas (id_alumno, id_tarea) VALUES (?, ?)';
+        await connection.promise().query(queryInsert, [idAlumno, tareas]);
+
+        // Query is successful, send a response
+        console.log('Tarea añadida al estudiante con éxito');
+        res.status(201).json({ message: 'Tarea añadida al estudiante con éxito.' });
+      }
     } catch (error) {
       console.error('Error al añadir tareas al alumno:', error);
       res.status(500).json({ error: 'Error al añadir tareas al alumno.' });
@@ -935,7 +1043,22 @@ app.post('/tareas/quitarasignaciones', async (req, res) => {
 });
 
 
-
+// Get datos de la imagen dado el id
+app.post('/tareas/finalizar', async (req, res) => { // GET Tareas
+  try {
+    const connection = await abrirConexion();
+    const alumnoId=req.body.alumnoId;
+    const id = req.body.id;
+    console.log('Alumno ', alumnoId, 'Tarea ', id);
+    const query = 'UPDATE asignaciones_tareas SET finalizada = 1 WHERE id_alumno = ? AND id_tarea = ?';
+    const [resultado] = await connection.promise().query(query, [alumnoId, id]);
+    connection.end(); // Libera recursos BD
+    res.json(resultado); // Resultado servido en HTTP formato JSON
+  } catch (error) {
+    console.error('Error al finalizar la tarea:', error);
+    res.status(500).json({ error: 'Error al finalizar la tarea' });
+  }
+});
 
 
 // Actualizaciones / PUT
@@ -1030,43 +1153,61 @@ app.put('/clases/actualizarClase', async (req, res) => {
 
 // Actualizar elemento inventario
 app.put('/inventario/actualizarElemento', async (req, res) => {
-  try{
+  try {
     const connection = await abrirConexion();
     const { id, nombre, cantidad } = req.body;
     const query1 = 'UPDATE inventario SET nombre = ?, cantidad = ? WHERE id = ?';
-    await connection.promise().query(query1, [nombre, cantidad, id ], (err, result) => {
-    if (err) {
-      console.error('Error al actualizar elemento: ' + err);
-      res.status(500).json({ error: 'Error al actualizar elemento en la base de datos' });
-      return;
-    }
-    console.log('Elemento actualizado con éxito en inventario');
-    res.status(201).json({ message: 'Elemento actualizado con éxito' });
+    await connection.promise().query(query1, [nombre, cantidad, id], (err, result) => {
+      if (err) {
+        console.error('Error al actualizar elemento: ' + err);
+        res.status(500).json({ error: 'Error al actualizar elemento en la base de datos' });
+        return;
+      }
+      console.log('Elemento actualizado con éxito en inventario');
+      res.status(201).json({ message: 'Elemento actualizado con éxito' });
     });
     connection.end();
-  } catch (error){
+  } catch (error) {
     console.error('Error al actualizar elemento:', error);
     res.status(500).json({ error: 'Error al actualizar elemento' });
   }
 });
 
+// Actualizar elemento inventario
+app.put('/inventario/actualizarElemento/:id', async (req, res) => {
+  try {
+    const connection = await abrirConexion();
+    const id = req.params.id;
+    const { nombre, cantidad } = req.body;
+    const query1 = 'UPDATE inventario SET nombre = ?, cantidad = ? WHERE id = ?';
+    await connection.promise().query(query1, [nombre, cantidad, id]);
+    connection.end();
+    console.log('Elemento actualizado con éxito en inventario');
+    res.status(200).json({ message: 'Elemento actualizado con éxito' });
+  } catch (error) {
+    console.error('Error al actualizar elemento:', error);
+    res.status(500).json({ error: 'Error al actualizar elemento en la base de datos' });
+  }
+});
+
+
 // Actualizar menú
 app.put('/menus/actualizarMenu', async (req, res) => {
-  try{
+  try {
     const connection = await abrirConexion();
     const { id, nombre, descripcion } = req.body;
     const query1 = 'UPDATE menus SET nombre = ?, descripcion = ? WHERE id = ?';
-    await connection.promise().query(query1, [nombre, descripcion, id ], (err, result) => {
-    if (err) {
-      console.error('Error al actualizar menu: ' + err);
-      res.status(500).json({ error: 'Error al actualizar menu en la base de datos' });
-      return;
-    }
-    console.log('Menu actualizado con éxito en menus');
-    res.status(201).json({ message: 'Menu actualizado con éxito' });
+    await connection.promise().query(query1, [nombre, descripcion, id], (err, result) => {
+      if (err) {
+        console.error('Error al actualizar menu: ' + err);
+        res.status(500).json({ error: 'Error al actualizar menu en la base de datos' });
+        return;
+      }
+      console.log('Menu actualizado con éxito en menus');
+      res.status(201).json({ message: 'Menu actualizado con éxito' });
     });
     connection.end();
-  } catch (error){
+  } catch (error) {
     console.error('Error al actualizar menu:', error);
     res.status(500).json({ error: 'Error al actualizar menu' });
   }
@@ -1176,6 +1317,7 @@ app.delete('/profesores/borrarProfe/:id', async (req, res) => {
 
     const query2 = 'DELETE FROM usuarios WHERE id = ?';
     await connection.promise().query(query2, [id], (err, result) => {
+
     if (err) {
       console.error('Error al borrar profesor: ' + err);
       return;
@@ -1219,23 +1361,23 @@ app.delete('/clases/borrarClase/:id', async (req, res) => {
 
 // Borrar elemento inventario
 app.delete('/inventario/borrarElemento/:id', async (req, res) => {
-  try{
+  try {
     const connection = await abrirConexion();
     const id = parseInt(req.params.id, 10);
-    console.log('Queremos borrar un elemento del inventario. ID: ',id)
+    console.log('Queremos borrar un elemento del inventario. ID: ', id)
 
     const query1 = 'DELETE FROM inventario WHERE id = ?';
     await connection.promise().query(query1, [id], (err, result) => {
-    if (err) {
-      console.error('Error al borrar elemento: ' + err);
-      res.status(500).json({ error: 'Error al borrar elemento en la base de datos' });
-      return;
-    }
-    console.log('Elemento borrado con éxito en inventario');
-    res.status(201).json({ message: 'Elemento borrado con éxito' });
+      if (err) {
+        console.error('Error al borrar elemento: ' + err);
+        res.status(500).json({ error: 'Error al borrar elemento en la base de datos' });
+        return;
+      }
+      console.log('Elemento borrado con éxito en inventario');
+      res.status(201).json({ message: 'Elemento borrado con éxito' });
     });
     connection.end();
-  } catch (error){
+  } catch (error) {
     console.error('Error al borrar elemento:', error);
     res.status(500).json({ error: 'Error al borrar elemento' });
   }
@@ -1321,6 +1463,32 @@ app.delete('/tareas/borrarTarea/:id', async (req, res) => {
   res.status(201).json({ message: ' Tarea eliminada con éxito' });
 });
 
+
+// Borrar un pedido
+app.delete('/pedido/:id', async (req, res) => {
+  try{
+    const connection = await abrirConexion();
+    const idClase = parseInt(req.params.id, 10);
+
+    const query1 = 'DELETE FROM pedido_material WHERE id_clase = ?';
+    await connection.promise().query(query1, [idClase], (err, result) => {
+    if (err) {
+      console.error('Error al borrar el pedido: ' + err);
+      res.status(500).json({ error: 'Error al borrar el pedido en la base de datos' });
+      return;
+    }
+    console.log('Peido borrado con éxito');
+    res.status(201).json({ message: 'Pedido borrado con éxito' });
+    });
+    connection.end();
+  } catch (error){
+    console.error('Error al borrar el pedido:', error);
+    res.status(500).json({ error: 'Error al borrar el pedido' });
+  }
+  console.log('Pedido eliminado con éxito en la base de datos!');
+  res.status(201).json({ message: ' Pedido eliminado con éxito' });
+});
+
 // Get de todas las imágenes una tarea
 
 app.post('/obtener_imagenes', async (req, res) => {
@@ -1345,32 +1513,32 @@ app.post('/obtener_imagenes', async (req, res) => {
 
 app.get('/uploads/:name', (req, res) => {
   const name = req.params.name;
-  const filePath = 'uploads/'+name;
+  const filePath = 'uploads/' + name;
   const extension = filePath.split('.')[1];
-  const contentType = 'image/'+extension;
+  const contentType = 'image/' + extension;
   // Comprueba exista el archivo
   console.log(fs.existsSync(filePath));
-  if(fs.existsSync(filePath)){
-    fs.readFile(filePath,(err, content) => { // lee archivo asíncronamente
-      if(err){
+  if (fs.existsSync(filePath)) {
+    fs.readFile(filePath, (err, content) => { // lee archivo asíncronamente
+      if (err) {
         res.writeHead(404, {
           "Content-Type": "text/plain"
       });
       res.end("404 Not Found");
       }else{
-        res.writeHead(200, {
+       res.writeHead(200, {
           "Content-Type": contentType
-      });
+        });
         console.log(content);
         res.end(content);
       }
     });
-  }else{
+  } else {
     res.writeHead(404, {
       "Content-Type": "text/plain"
-  });
-  res.end("404 Not Found");
-  return;
+    });
+    res.end("404 Not Found");
+    return;
   }
 });
 

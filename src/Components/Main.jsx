@@ -1,4 +1,5 @@
 import {NativeRouter,Route, Routes, } from 'react-router-native'
+import EditarItem from './administracion/EditarItem.jsx';
 import Inicio from './Inicio.jsx';
 import Alumno from './Alumno.jsx'
 import Profesor from './Profesor.jsx';
@@ -25,6 +26,9 @@ import MenuComanda from './tareas/MenuComanda.jsx';
 import EditarTarea from './administracion/EditarTarea.jsx';
 // import EditarPaso from "./administracion/EditarPaso.jsx";
 import StatsAlumno from './StatsAlumno.jsx';
+import CrearItem from './administracion/CrearItem.jsx';
+import Inventario from "./tareasAlumno/TareaInventario.jsx";
+import PedirMaterial from './PedirMaterial.jsx';
 
 
 const Main = ()=>{
@@ -43,7 +47,9 @@ const Main = ()=>{
                     <Route path='/admin/editaralumno' exact element={<EditarAlumno/>} />
                     <Route path='/admin/crearprofe' exact element={<CrearProfe/>} />
                     <Route path='/admin/creartarea' exact element={<CrearTarea/>} />
+                    <Route path='/admin/crearitem' exact element={<CrearItem/>} />
                     <Route path='/admin/editarprofe' exact element={<EditarProfe/>} />
+                    <Route path='/admin/editaritem' exact element={<EditarItem/>} />
                     <Route path='/admin/editarclase' exact element={<EditarClase/>}/>
                     <Route path='/admin/crearaula' exact element={<CrearAula/>} />
                     <Route path='/confirmaciones' exact element={<ConfirmAccion/>}/>
@@ -65,6 +71,8 @@ const Main = ()=>{
                 <Route path='/tareafinalizada' exact element={<TareaFinalizada/>}/>
           { /* <Route path='/mostrarpasos/:id/:alumnoId' element={<MostrarPasos/>} /> */ }
                     <Route path='/statsalumno' element={<StatsAlumno/>} />
+                    <Route path='/tareainventario' element={<Inventario/>} />
+                    <Route path='/pedirmaterial' exact element={<PedirMaterial/>} />
                 </Routes>
             </View>
         </NativeRouter>
