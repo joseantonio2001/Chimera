@@ -27,7 +27,7 @@ const CrearPaso = () => {
     const { state } = useLocation();
     const idTarea = state ? state.idT : '';
     const nPaso = state ? state.numPaso : '';
-    const mensaje = "Actualizar cambios"
+    const mensaje = "TAREA"
 
     const handleCreatePaso = async () => {
         // Peticiones para convertir a blob
@@ -121,6 +121,9 @@ const CrearPaso = () => {
             <Pressable style={styles.pressableButton} onPress={handleCreatePaso}>
                     <Text style={styles.pressableText}>Crear paso</Text>
             </Pressable>
+            <Pressable style={styles.pressableButton} onPress={handleVolverTarea}>
+                    <Text style={styles.pressableText}>Volver a la tarea</Text>
+            </Pressable>
             </>)}
             {pasoCreado && (
             <>
@@ -201,7 +204,7 @@ const styles=StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         alignSelf: 'center',
-        backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
+        backgroundColor: '#049CDC',  // Un verde fresco, puedes cambiarlo según tus preferencias
         borderRadius: 10,
         elevation: 3, // Sombra para un efecto de elevación
         marginBottom: 15,

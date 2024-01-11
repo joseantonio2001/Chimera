@@ -24,11 +24,11 @@ import SeleccionMenu from './tareas/SeleccionMenu.jsx';
 import AulasComanda from './tareas/AulasComanda.jsx';
 import MenuComanda from './tareas/MenuComanda.jsx';
 import EditarTarea from './administracion/EditarTarea.jsx';
-// import EditarPaso from "./administracion/EditarPaso.jsx";
 import StatsAlumno from './StatsAlumno.jsx';
 import CrearItem from './administracion/CrearItem.jsx';
 import Inventario from "./tareasAlumno/TareaInventario.jsx";
 import PedirMaterial from './PedirMaterial.jsx';
+import EditarPaso from "./administracion/EditarPaso.jsx";
 
 
 const Main = ()=>{
@@ -61,15 +61,13 @@ const Main = ()=>{
                     <Route path='/tareaComanda/menu' exact element={<MenuComanda/>}/>
                     <Route path='/tareaComanda/menu/seleccion' exact element={<SeleccionMenu/>}/>
                     <Route path='/admin/tareas/crearpaso' exact element={<CrearPaso/>}/>
-                { /*<Route path='/admin/tareas/editarpaso' exact element={<EditarPaso/>}/> */ }
+                    <Route path='/admin/tareas/editarpaso' exact element={<EditarPaso/>}/>
                 { /* <Route path='/admin/editartarea' exact element={<EditarTarea/>}/> */ }
                 <Route path='/mostrarpasos/:id' element={<MostrarPasos/>} />
                 <Route path='/confirmaciones' exact element={<ConfirmAccion/>}/>                 
-                <Route path='/tareasHoy' exact element={<TareasHoy/>}/>                    
-                <Route path='/admin/editartareasalumno' exact element ={<EditarTareasAlumno/>}/>
+                <Route path='/tareasHoy' exact element={<TareasHoy/>}/>                     
                 <Route path='confirmacioncrearaula' exact element={<ConfirmAccion/>}/>
-                <Route path='/tareafinalizada' exact element={<TareaFinalizada/>}/>
-          { /* <Route path='/mostrarpasos/:id/:alumnoId' element={<MostrarPasos/>} /> */ }
+                <Route path='/tareafinalizada' exact element={<TareaFinalizada/>}/> 
                     <Route path='/statsalumno' element={<StatsAlumno/>} />
                     <Route path='/tareainventario' element={<Inventario/>} />
                     <Route path='/pedirmaterial' exact element={<PedirMaterial/>} />
