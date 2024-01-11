@@ -45,7 +45,7 @@ const TareasHoy = () => {
   const [portadas, setPortadas] = useState([]);
 
   const handleButtonClick = (enlace) => {
-    navigate(enlace, { state: { alumnoId }});
+    navigate(enlace, { state: { id: 2 }})
   };
 
   const handleTareas = (ruta) => {
@@ -84,6 +84,8 @@ const TareasHoy = () => {
   
 
     obtenerTareas();
+
+    console.log(tareasPortada);
   }, [alumnoId]);
 
  

@@ -242,7 +242,7 @@
           justifyContent: 'center',
           alignItems: 'center',
           alignSelf: 'center',
-          backgroundColor: '#4CAF50',  // Un verde fresco, puedes cambiarlo según tus preferencias
+          backgroundColor: '#049CDC',  // Un verde fresco, puedes cambiarlo según tus preferencias
           borderRadius: 10,
           elevation: 3, // Sombra para un efecto de elevación
           marginBottom: 15,

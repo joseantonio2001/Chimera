@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {ActivityIndicator, Text, View, Image, TouchableOpacity, Button} from 'react-native';
 import axios from 'axios';
-import {useNavigate, useParams} from "react-router-native";
+import {useNavigate, useParams, useLocation} from "react-router-native";
 import { modoVisualizacion } from '../Main';
 import { Video, ResizeMode } from 'expo-av';
 
@@ -125,7 +125,7 @@ const MostrarPasos = () => {
             {pasos.slice(currentIndex, currentIndex + 1).map(paso => (
               <View key={paso.id}>
                 <Text style={styles.textoPaso}>{`Paso ${paso.n_paso}: ${paso.descripcion}`}</Text>
-                <Image source={{uri: `http://localhost:5050/uploads/${images[paso.n_paso-1].url}`}} style={{ width: 200, height: 200 }} />
+                <Image source={{uri: `http://localhost:5050/  ${images[paso.n_paso-1].url}`}} style={{ width: 200, height: 200 }} />
               </View>
             ))}
           </View>
