@@ -48,6 +48,8 @@ const MostrarPasos = () => {
     const obtenerNombresImagenes = async (ids) => {
       try {
         const response = await axios.post('http://localhost:5050/obtener_imagenes', {ids});
+        console.log("HOLA")
+        console.log(response.data)
         return response.data;
       } catch (error) {
         console.error('Error al obtener nombres de imágenes:', error);
@@ -79,6 +81,7 @@ const MostrarPasos = () => {
 
 
         const idImagenes = pasos.map((paso, index) => {
+          console.log(paso.id_imagen)
           return paso.id_imagen
         });
         const imagenesResponse = await obtenerNombresImagenes(idImagenes);
@@ -125,7 +128,7 @@ const MostrarPasos = () => {
             {pasos.slice(currentIndex, currentIndex + 1).map(paso => (
               <View key={paso.id}>
                 <Text style={styles.textoPaso}>{`Paso ${paso.n_paso}: ${paso.descripcion}`}</Text>
-                <Image source={{uri: `http://localhost:5050/  ${images[paso.n_paso-1].url}`}} style={{ width: 200, height: 200 }} />
+                <Image source={{uri: `http://localhost:5050/${images[paso.n_paso-1].url}`}} style={{ width: 200, height: 200 }} />
               </View>
             ))}
           </View>

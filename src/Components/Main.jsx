@@ -79,4 +79,5 @@ const Main = ()=>{
 }
 
 export default Main
-export const modoVisualizacion = '010';
+export const modoVisualizacion = '101';
+// export const modoVisualizacion = '010';

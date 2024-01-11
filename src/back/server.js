@@ -1641,7 +1641,7 @@ app.get('/obtener_video/:id', async (req, res) => {
 
     const query = 'SELECT * FROM media WHERE id = ?';
     const resultado = await connection.promise().query(query, id);
-    console.log(resultado[0][0].ruta);
+    console.log(resultado[0][0]);
     const videoNew = { id: resultado[0].id, url: resultado[0][0].ruta.replace('uploads/', '') };
 
     res.json(videoNew);
